@@ -19,10 +19,15 @@ export interface MixerState {
  * matters less than one that was right two presses ago.
  *
  * Confidence: the weighted agreement of the predictors, where each vote is
- * scaled by that predictor's own confidence. Full agreement among confident
- * models gives high confidence; an even split gives none; a table of models
- * that are all guessing gives none either, which is what makes the machine fall
- * back constantly against a real random source.
+ * scaled by that predictor's own strength of belief. Full agreement among
+ * confident models gives high confidence; an even split gives none; a table of
+ * models that are all merely guessing gives none either, which is what makes
+ * the machine fall back constantly against a real random source.
+ *
+ * The mixture reports confidence as a probability — 0.5 is no information, 1.0
+ * is certainty — so `confidenceFloor` reads as "how sure the machine must be
+ * before it will claim a guess", which is the only reading of that control that
+ * a user could act on.
  */
 export function createMixer(
   predictors: readonly Predictor[],
@@ -66,7 +71,8 @@ export function createMixer(
 
       lastGuesses = perPredictor.map(({ id, guess }) => ({ id, guess }));
 
-      const confidence = totalWeight > 0 ? Math.min(1, Math.abs(vote) / totalWeight) : 0;
+      const strength = totalWeight > 0 ? Math.min(1, Math.abs(vote) / totalWeight) : 0;
+      const confidence = 0.5 + strength / 2;
       const believed: Move = vote === 0 ? rng.bit() : vote > 0 ? 1 : 0;
 
       // Warm-up and the confidence floor are the honesty mechanism (PRD §4.4,

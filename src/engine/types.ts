@@ -21,7 +21,7 @@ export interface PerPredictorRecord {
   id: PredictorId;
   /** What this model would have played, whether or not it drove the mixture. */
   guess: Move;
-  /** Its own confidence in that guess, before mixing. */
+  /** Its own strength of belief, 0 (abstaining) to 1 (certain), before mixing. */
   confidence: number;
   /** Its weight in the mixture at commit time. */
   weight: number;
@@ -35,7 +35,10 @@ export interface Round {
   prediction: Move;
   actual: Move;
   machineWon: boolean;
-  /** 0..1 at commit time. */
+  /**
+   * The machine's own probability that its commit is right, at commit time.
+   * 0.5 is no information; 1.0 is certainty.
+   */
   confidence: number;
   /** The machine fell below the confidence floor, or was still warming up. */
   wasRandom: boolean;
@@ -45,7 +48,10 @@ export interface Round {
 export interface MixerConfig {
   /** Exponential weight decay. */
   decay: number;
-  /** Below this the machine plays randomly. */
+  /**
+   * How sure the machine must be before it claims a guess. Below this it plays
+   * a fair bit from the seeded PRNG. 0.5 means it never abstains.
+   */
   confidenceFloor: number;
   /** Warm-up: rounds played uniformly at random before any model is trusted. */
   minRounds: number;
@@ -71,6 +77,7 @@ export const DEFAULT_CONFIG: Config = {
   decay: 0.95,
   confidenceFloor: 0.55,
   minRounds: 20,
-  active: [...PREDICTOR_IDS],
+  // Extended as each predictor lands; the fairness gate widens with it.
+  active: ['ngram', 'backoff'],
   ngramOrder: 5,
 };
