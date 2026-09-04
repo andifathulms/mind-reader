@@ -3,6 +3,7 @@ import { Ensemble } from './views/Ensemble/Ensemble';
 import { Portrait } from './views/Portrait/Portrait';
 import { Lab } from './views/Lab/Lab';
 import { Rematch } from './views/Rematch/Rematch';
+import { Archive } from './views/Archive/Archive';
 import './styles/base.css';
 
 /**
@@ -20,6 +21,7 @@ export function App() {
         <Portrait />
         <Lab />
         <Rematch />
+        <Archive />
       </main>
     </>
   );

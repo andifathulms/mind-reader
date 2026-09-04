@@ -1,0 +1,92 @@
+/*
+ * Courier Prime, and only here. Shannon's memorandum was a typescript and so
+ * was Hagelbarger's paper; setting the reconstructed historical material in a
+ * well-drawn Courier quotes a document form rather than dressing up as one.
+ * If it appears outside this view, delete it.
+ */
+.archive {
+  font: var(--t-archive);
+  max-width: 62ch;
+}
+
+.archive p {
+  margin-bottom: var(--s2);
+}
+
+.archive__disclosure {
+  border-left: 2px solid var(--yours-ink);
+  padding-left: var(--s2);
+  margin-bottom: var(--s4);
+}
+
+.archive__machine {
+  margin-bottom: var(--s4);
+  padding-top: var(--s3);
+  border-top: 1px solid var(--rule);
+}
+
+.archive__name {
+  font: var(--t-h2);
+  margin-bottom: var(--s1);
+}
+
+.archive__quote {
+  padding-left: var(--s2);
+  border-left: 2px solid var(--rule);
+  margin-bottom: var(--s2);
+}
+
+/* Courier here too: a citation on a typescript page is part of the document. */
+.archive__cite {
+  font: 400 12px/1.6 var(--font-archive);
+  opacity: 0.75;
+  margin-bottom: var(--s2);
+}
+
+.archive__sources {
+  padding-top: var(--s3);
+  border-top: 1px solid var(--rule);
+}
+
+.archive__sources li {
+  font: var(--t-archive);
+  margin-bottom: var(--s2);
+  padding-left: var(--s3);
+  text-indent: calc(-1 * var(--s3));
+}
+
+.archive__seams {
+  margin-top: var(--s4);
+  padding-top: var(--s3);
+  border-top: 1px solid var(--rule);
+}
+
+.archive__seam-list {
+  margin-bottom: var(--s2);
+}
+
+.archive__seam-list li {
+  margin-bottom: var(--s1);
+  padding-left: var(--s2);
+  text-indent: calc(-1 * var(--s2));
+}
+
+.archive a {
+  color: inherit;
+}
+
+.archive__notes > summary {
+  cursor: pointer;
+  padding: var(--s1) 0;
+  font: var(--t-archive);
+}
+
+.archive__notes pre {
+  font: var(--t-archive);
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  margin: var(--s2) 0 0;
+  padding-left: var(--s2);
+  border-left: 1px solid var(--rule);
+  opacity: 0.9;
+}
