@@ -5,10 +5,10 @@
 
 .lab__row {
   display: grid;
-  grid-template-columns: 1fr 148px 132px;
-  gap: var(--s2) var(--s3);
-  align-items: baseline;
-  padding: var(--s3) 0;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 420px);
+  gap: var(--s3) var(--s5);
+  align-items: start;
+  padding: var(--s4) 0;
   border-top: 1px solid var(--rule);
 }
 
@@ -16,99 +16,199 @@
   border-bottom: 1px solid var(--rule);
 }
 
-/* The coin is marked distinctly and sits last, because it is the only one that
-   works, and finding that out after failing at four mental strategies is the
-   correct order to learn it. */
-.lab__row--control {
-  border-top: 2px solid var(--yours-ink);
+/* The three controls hold the machine to 50%. They are the finding, not a
+   footnote, and they are marked as such. */
+.lab__row--control .lab__tag {
+  color: var(--miss);
+  border-color: color-mix(in srgb, var(--miss) 45%, transparent);
 }
 
 .lab__name {
   font: var(--t-h2);
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+
+.lab__tag {
+  font: var(--t-micro);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  color: var(--ink-soft);
 }
 
 .lab__instruction {
   font: var(--t-body);
-  opacity: 0.8;
-  grid-column: 1;
-  max-width: 60ch;
+  color: var(--ink-soft);
+  max-width: 52ch;
+  margin-top: var(--s1);
 }
 
-.lab__verdict {
-  font: var(--t-small);
-  opacity: 0.8;
-  grid-column: 1 / -1;
-  max-width: 66ch;
+/* ------------------------------------------------------------- the gauge */
+
+.lab__scores {
+  display: grid;
+  gap: var(--s2);
+}
+
+/*
+ * One scale, both numbers. The gap between what the sequence is worth and what
+ * the player manages while trying to produce it is the point of the section,
+ * and two figures in separate columns leave that gap to be worked out rather
+ * than seen.
+ */
+.lab__gauge {
+  position: relative;
+  height: 26px;
+}
+
+.lab__gauge-track {
+  position: absolute;
+  inset: 12px 0 auto;
+  height: 2px;
+  background: color-mix(in srgb, var(--ink) 14%, transparent);
+}
+
+/* 50%: where a sequence the machine cannot read would sit. */
+.lab__gauge-even {
+  position: absolute;
+  left: 50%;
+  top: 4px;
+  bottom: 4px;
+  width: 1px;
+  background: color-mix(in srgb, var(--ink) 34%, transparent);
+}
+
+.lab__gauge-mark {
+  position: absolute;
+  top: 4px;
+  height: 18px;
+  width: 2px;
+  margin-left: -1px;
+  transition: left var(--weight-change) var(--ease-out);
+}
+
+.lab__gauge-mark--script {
+  background: var(--ink);
+}
+
+.lab__gauge-mark--yours {
+  background: var(--hit);
+  height: 22px;
+  top: 2px;
+  width: 3px;
+}
+
+.lab__figures {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s2);
+}
+
+.lab__figure {
+  display: grid;
+  gap: 2px;
+  align-content: start;
+  padding-left: var(--s2);
+  border-left: 2px solid var(--rule);
+}
+
+.lab__figure--yours {
+  border-left-color: var(--hit);
+}
+
+.lab__figure--script {
+  border-left-color: var(--ink);
 }
 
 .lab__rate {
   font: var(--t-figure);
-  text-align: right;
+  margin: 0;
 }
 
 .lab__rate--pending {
-  opacity: 0.4;
+  color: var(--ink-soft);
+  opacity: 0.5;
 }
 
-.lab__ci,
-.lab__yours {
+.lab__ci {
   font: var(--t-small);
-  opacity: 0.7;
-  text-align: right;
+  color: var(--ink-soft);
+  margin: 0;
 }
 
-.lab__head {
-  display: grid;
-  grid-template-columns: 1fr 148px 132px;
-  gap: var(--s3);
-  font: var(--t-small);
-  opacity: 0.7;
-  padding-bottom: var(--s1);
-}
+/* ------------------------------------------------------------- the buttons */
 
-.lab__head > :not(:first-child) {
-  text-align: right;
+.lab__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s1);
 }
 
 .lab__run {
-  border: 1px solid var(--yours-ink);
-  padding: 6px var(--s2);
+  border: 1px solid color-mix(in srgb, var(--ink) 35%, transparent);
+  padding: 9px var(--s2);
   font: var(--t-data);
-  border-radius: 2px;
+  border-radius: var(--radius);
+  transition:
+    background 160ms linear,
+    border-color 160ms linear,
+    color 160ms linear;
 }
 
-.lab__run[disabled] {
-  opacity: 0.4;
-  cursor: default;
+.lab__run:hover {
+  border-color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
 }
 
-.lab__actions {
+/* An attempt in progress. The machine is scoring these rounds against this
+   strategy, and the button says so rather than only reading "stop". */
+.lab__run--live {
+  border-color: var(--hit);
+  background: color-mix(in srgb, var(--hit) 14%, transparent);
+}
+
+.lab__run--live::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--hit);
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: baseline;
+  animation: lab-live 1.6s ease-in-out infinite;
+}
+
+@keyframes lab-live {
+  0%,
+  100% {
+    opacity: calc(1 - 0.65 * (1 - var(--still)));
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.lab__verdict {
   grid-column: 1 / -1;
-  display: flex;
-  gap: var(--s2);
-  flex-wrap: wrap;
-  margin-top: var(--s1);
+  font: var(--t-small);
+  color: var(--ink-soft);
+  max-width: 68ch;
+  padding-left: var(--s3);
+  border-left: 2px solid var(--rule);
 }
 
 .lab__actions--footer {
-  margin-top: var(--s3);
+  margin-top: var(--s4);
 }
 
-/* Selection is a 2px outline in the local ink. Nothing else is coloured. */
-.lab__run--live {
-  outline: 2px solid var(--yours-ink);
-  outline-offset: 2px;
-}
-
-@media (max-width: 640px) {
-  .lab__row,
-  .lab__head {
-    grid-template-columns: 1fr auto;
-  }
-
-  .lab__ci,
-  .lab__yours {
-    grid-column: 1 / -1;
-    text-align: left;
+@media (max-width: 900px) {
+  .lab__row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s3);
   }
 }

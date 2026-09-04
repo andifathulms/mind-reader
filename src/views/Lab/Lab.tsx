@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useGameThrottled } from '../../state/context';
 import { Section } from '../../ui/Section';
+import { Reveal } from '../../ui/Reveal';
 import { STRATEGIES } from '../../strategies';
 import { runStrategy } from '../../strategies/run';
 import type { StrategyResult } from '../../strategies/run';
@@ -86,6 +87,7 @@ export function Lab() {
     <Section
       id="lab"
       title="The strategy lab"
+      eyebrow="try it"
       intro={
         <>
           Five strategies you are invited to try. Each also runs as a script against a fresh machine
@@ -94,41 +96,78 @@ export function Lab() {
         </>
       }
     >
-      <div className="lab__head" aria-hidden="true">
-        <span>Strategy</span>
-        <span>Machine, scripted</span>
-        <span>Machine, against you</span>
-      </div>
-
       <div className="lab">
-        {STRATEGIES.map((strategy) => {
+        {STRATEGIES.map((strategy, i) => {
           const result = results.get(strategy.id);
           const mine = yours(strategy.id);
           const live = attempting === strategy.id;
+          const mineRate = mine && mine.played ? mine.wins / mine.played : null;
           return (
-            <div
+            <Reveal
+              as="article"
               className={`lab__row${strategy.isControl ? ' lab__row--control' : ''}`}
               key={strategy.id}
+              delay={i}
             >
-              <h3 className="lab__name">{strategy.name}</h3>
-              <span className={`lab__rate${result ? '' : ' lab__rate--pending'}`}>
-                {result ? `${Math.round(result.rate * 100)}%` : '—'}
-              </span>
-              <span className={`lab__rate${mine && mine.played ? '' : ' lab__rate--pending'}`}>
-                {mine && mine.played ? `${Math.round((mine.wins / mine.played) * 100)}%` : '—'}
-              </span>
+              <div className="lab__id">
+                <h3 className="lab__name">
+                  {strategy.name}
+                  {strategy.isControl ? <span className="lab__tag">control</span> : null}
+                </h3>
+                <p className="lab__instruction">{strategy.instruction}</p>
+              </div>
 
-              <p className="lab__instruction">{strategy.instruction}</p>
-              <span className="lab__ci">
-                {result ? formatRate(result.machineWins, result.rounds) : null}
-              </span>
-              <span className="lab__yours">
-                {mine
-                  ? mine.played
-                    ? `over ${mine.played} ${mine.played === 1 ? 'round' : 'rounds'}${live ? ', still going' : ''}`
-                    : 'go and play'
-                  : null}
-              </span>
+              {/*
+                The gap between the two numbers is the section's whole claim, so
+                it is drawn rather than left to be worked out from two figures
+                in separate columns. Both sit on one scale against 50%, which is
+                where a sequence the machine cannot read would put it.
+              */}
+              <div className="lab__scores">
+                <div className="lab__gauge" aria-hidden="true">
+                  <span className="lab__gauge-track" />
+                  <span className="lab__gauge-even" />
+                  {result ? (
+                    <span
+                      className="lab__gauge-mark lab__gauge-mark--script"
+                      style={{ left: `${(result.rate * 100).toFixed(2)}%` }}
+                    />
+                  ) : null}
+                  {mineRate === null ? null : (
+                    <span
+                      className="lab__gauge-mark lab__gauge-mark--yours"
+                      style={{ left: `${(mineRate * 100).toFixed(2)}%` }}
+                    />
+                  )}
+                </div>
+
+                <dl className="lab__figures">
+                  <div className="lab__figure lab__figure--script">
+                    <dt className="eyebrow">machine, scripted</dt>
+                    <dd className={`lab__rate numeral${result ? '' : ' lab__rate--pending'}`}>
+                      {result ? `${Math.round(result.rate * 100)}%` : '—'}
+                    </dd>
+                    <dd className="lab__ci">
+                      {result ? formatRate(result.machineWins, result.rounds) : 'not run yet'}
+                    </dd>
+                  </div>
+                  <div className="lab__figure lab__figure--yours">
+                    <dt className="eyebrow">machine, against you</dt>
+                    <dd
+                      className={`lab__rate numeral${mineRate === null ? ' lab__rate--pending' : ''}`}
+                    >
+                      {mineRate === null ? '—' : `${Math.round(mineRate * 100)}%`}
+                    </dd>
+                    <dd className="lab__ci">
+                      {mine
+                        ? mine.played
+                          ? `over ${mine.played} ${mine.played === 1 ? 'round' : 'rounds'}${live ? ', still going' : ''}`
+                          : 'go and play'
+                        : 'not attempted'}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
 
               <div className="lab__actions">
                 <button className="lab__run" type="button" onClick={() => run(strategy.id)}>
@@ -145,7 +184,7 @@ export function Lab() {
               </div>
 
               {result ? <p className="lab__verdict">{strategy.verdict}</p> : null}
-            </div>
+            </Reveal>
           );
         })}
       </div>
