@@ -11,9 +11,26 @@
   gap: var(--s2);
 }
 
+/*
+ * The name is in the machine's ink with a swatch beside it, not in the
+ * predictor's colour. Two of DESIGN's five tints fall below 4.5:1 as text on
+ * this ground — backoff's violet reaches 3.9 — and the palette is the right
+ * palette, so the labels move rather than the colours. The bar and the swatch
+ * carry the colour, which is also what a reader who cannot separate the hues
+ * needs.
+ */
 .ensemble__name {
   font: var(--t-data);
-  color: var(--tint);
+  display: flex;
+  align-items: center;
+  gap: var(--s1);
+}
+
+.ensemble__swatch {
+  width: 10px;
+  height: 10px;
+  flex: none;
+  background: var(--tint);
 }
 
 .ensemble__bar {

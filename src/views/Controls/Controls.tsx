@@ -151,6 +151,7 @@ export function Controls() {
                   checked={config.active.includes(id)}
                   onChange={() => toggle(id)}
                 />
+                <span className="control__swatch" aria-hidden="true" />
                 {PREDICTOR_NAMES[id]}
               </label>
             ))}

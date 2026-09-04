@@ -43,11 +43,16 @@
   align-items: center;
   gap: 6px;
   font: var(--t-data);
-  color: var(--tint);
 }
 
 .control__model input {
-  accent-color: currentColor;
+  accent-color: var(--tint);
+}
+
+.control__swatch {
+  width: 10px;
+  height: 10px;
+  background: var(--tint);
 }
 
 .controls__footer {

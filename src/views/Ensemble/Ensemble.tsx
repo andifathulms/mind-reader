@@ -77,7 +77,10 @@ export function Ensemble() {
                 } as CSSProperties
               }
             >
-              <span className="ensemble__name">{PREDICTOR_NAMES[id]}</span>
+              <span className="ensemble__name">
+                <span className="ensemble__swatch" aria-hidden="true" />
+                {PREDICTOR_NAMES[id]}
+              </span>
               <span className="ensemble__weight">{(weight * 100).toFixed(0)}%</span>
               <span className="ensemble__bar" aria-hidden="true">
                 <span className="ensemble__fill" />

@@ -173,7 +173,9 @@
 .arena__seal-half {
   position: absolute;
   top: 0;
-  width: 50%;
+  /* A hair over half each: at some widths two exact halves leave a subpixel
+     seam, and a seal you can see through is not a seal. */
+  width: calc(50% + 0.5px);
   height: 100%;
   background: var(--yours);
   border: 1px solid var(--boundary);
@@ -249,7 +251,7 @@
   left: var(--s3);
   top: max(var(--s3), env(safe-area-inset-top));
   font: var(--t-small);
-  opacity: 0.55;
+  opacity: 0.72;
 }
 
 @media (max-width: 420px) {
