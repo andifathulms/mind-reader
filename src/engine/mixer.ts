@@ -5,6 +5,8 @@ import type { Predictor } from './predictors/predictor';
 
 export interface MixerState {
   weights: ReadonlyMap<PredictorId, number>;
+  /** How much better than a coin each predictor has recently been, 0 to 1. */
+  edges: ReadonlyMap<PredictorId, number>;
   rounds: number;
 }
 
@@ -18,16 +20,21 @@ export interface MixerState {
  * guess, then the set is normalised. A predictor that was right ten presses ago
  * matters less than one that was right two presses ago.
  *
- * Confidence: the weighted agreement of the predictors, where each vote is
- * scaled by that predictor's own strength of belief. Full agreement among
- * confident models gives high confidence; an even split gives none; a table of
- * models that are all merely guessing gives none either, which is what makes
- * the machine fall back constantly against a real random source.
+ * Confidence: the weighted agreement of the predictors. Each vote is scaled by
+ * the smaller of two things — what that model claims about this particular
+ * guess, and the edge it has actually demonstrated over the recent past. A
+ * model is trusted no further than the weaker of the two, which is what keeps
+ * the number honest. A predictor that has been right half the time contributes
+ * nothing to the mixture's confidence however sure it sounds, so against a real
+ * random source the confidence never sustains and the machine falls back to the
+ * PRNG constantly. Full agreement among models that are demonstrably right
+ * gives high confidence; an even split gives none.
  *
  * The mixture reports confidence as a probability — 0.5 is no information, 1.0
  * is certainty — so `confidenceFloor` reads as "how sure the machine must be
  * before it will claim a guess", which is the only reading of that control that
- * a user could act on.
+ * a user could act on. It also means the figure the interface prints is a
+ * number the machine can be held to (PRD §7.4).
  */
 export function createMixer(
   predictors: readonly Predictor[],
@@ -35,15 +42,32 @@ export function createMixer(
   rng: Rng,
 ): Oracle & { state(): MixerState } {
   let weights = new Map<PredictorId, number>();
+  /** Decayed hit counts per predictor, for the demonstrated edge. */
+  let hits = new Map<PredictorId, number>();
+  let tries = new Map<PredictorId, number>();
   let rounds = 0;
   let lastGuesses: Array<{ id: PredictorId; guess: Move }> = [];
 
   const seed = () => {
     weights = new Map(predictors.map((p) => [p.id, 1 / predictors.length]));
+    hits = new Map(predictors.map((p) => [p.id, 0]));
+    tries = new Map(predictors.map((p) => [p.id, 0]));
     rounds = 0;
     lastGuesses = [];
   };
   seed();
+
+  /**
+   * How much better than a coin this predictor has recently been, 0 to 1.
+   * Laplace-smoothed, so a model with a short record is pulled back towards
+   * having no edge rather than towards whatever its first few guesses did.
+   */
+  const edgeOf = (id: PredictorId): number => {
+    const hit = hits.get(id) ?? 0;
+    const total = tries.get(id) ?? 0;
+    const accuracy = (hit + 1) / (total + 2);
+    return Math.max(0, 2 * accuracy - 1);
+  };
 
   const normalise = () => {
     let sum = 0;
@@ -65,7 +89,8 @@ export function createMixer(
         const weight = weights.get(p.id) ?? 0;
         const { guess, confidence } = p.predict(history);
         perPredictor.push({ id: p.id, guess, confidence, weight });
-        vote += weight * confidence * (guess === 1 ? 1 : -1);
+        const trusted = Math.min(confidence, edgeOf(p.id));
+        vote += weight * trusted * (guess === 1 ? 1 : -1);
         totalWeight += weight;
       }
 
@@ -86,8 +111,11 @@ export function createMixer(
 
     learn(actual: Move) {
       for (const { id, guess } of lastGuesses) {
+        const correct = guess === actual;
         const w = weights.get(id) ?? 0;
-        weights.set(id, w * config.decay + (guess === actual ? 1 : 0));
+        weights.set(id, w * config.decay + (correct ? 1 : 0));
+        hits.set(id, (hits.get(id) ?? 0) * config.decay + (correct ? 1 : 0));
+        tries.set(id, (tries.get(id) ?? 0) * config.decay + 1);
       }
       normalise();
       for (const p of predictors) p.observe(actual);
@@ -99,6 +127,10 @@ export function createMixer(
       seed();
     },
 
-    state: () => ({ weights: new Map(weights), rounds }),
+    state: () => ({
+      weights: new Map(weights),
+      edges: new Map(predictors.map((p) => [p.id, edgeOf(p.id)])),
+      rounds,
+    }),
   };
 }

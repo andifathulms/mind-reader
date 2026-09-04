@@ -5,16 +5,22 @@ import type { MixerState } from './mixer';
 import { Referee } from './referee';
 import { createNgram } from './predictors/ngram';
 import { createBackoff } from './predictors/backoff';
+import { createSeer } from './predictors/seer';
+import { createMrm } from './predictors/mrm';
 import type { Predictor } from './predictors/predictor';
 import type { Config, PredictorId, Session } from './types';
 import { DEFAULT_CONFIG } from './types';
 
-export function createPredictor(id: PredictorId, config: Config): Predictor {
+export function createPredictor(id: PredictorId, config: Config, rng: Rng): Predictor {
   switch (id) {
     case 'ngram':
       return createNgram(config.ngramOrder);
     case 'backoff':
       return createBackoff();
+    case 'seer':
+      return createSeer(rng);
+    case 'mrm':
+      return createMrm(rng);
     default:
       throw new Error(`Predictor not implemented yet: ${id}`);
   }
@@ -35,7 +41,7 @@ export function createMachine(
   now: () => number = () => 0,
 ): Machine {
   const rng = createRng(seed);
-  const predictors = config.active.map((id) => createPredictor(id, config));
+  const predictors = config.active.map((id) => createPredictor(id, config, rng));
   const mixer = createMixer(predictors, config, rng);
   const referee = new Referee(mixer, now);
 
@@ -53,4 +59,6 @@ export * from './types';
 export * from './rng';
 export * from './referee';
 export { createMixer } from './mixer';
+export { umpire } from './umpire';
+export type { Match, Exchange } from './umpire';
 export type { Predictor, Guess } from './predictors/predictor';
