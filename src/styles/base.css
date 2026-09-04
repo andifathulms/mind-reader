@@ -10,17 +10,29 @@
 html {
   /* The arena fills the viewport and the analysis scrolls under it. */
   background: var(--machine);
+  scroll-behavior: smooth;
+  /* Anchored sections land under the index rail rather than behind it. */
+  scroll-padding-top: var(--s5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {
   margin: 0;
   font: var(--t-body);
+  letter-spacing: var(--track-body);
   /* The score changes every press and must not shift width. */
   font-variant-numeric: tabular-nums;
   color: var(--yours-ink);
   background: var(--yours);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  overflow-x: clip;
 }
 
 h1,
@@ -30,8 +42,20 @@ p,
 figure,
 ul,
 ol,
-dl {
+dl,
+blockquote {
   margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: var(--track-title);
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 ul,
@@ -48,28 +72,56 @@ button {
   padding: 0;
   cursor: pointer;
   font-variant-numeric: tabular-nums;
+  letter-spacing: inherit;
 }
 
 /* 2.4 Restraint: selection is a 2px outline in the local ink, nothing else. */
 :focus-visible {
   outline: 2px solid currentColor;
-  outline-offset: 2px;
+  outline-offset: 3px;
+  border-radius: 1px;
 }
 
 :focus:not(:focus-visible) {
   outline: none;
 }
 
+::selection {
+  background: color-mix(in srgb, var(--hit) 26%, transparent);
+}
+
+/* -------------------------------------------------------------------- type */
+
+/*
+ * The eyebrow. Every label in the app that names a thing rather than saying
+ * something uses it, which is what keeps a caption from competing with a
+ * sentence.
+ */
+.eyebrow {
+  font: var(--t-micro);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.numeral {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--track-display);
+}
+
+/* ------------------------------------------------------------------ tables */
+
 table {
   border-collapse: collapse;
   font: var(--t-data);
   font-variant-numeric: tabular-nums;
+  width: 100%;
 }
 
 th,
 td {
   text-align: right;
-  padding: 4px var(--s2) 4px 0;
+  padding: 6px var(--s2) 6px 0;
   border-bottom: 1px solid var(--rule);
   white-space: nowrap;
 }
@@ -83,20 +135,33 @@ th {
   font-weight: 600;
 }
 
+thead th {
+  font: var(--t-micro);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  border-bottom-color: var(--rule-strong);
+}
+
 /* Chart table equivalents: reachable by keyboard, out of the way otherwise. */
 .table-equivalent {
   overflow-x: auto;
+  margin-top: var(--s2);
 }
 
 .table-equivalent > summary {
-  font: var(--t-small);
+  font: var(--t-micro);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
   cursor: pointer;
-  opacity: 0.7;
-  padding: 4px 0;
+  color: var(--ink-soft);
+  padding: 6px 0;
+  transition: color var(--tap) linear;
 }
 
+.table-equivalent > summary:hover,
 .table-equivalent[open] > summary {
-  opacity: 1;
+  color: var(--ink);
 }
 
 .visually-hidden {
@@ -118,4 +183,60 @@ th {
  */
 table.visually-hidden {
   table-layout: fixed;
+}
+
+/* ------------------------------------------------------------------ motion */
+
+/*
+ * Scroll reveal. Everything below the arena arrives the same way — a short rise
+ * and a fade, staggered by an index the element sets itself. `--still` is 1
+ * under reduced motion, which lands every element at its final state before the
+ * first frame instead of animating to it.
+ */
+[data-reveal] {
+  opacity: calc(0.001 + var(--still));
+  transform: translateY(calc(var(--reveal-rise, 14px) * (1 - var(--still))));
+  transition:
+    opacity var(--reveal) var(--ease-out) calc(var(--reveal-delay, 0ms) * (1 - var(--still))),
+    transform var(--reveal) var(--ease-out) calc(var(--reveal-delay, 0ms) * (1 - var(--still)));
+}
+
+[data-reveal='shown'] {
+  opacity: 1;
+  transform: none;
+}
+
+/* ------------------------------------------------------------------ chrome */
+
+.skip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  padding: var(--s1) var(--s2);
+  font: var(--t-micro);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--machine-ink);
+  background: var(--machine);
+  text-decoration: none;
+  transform: translateY(-120%);
+  transition: transform 160ms var(--ease-out);
+}
+
+.skip:focus-visible {
+  transform: none;
+}
+
+.colophon {
+  padding: var(--s4) var(--gutter) calc(var(--s5) + env(safe-area-inset-bottom));
+  background: var(--machine);
+  color: var(--machine-ink-soft);
+  border-top: 1px solid var(--rule-dark);
+  font: var(--t-small);
+}
+
+.colophon p {
+  max-width: var(--measure);
+  margin: 0 auto;
 }

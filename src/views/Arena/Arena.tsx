@@ -207,6 +207,7 @@ export function Arena() {
   return (
     <section
       className="arena"
+      id="arena"
       style={
         { '--split': `${(split(machineWins, rounds.length) * 100).toFixed(3)}%` } as CSSProperties
       }

@@ -1,0 +1,157 @@
+/*
+ * The read-through line and the section index.
+ *
+ * Both are the machine's chrome rather than the page's, so both are painted in
+ * the machine's ground wherever they land. That is what lets one rail cross
+ * four alternating grounds without changing colour under itself.
+ */
+
+.progress {
+  position: fixed;
+  inset: 0 0 auto;
+  height: 2px;
+  z-index: 40;
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out);
+  pointer-events: none;
+}
+
+.progress[data-shown] {
+  opacity: 1;
+}
+
+.progress__line {
+  display: block;
+  height: 100%;
+  transform-origin: 0 50%;
+  transform: scaleX(var(--progress, 0));
+  background: linear-gradient(90deg, var(--hit), var(--p-mrm));
+}
+
+/* ------------------------------------------------------------------- rail */
+
+.index {
+  position: fixed;
+  z-index: 39;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 340ms var(--ease-out),
+    transform 340ms var(--ease-out);
+}
+
+.index--shown {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.index__list {
+  display: flex;
+}
+
+.index__link {
+  display: flex;
+  align-items: center;
+  gap: var(--s1);
+  width: 100%;
+  padding: 7px 10px;
+  color: var(--machine-ink-soft);
+  font: var(--t-micro);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: color 160ms linear;
+}
+
+.index__link:hover,
+.index__link--active {
+  color: var(--machine-ink);
+}
+
+.index__tick {
+  width: 10px;
+  height: 1px;
+  flex: none;
+  background: currentColor;
+  opacity: 0.5;
+  transition:
+    width 260ms var(--ease-out),
+    opacity 160ms linear;
+}
+
+.index__link--active .index__tick {
+  width: 20px;
+  opacity: 1;
+  background: var(--hit);
+}
+
+.index__number {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.5;
+}
+
+/* Desktop: a vertical rail on the right margin. */
+@media (min-width: 1080px) {
+  .index {
+    top: 50%;
+    right: 18px;
+    transform: translateY(-50%) translateX(calc(10px * (1 - var(--still))));
+    background: color-mix(in srgb, var(--machine) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--rule-dark);
+    border-radius: var(--radius-lg);
+    padding: 6px;
+  }
+
+  .index--shown {
+    transform: translateY(-50%);
+  }
+
+  .index__list {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1px;
+  }
+
+  .index__short {
+    display: none;
+  }
+}
+
+/* Below that the rail lies along the top edge and scrolls sideways, with the
+   long names dropped: there is no room for prose in a 40px strip. */
+@media (max-width: 1079px) {
+  .index {
+    inset: 0 0 auto;
+    transform: translateY(calc(-8px * (1 - var(--still))));
+    background: color-mix(in srgb, var(--machine) 92%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--rule-dark);
+    padding-top: 2px;
+  }
+
+  .index--shown {
+    transform: none;
+  }
+
+  .index__list {
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 2px var(--s2) 3px;
+    gap: 2px;
+  }
+
+  .index__list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .index__number,
+  .index__label {
+    display: none;
+  }
+
+  .index__link {
+    width: auto;
+    padding: 8px 6px;
+  }
+}

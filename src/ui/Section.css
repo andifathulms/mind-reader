@@ -1,25 +1,25 @@
 .section {
-  padding: var(--s5) var(--s3);
+  position: relative;
+  padding: var(--s6) var(--gutter);
   border-top: 1px solid var(--rule);
+  background: var(--ground);
+  color: var(--ink);
 }
 
 .section--yours {
-  background: var(--yours);
-  color: var(--yours-ink);
+  --ground: var(--yours);
 }
 
 /* The ensemble sits on the machine's ground, because it is the machine's own
-   account of itself. */
+   account of itself. The `on-machine` class carries the ink with it. */
 .section--machine {
-  background: var(--machine);
-  color: var(--machine-ink);
   border-top-color: var(--rule-dark);
 }
 
 /* The archive sits on a slightly warmer paper than the rest of the light side. */
 .section--archive {
-  background: var(--archive-paper);
-  color: var(--yours-ink);
+  --ground: var(--archive-paper);
+  --ground-raised: #f7f4ec;
 }
 
 .section__inner {
@@ -27,23 +27,63 @@
   margin: 0 auto;
 }
 
+/*
+ * The head. A marker column carrying the number and the ground's label, then
+ * the heading and its opening paragraph. On a narrow screen the marker lies
+ * along the top instead, because a 60px column of nothing is worse than a line.
+ */
 .section__head {
-  margin-bottom: var(--s4);
+  display: grid;
+  grid-template-columns: minmax(0, 8rem) minmax(0, 1fr);
+  gap: var(--s3) var(--s4);
+  align-items: start;
+  margin-bottom: var(--s5);
+}
+
+.section__marker {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding-top: 8px;
+}
+
+.section__number {
+  font: var(--t-micro);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--track-eyebrow);
+  color: var(--hit);
+}
+
+.section--machine .section__number {
+  color: var(--p-mrm);
+}
+
+.section__rule {
+  display: block;
+  width: 100%;
+  max-width: 56px;
+  height: 1px;
+  background: var(--rule-strong);
 }
 
 .section__title {
-  font: var(--t-h2);
+  font: var(--t-title);
+  letter-spacing: var(--track-title);
 }
 
 .section__intro {
   font: var(--t-body);
-  max-width: 66ch;
-  margin-top: var(--s1);
-  opacity: 0.8;
+  letter-spacing: var(--track-body);
+  max-width: 62ch;
+  margin-top: var(--s2);
+  color: var(--ink-soft);
 }
 
+/* ------------------------------------------------------------------ figure */
+
 .figure {
-  margin: 0 0 var(--s4);
+  margin: 0 0 var(--s5);
 }
 
 .figure__head {
@@ -51,7 +91,9 @@
   flex-wrap: wrap;
   align-items: baseline;
   gap: var(--s2);
-  margin-bottom: var(--s2);
+  padding-bottom: var(--s2);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: var(--s3);
 }
 
 .figure__title {
@@ -60,37 +102,59 @@
 }
 
 .figure__value {
-  font: var(--t-display);
+  font: var(--t-figure);
   margin-left: auto;
+  color: var(--hit);
 }
 
 .figure__note {
   font: var(--t-small);
-  opacity: 0.75;
+  color: var(--ink-soft);
   /* Its own line under the heading. flex-basis alone would let it shrink back
      up beside the title on a wide figure. */
   flex: none;
   width: 100%;
-  max-width: 66ch;
+  max-width: 68ch;
 }
 
 .figure__body {
   overflow-x: auto;
+  overflow-y: hidden;
 }
 
 /* A lab notebook: left-aligned prose, right-aligned figures. */
 .grid-two {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
   gap: var(--s4) var(--s5);
+}
+
+@media (max-width: 820px) {
+  .section__head {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s2);
+    margin-bottom: var(--s4);
+  }
+
+  .section__marker {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--s2);
+    padding-top: 0;
+  }
+
+  .section__rule {
+    flex: 1;
+    max-width: none;
+  }
 }
 
 @media (max-width: 640px) {
   .section {
-    padding: var(--s4) var(--s2);
+    padding: var(--s5) var(--gutter);
   }
 
-  .figure__value {
-    font: var(--t-figure);
+  .grid-two {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

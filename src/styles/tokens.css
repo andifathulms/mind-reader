@@ -1,11 +1,27 @@
-/* Design tokens. DESIGN.md is the source; nothing here is invented. */
+/*
+ * Design tokens.
+ *
+ * DESIGN.md sets the palette and the two grounds; this file keeps them and
+ * builds the rest of the system on top: a fluid type scale, a tracking scale,
+ * a motion set, and the tints the visualisations share.
+ */
 
 :root {
+  color-scheme: light dark;
+
+  /* ---------------------------------------------------------------- colour */
+
   /* 2.1 The two territories */
-  --yours: #e8e6e1;
-  --yours-ink: #1c1a17;
-  --machine: #14171a;
-  --machine-ink: #dde2e5;
+  --yours: #eceae4;
+  --yours-raised: #f5f3ee;
+  --yours-sunk: #e2dfd7;
+  --yours-ink: #16140f;
+  --yours-ink-soft: #56524a;
+  --machine: #111417;
+  --machine-raised: #191d21;
+  --machine-sunk: #0b0e10;
+  --machine-ink: #e2e7ea;
+  --machine-ink-soft: #939ba1;
   --boundary: #8c9094;
 
   /* The archive sits on a slightly warmer paper than the rest of the light side. */
@@ -19,45 +35,108 @@
   /* 2.3 The five predictors. Tuned for the machine's dark ground, which is the
      only place they appear. SEER and MRM sit adjacent in hue because they are
      historically adjacent. */
-  --p-seer: #c4703a;
-  --p-mrm: #c9a227;
-  --p-ngram: #4f8fa8;
-  --p-backoff: #7b6baf;
-  --p-levelk: #5d9e6b;
+  --p-seer: #d2793f;
+  --p-mrm: #d5ad2b;
+  --p-ngram: #56a0bc;
+  --p-backoff: #8b79c6;
+  --p-levelk: #64ad74;
 
-  /* Hairlines. Sections separate by a rule and space; there are no panels,
-     no cards and no shadows. */
-  --rule: color-mix(in srgb, var(--yours-ink) 16%, transparent);
+  /* Local ink, switched per ground. Everything below reads these two rather
+     than naming a side, so one rule can serve both territories. */
+  --ink: var(--yours-ink);
+  --ink-soft: var(--yours-ink-soft);
+  --ground: var(--yours);
+  --ground-raised: var(--yours-raised);
+  --ground-sunk: var(--yours-sunk);
+
+  /* Hairlines, derived from the local ink so they follow the ground. */
+  --rule: color-mix(in srgb, var(--ink) 14%, transparent);
+  --rule-strong: color-mix(in srgb, var(--ink) 28%, transparent);
   --rule-dark: color-mix(in srgb, var(--machine-ink) 18%, transparent);
 
-  /* 3.1 Type scale, base 16px */
+  /* ------------------------------------------------------------------ type */
+
   --font: 'Public Sans Variable', 'Public Sans', -apple-system, BlinkMacSystemFont,
     'Segoe UI', system-ui, sans-serif;
   --font-archive: 'Courier Prime', ui-monospace, 'SF Mono', Menlo, monospace;
 
-  --t-score: 700 64px/0.95 var(--font);
-  --t-display: 600 36px/1.05 var(--font);
-  --t-figure: 600 22px/1.1 var(--font);
-  --t-h2: 600 18px/1.3 var(--font);
-  --t-body: 400 15px/1.6 var(--font);
-  --t-data: 400 13px/1.45 var(--font);
-  --t-small: 400 12px/1.35 var(--font);
+  /*
+   * Fluid scale. The steps are the same seven as before; each now moves with
+   * the viewport between a phone and a desktop, so the display sizes can be
+   * genuinely large on a wide screen without breaking a 360px one.
+   */
+  --size-score: clamp(56px, 13vw, 132px);
+  --size-display: clamp(30px, 4.6vw, 54px);
+  --size-title: clamp(21px, 2.2vw, 28px);
+  --size-figure: clamp(20px, 1.9vw, 26px);
+  --size-h2: 17px;
+  --size-body: clamp(15px, 0.42vw + 14px, 17px);
+  --size-data: 13px;
+  --size-small: 12px;
+  --size-micro: 11px;
+
+  /* Tracking. Large type tightens, small type opens; the eyebrow opens a lot,
+     because it is read as a label rather than as a word. */
+  --track-score: -0.045em;
+  --track-display: -0.028em;
+  --track-title: -0.018em;
+  --track-body: -0.005em;
+  --track-eyebrow: 0.16em;
+
+  --t-score: 800 var(--size-score) / 0.86 var(--font);
+  --t-display: 700 var(--size-display) / 1.02 var(--font);
+  --t-title: 650 var(--size-title) / 1.15 var(--font);
+  --t-figure: 650 var(--size-figure) / 1.1 var(--font);
+  --t-h2: 650 var(--size-h2) / 1.3 var(--font);
+  --t-body: 400 var(--size-body) / 1.62 var(--font);
+  --t-data: 450 var(--size-data) / 1.45 var(--font);
+  --t-small: 400 var(--size-small) / 1.4 var(--font);
+  --t-micro: 550 var(--size-micro) / 1.3 var(--font);
   --t-archive: 400 14px/1.7 var(--font-archive);
 
-  /* 4.4 Grid and rhythm. 8px base. */
+  /* --------------------------------------------------------------- spacing */
+
   --s1: 8px;
   --s2: 16px;
   --s3: 24px;
   --s4: 40px;
   --s5: 64px;
-  --measure: 68rem;
+  --s6: clamp(64px, 9vw, 120px);
+  --measure: 74rem;
+  --gutter: clamp(20px, 4vw, 56px);
+  --radius: 3px;
+  --radius-lg: 6px;
 
-  /* 6.2 Durations */
+  /* ---------------------------------------------------------------- motion */
+
+  /* 6.2 Durations. The seal and the boundary are unchanged — they are the
+     game's feel and DESIGN.md fixes them. The rest is the surrounding
+     choreography: entrances, reveals, and the charts drawing themselves. */
   --seal-open: 120ms;
   --move-fly: 180ms;
   --weight-change: 400ms;
+  --tap: 90ms;
+  --reveal: 620ms;
+  --draw: 900ms;
+  --drift: 22s;
+
   --ease-seal: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-fly: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.5, 1);
+
+  /* Set to 1 by the reduced-motion query; every decorative animation is
+     multiplied out of existence by it rather than being re-declared. */
+  --still: 0;
+}
+
+/* A ground swaps the local ink and everything that derives from it. */
+.on-machine {
+  --ink: var(--machine-ink);
+  --ink-soft: var(--machine-ink-soft);
+  --ground: var(--machine);
+  --ground-raised: var(--machine-raised);
+  --ground-sunk: var(--machine-sunk);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -65,5 +144,10 @@
     --seal-open: 0ms;
     --move-fly: 0ms;
     --weight-change: 0ms;
+    --tap: 0ms;
+    --reveal: 0ms;
+    --draw: 0ms;
+    --drift: 0s;
+    --still: 1;
   }
 }
