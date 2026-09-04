@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      # fairness.test.ts plays 100,000 rounds against a PRNG and blocks the
+      # deploy if the machine beats it (PRD §8.1). historical.test.ts blocks it
+      # if MRM does not beat SEER.
+      - run: npm test
+      - run: npm run build
+      - name: Bundle budget
+        run: |
+          bytes=$(cat dist/assets/*.js dist/assets/*.css | gzip -9 | wc -c)
+          echo "gzipped app: $bytes bytes"
+          # PRD §8.11: under 150 KB gzipped.
+          test "$bytes" -lt 153600
+      - uses: actions/upload-pages-artifact@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          path: dist
+
+  deploy:
+    # Deploy only on green.
+    needs: check
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
