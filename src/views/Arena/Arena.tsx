@@ -81,6 +81,13 @@ function Face({ yourWins, machineWins, rounds, open, committed, onPress }: FaceP
 
   return (
     <>
+      {/*
+        The boundary belongs to each layer rather than sitting above both, so
+        the seal paints over it. On top, its line struck through the move it had
+        just revealed.
+      */}
+      <div className="arena__boundary" />
+
       <h1 className="arena__title">Mind reader (?)</h1>
 
       <div className="arena__side arena__side--yours">
@@ -190,7 +197,6 @@ export function Arena() {
       <div className="arena__layer arena__layer--machine" aria-hidden="true">
         <Face {...face} />
       </div>
-      <div className="arena__boundary" aria-hidden="true" />
 
       {/* The machine reports. It does not comment. */}
       <p className="visually-hidden" role="status" aria-live="polite">

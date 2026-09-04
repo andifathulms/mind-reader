@@ -207,12 +207,23 @@
   opacity: 0.5;
 }
 
+/* Opening, the halves draw apart and go with them. Leaving them parked either
+   side of the opening reads as a seal still closed in two places. */
+.arena__seal-half {
+  opacity: 1;
+  transition:
+    transform var(--seal-open) var(--ease-seal),
+    opacity var(--seal-open) var(--ease-seal);
+}
+
 .arena__seal--open .arena__seal-half--left {
   transform: translateX(-100%);
+  opacity: 0;
 }
 
 .arena__seal--open .arena__seal-half--right {
   transform: translateX(100%);
+  opacity: 0;
 }
 
 /* Two tap targets, side by side, generous enough for a thumb without looking.
