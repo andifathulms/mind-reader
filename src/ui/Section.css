@@ -67,7 +67,10 @@
 .figure__note {
   font: var(--t-small);
   opacity: 0.75;
-  flex-basis: 100%;
+  /* Its own line under the heading. flex-basis alone would let it shrink back
+     up beside the title on a wide figure. */
+  flex: none;
+  width: 100%;
   max-width: 66ch;
 }
 
