@@ -91,7 +91,7 @@
 }
 
 /* Desktop: a vertical rail on the right margin. */
-@media (min-width: 1080px) {
+@media (min-width: 1400px) {
   .index {
     top: 50%;
     right: 18px;
@@ -141,7 +141,7 @@
 
 /* Below that the rail lies along the top edge and scrolls sideways, with the
    long names dropped: there is no room for prose in a 40px strip. */
-@media (max-width: 1079px) {
+@media (max-width: 1399px) {
   .index {
     inset: 0 0 auto;
     transform: translateY(calc(-8px * (1 - var(--still))));

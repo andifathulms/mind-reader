@@ -222,18 +222,36 @@ The arena and the analysis have different update rates and should be separate re
 
 ## 8. Animation
 
-Two things animate. That is the whole budget.
+Two things carry the game. The rest is arrival, and it is governed by one rule: **nothing that
+moves may report anything the readouts do not already report.**
 
 **The boundary** between the player's territory and the machine's moves with the score,
 continuously, tracking the running win rate with no easing. It is a live readout, not a
-transition.
+transition. Its own past is drawn behind it as a trail on the same scale — the same quantity
+over time, not a projection, and not smoothed beyond the shrinkage the boundary already
+applies.
 
 **The seal** opens on reveal. Fast — 120 ms — because the game's feel depends on it.
+
+**One pulse** runs the boundary on reveal, in the colour of the mark just laid. It is the same
+on a win as on a loss and carries nothing the marks and the scores do not. DESIGN.md §6.4 is
+the test anything else proposed here has to pass.
+
+**Arrival**: everything below the arena rises and fades as it is scrolled into, once, through
+one shared IntersectionObserver. Bars grow from their own feet; traces wipe in left to right
+in the direction the session was played. A reveal is a flourish and nothing may depend on one
+to become visible — where the observer is missing, the element is shown immediately.
 
 The house rule applies as usual: continuous control maps directly, discrete change animates.
 Here the only continuous quantity is the score.
 
-`prefers-reduced-motion: reduce`: the seal opens with no animation, the boundary jumps.
+`prefers-reduced-motion: reduce` is one token, `--still`, not a second stylesheet: it is 0
+normally and 1 under the query, and every decorative animation is written so a `--still` of 1
+lands it at its final state before the first frame. The seal opens with no animation and the
+boundary jumps.
+
+Nothing in the arrival choreography may touch the press path. Input to reveal stays under
+80 ms (§7).
 
 ## 9. State and URL
 

@@ -87,6 +87,19 @@ export function SiteIndex() {
     return () => observer.disconnect();
   }, []);
 
+  // On the phone the rail is a strip that scrolls sideways, and the section you
+  // are in can be off the end of it. Keep the current one in view — horizontally
+  // only, which is what `block: nearest` guarantees.
+  const list = useRef<HTMLOListElement | null>(null);
+
+  useEffect(() => {
+    const element = list.current;
+    if (!element || element.scrollWidth <= element.clientWidth) return;
+    element
+      .querySelector('.index__link--active')
+      ?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+  }, [active]);
+
   const jump = useCallback((id: string) => {
     const target = document.getElementById(id);
     if (!target) return;
@@ -100,7 +113,7 @@ export function SiteIndex() {
       </div>
 
       <nav className={`index${past ? ' index--shown' : ''}`} aria-label="Sections">
-        <ol className="index__list">
+        <ol className="index__list" ref={list}>
           {SECTIONS.map((entry, i) => (
             <li className="index__item" key={entry.id}>
               <button

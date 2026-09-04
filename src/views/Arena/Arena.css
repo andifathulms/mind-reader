@@ -30,6 +30,8 @@
 
 .arena__layer--yours {
   color: var(--yours-ink);
+  --ink: var(--yours-ink);
+  --ink-soft: var(--yours-ink-soft);
 }
 
 .arena__layer--machine {
@@ -146,9 +148,14 @@
   color: var(--p-mrm);
 }
 
+/*
+ * The quiet text in the arena is set in the ground's own soft ink rather than
+ * being the loud ink at reduced opacity: an opacity that looks right on the
+ * light side lands under 4.5:1 on it, and the soft ink is a value that has been
+ * checked on both.
+ */
 .arena__round {
-  color: inherit;
-  opacity: 0.62;
+  color: var(--ink-soft);
 }
 
 /* ------------------------------------------------------------- the scores */
@@ -171,8 +178,7 @@
 }
 
 .arena__label {
-  color: inherit;
-  opacity: 0.62;
+  color: var(--ink-soft);
 }
 
 .arena__score {
@@ -194,14 +200,14 @@
 
 .arena__rate {
   font: var(--t-small);
-  opacity: 0.75;
+  color: var(--ink-soft);
 }
 
 .arena__last {
   font: var(--t-micro);
   letter-spacing: var(--track-eyebrow);
   text-transform: uppercase;
-  opacity: 0.5;
+  color: var(--ink-soft);
 }
 
 /*
@@ -333,8 +339,7 @@
 }
 
 .arena__caption {
-  color: inherit;
-  opacity: 0.5;
+  color: var(--ink-soft);
   white-space: nowrap;
 }
 
@@ -436,7 +441,7 @@
 .arena__target-hint {
   font: var(--t-micro);
   letter-spacing: var(--track-eyebrow);
-  opacity: 0.45;
+  color: var(--ink-soft);
 }
 
 /*
@@ -475,7 +480,7 @@
   left: 50%;
   bottom: max(var(--s1), env(safe-area-inset-bottom));
   transform: translateX(-50%);
-  opacity: 0.42;
+  color: var(--ink-soft);
   white-space: nowrap;
   animation: cue-breathe var(--drift) ease-in-out infinite;
 }
@@ -483,10 +488,10 @@
 @keyframes cue-breathe {
   0%,
   100% {
-    opacity: calc(0.42 - 0.14 * (1 - var(--still)));
+    opacity: calc(1 - 0.4 * (1 - var(--still)));
   }
   50% {
-    opacity: 0.42;
+    opacity: 1;
   }
 }
 
@@ -555,15 +560,24 @@
   transform: none;
 }
 
-.arena--ready .arena__cue {
-  opacity: 0.42;
-}
 
 /* The boundary itself never animates in. It is a readout and it is correct from
    the first frame; sliding it into place would be a claim about a score that
    had not been played. */
 
 @media (max-width: 720px) {
+  /* The title and the round line stack, so the score has to start below both
+     rather than below one of them. */
+  .arena__head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .arena__side--yours {
+    top: calc(max(var(--s3), env(safe-area-inset-top)) + 66px);
+  }
+
   .arena__side--machine {
     bottom: 152px;
   }
@@ -574,6 +588,13 @@
 
   .arena__marks {
     right: calc(50% + 34px);
+  }
+}
+
+/* A touch device has no arrow keys to be told about. */
+@media (pointer: coarse) {
+  .arena__target-hint {
+    display: none;
   }
 }
 

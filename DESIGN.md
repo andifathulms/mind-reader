@@ -297,14 +297,29 @@ seams, and showing them is what makes the rest credible.
 
 ### 6.1 What moves
 
-Two things. That is the entire budget.
+Two things carry the game. Everything else is the surrounding choreography, and it is held to
+a rule: nothing that moves may report anything the readouts do not already report.
 
 **The boundary** tracks the running win rate continuously, no easing. It is a readout, not a
-transition, and it should drift and jitter early exactly as a noisy statistic does.
+transition, and it should drift and jitter early exactly as a noisy statistic does. Behind it
+the boundary's own past is drawn as a trail, on the same scale, so a rate can be seen to have
+been climbed to rather than fallen from. The trail is the same quantity over time; it is not a
+projection and nothing about it is smoothed.
 
 **The seal** opens on reveal.
 
-Everything else is instant.
+**The beat.** One pulse runs the width of the boundary on reveal, in the colour of the mark
+just laid. It is the only concession in §6.4 and it is a deliberate one: it carries nothing
+the marks and the scores do not already carry, it is the same on a win as on a loss, and it is
+gone in 380 ms.
+
+**Arrival.** Everything below the arena rises and fades in as it is scrolled into, once,
+through one shared observer. Bars grow from their own feet, traces wipe in left to right in
+the direction the session was played. A reveal is a flourish; nothing depends on one to become
+visible, and an element whose observer never fires is shown immediately.
+
+**The arena's opening**, played once on load, staggered over 600 ms. The surface is
+interactive from the first frame: a press during the entrance is played, not swallowed.
 
 ### 6.2 Durations
 
@@ -312,12 +327,16 @@ Everything else is instant.
 |---|---|---|
 | Seal opening | 120 ms | `cubic-bezier(.4,0,.2,1)` |
 | Move flying to its side | 180 ms, overlapping the seal | `cubic-bezier(.32,.72,0,1)` |
+| Press acknowledgement | 90 ms | `cubic-bezier(.16,1,.3,1)` |
+| Boundary pulse | 380 ms | `cubic-bezier(.16,1,.3,1)` |
 | Boundary | continuous, no duration | — |
 | Ensemble weight change | 400 ms | `cubic-bezier(.32,.72,0,1)` |
-| Section reveal on scroll | none | — |
+| Section reveal on scroll | 620 ms, staggered ≤ 6 × 55 ms | `cubic-bezier(.16,1,.3,1)` |
+| A chart drawing itself | 900 ms | `cubic-bezier(.16,1,.3,1)` |
 
 Total press-to-resolution is under 300 ms of animation and under 80 ms to the first visible
 response. The next round's seal is already prepared (CLAUDE.md §7), so there is never a wait.
+Nothing in the arrival choreography touches the press path.
 
 ### 6.3 The orchestrated moment: the crossing
 
@@ -338,15 +357,26 @@ machine has begun to claim its guesses rather than a dramatic effect.
 
 ### 6.4 Restraint
 
-No celebration. No taunt. No shake, no pulse, no particle, no sound. The machine reports its
-score and says nothing else, and that silence is the app's register (CLAUDE.md §10).
+No celebration. No taunt. No shake, no particle, no sound. The machine reports its score and
+says nothing else, and that silence is the app's register (CLAUDE.md §10).
+
+The one pulse in §6.1 is the single exception. The test it has to pass, and the test anything
+proposed after it has to pass: does it say something the score does not, and does it say
+something different when the player wins? The pulse fails both, which is why it is allowed. A
+flash that appeared only on a machine win would be a taunt with the sound turned off.
 
 ### 6.5 Reduced motion
 
 `prefers-reduced-motion: reduce`: the seal opens with no transition, the move appears at its
 destination rather than travelling, the boundary jumps rather than slides, ensemble weights
-snap. Nothing is lost — the game is unaffected, which is the correct outcome for an app whose
-core loop is a single binary choice.
+snap. Every arrival lands at its final state before the first frame rather than animating to
+it, and no chart draws itself. Nothing is lost — the game is unaffected, and every figure is
+present and complete, which is the correct outcome for an app whose core loop is a single
+binary choice.
+
+This is one token, not a second stylesheet. `--still` is 0 normally and 1 under the query, and
+every decorative animation is written so that a `--still` of 1 multiplies it out of existence.
+A motion rule that has to be remembered twice will eventually be remembered once.
 
 ---
 
