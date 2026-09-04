@@ -7,6 +7,7 @@ import { createNgram } from './predictors/ngram';
 import { createBackoff } from './predictors/backoff';
 import { createSeer } from './predictors/seer';
 import { createMrm } from './predictors/mrm';
+import { createLevelK } from './predictors/levelk';
 import type { Predictor } from './predictors/predictor';
 import type { Config, PredictorId, Session } from './types';
 import { DEFAULT_CONFIG } from './types';
@@ -21,8 +22,8 @@ export function createPredictor(id: PredictorId, config: Config, rng: Rng): Pred
       return createSeer(rng);
     case 'mrm':
       return createMrm(rng);
-    default:
-      throw new Error(`Predictor not implemented yet: ${id}`);
+    case 'levelk':
+      return createLevelK();
   }
 }
 

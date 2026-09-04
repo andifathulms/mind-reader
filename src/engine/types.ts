@@ -77,7 +77,6 @@ export const DEFAULT_CONFIG: Config = {
   decay: 0.95,
   confidenceFloor: 0.55,
   minRounds: 20,
-  // Extended as each predictor lands; the fairness gate widens with it.
-  active: ['seer', 'mrm', 'ngram', 'backoff'],
+  active: [...PREDICTOR_IDS],
   ngramOrder: 5,
 };

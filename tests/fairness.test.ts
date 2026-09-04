@@ -111,3 +111,22 @@ describe('the machine against a source that is not random', () => {
     expect(wins / n).toBeGreaterThan(0.6);
   });
 });
+
+describe('the level-k model against a player who is second-guessing', () => {
+  it('catches a player who inverts their own instinct', () => {
+    // The strategy PRD §5.6 names as the one people reach for once they start
+    // losing: form an instinct, then do the opposite. It is a hierarchy one
+    // rung up, and the model is built to climb after it.
+    const machine = createMachine({ ...DEFAULT_CONFIG, active: ['levelk'] }, 7);
+    let last: 0 | 1 = 0;
+    let wins = 0;
+    const n = 4000;
+    for (let i = 0; i < n; i += 1) {
+      // The instinct is to repeat; inverting it produces an alternation the
+      // player believes is unpredictable.
+      last = (1 - last) as 0 | 1;
+      if (machine.referee.resolve(machine.referee.seal(), last).machineWon) wins += 1;
+    }
+    expect(wins / n).toBeGreaterThan(0.9);
+  });
+});
