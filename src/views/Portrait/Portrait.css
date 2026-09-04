@@ -1,29 +1,93 @@
 .portrait__chart {
   display: block;
   width: 100%;
+  /* The box is drawn at the size it is shown at: an SVG scales its type along
+     with its geometry, so stretching one chart to twice its box would give it
+     type twice the size of every other chart on the page. */
   max-width: 560px;
   height: auto;
   overflow: visible;
 }
 
+.portrait__chart--wide {
+  max-width: 1120px;
+}
+
 .portrait__axis {
   font: var(--t-small);
   fill: currentColor;
-  opacity: 0.65;
+  opacity: 0.6;
 }
 
+/*
+ * The bars. Ink for a quantity with no comparison to make; the arena's two
+ * colours where the chart is a comparison against what a coin would have done,
+ * so the finding is legible before the heights are read.
+ */
 .portrait__bar {
-  fill: var(--yours-ink);
+  fill: var(--ink);
 }
 
-/* Measured against expected: ink for what happened, a hairline for what a fair
-   coin would have done. This chart does not need colour and does not get any. */
+.portrait__bar--over {
+  fill: var(--hit);
+}
+
+.portrait__bar--under {
+  fill: var(--miss);
+}
+
+.portrait__bar--even {
+  fill: color-mix(in srgb, var(--ink) 45%, transparent);
+}
+
+/*
+ * Bars rise from the baseline as the figure arrives, in order, left to right.
+ * `transform-box: fill-box` puts each bar's origin on its own foot, which is
+ * the only way a rect in a shared coordinate system can grow from where it
+ * stands rather than from the top of the chart.
+ */
+.figure .portrait__bar {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transform: scaleY(var(--still));
+}
+
+.figure[data-reveal='shown'] .portrait__bar {
+  animation: bar-rise var(--reveal) var(--ease-out) var(--bar-delay, 0ms) both;
+}
+
+@keyframes bar-rise {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* Measured against expected: a hairline for what a fair coin would have done,
+   drawn in as the figure arrives so the eye follows it across the bars. */
 .portrait__expected {
   fill: none;
-  stroke: var(--yours-ink);
-  stroke-width: 1;
-  stroke-dasharray: 3 3;
-  opacity: 0.85;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  stroke-dasharray: 0.012 0.012;
+  opacity: 0.8;
+}
+
+.figure[data-reveal='shown'] .portrait__expected {
+  animation: expected-draw calc(var(--draw) * 1.1) var(--ease-out) 120ms both;
+}
+
+@keyframes expected-draw {
+  from {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 0.8;
+  }
 }
 
 .portrait__grid {
@@ -32,72 +96,103 @@
 }
 
 .portrait__rule {
-  stroke: var(--yours-ink);
+  stroke: var(--ink);
   stroke-width: 1;
-  opacity: 0.35;
+  opacity: 0.3;
 }
 
 /* The Wilson interval, as a lighter span around the measured rate. Early on
    that span is enormous, which is the point. */
 .portrait__span {
-  fill: var(--yours-ink);
-  opacity: 0.18;
+  fill: var(--ink);
+  opacity: 0.16;
+  transition: all var(--weight-change) var(--ease-out);
 }
 
 .portrait__value {
-  fill: var(--yours-ink);
+  fill: var(--ink);
+}
+
+/* The interval has cleared 50%: the rate is a finding rather than a number. */
+.portrait__value--clear {
+  fill: var(--hit);
 }
 
 .portrait__stem {
-  stroke: var(--yours-ink);
+  stroke: var(--ink);
   stroke-width: 2;
 }
 
 .portrait__band {
-  fill: var(--yours-ink);
-  opacity: 0.1;
+  fill: var(--ink);
+  opacity: 0.09;
 }
+
+/* --------------------------------------------------------------- patterns */
 
 .portrait__patterns {
   display: grid;
-  gap: 2px;
-  max-width: 560px;
+  gap: 1px;
+  max-width: 720px;
 }
 
 .portrait__pattern {
   display: grid;
-  grid-template-columns: 6ch 1fr 12ch;
+  grid-template-columns: 6ch minmax(0, 1fr) 12ch;
   align-items: center;
   gap: var(--s2);
   font: var(--t-data);
-  padding: 2px 0;
+  padding: 6px 0;
   border-bottom: 1px solid var(--rule);
 }
 
 .portrait__pattern-code {
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
+  font-weight: 600;
 }
 
 .portrait__pattern-bar {
-  height: 8px;
-  background: var(--yours-ink);
-  opacity: 0.8;
+  height: 10px;
+  background: var(--hit);
+  transform-origin: 0 50%;
+  transform: scaleX(var(--still));
+  border-radius: 1px;
+}
+
+.figure[data-reveal='shown'] .portrait__pattern-bar {
+  animation: pattern-grow var(--reveal) var(--ease-out) var(--bar-delay, 0ms) both;
+}
+
+@keyframes pattern-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 
 .portrait__pattern-count {
   text-align: right;
-  opacity: 0.75;
+  color: var(--ink-soft);
 }
 
 .portrait__empty {
   font: var(--t-body);
-  opacity: 0.7;
+  color: var(--ink-soft);
+  padding: var(--s3) 0;
 }
 
+/*
+ * The cross-reading, set apart. It is the one place the portrait stops
+ * measuring and says what the measurements amount to.
+ */
 .portrait__cross-link {
-  font: var(--t-small);
-  opacity: 0.8;
-  max-width: 66ch;
-  margin-top: var(--s3);
+  font: var(--t-body);
+  max-width: 62ch;
+  margin-top: var(--s4);
+  padding-left: var(--s3);
+  border-left: 2px solid var(--hit);
+  color: var(--ink-soft);
 }

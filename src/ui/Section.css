@@ -87,10 +87,10 @@
 }
 
 .figure__head {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: baseline;
-  gap: var(--s2);
+  gap: 4px var(--s2);
   padding-bottom: var(--s2);
   border-bottom: 1px solid var(--rule);
   margin-bottom: var(--s3);
@@ -98,22 +98,23 @@
 
 .figure__title {
   font: var(--t-h2);
-  flex: none;
 }
 
+/* The figure's headline number. In the local ink: red is the machine's colour
+   in the charts, and a switch rate is not a machine win. */
 .figure__value {
   font: var(--t-figure);
-  margin-left: auto;
-  color: var(--hit);
+  letter-spacing: var(--track-display);
+  text-align: right;
 }
 
 .figure__note {
+  /* Its own row under the heading, always. A note that can share a line with a
+     title will, and then two figures side by side disagree about where their
+     drawings start. */
+  grid-column: 1 / -1;
   font: var(--t-small);
   color: var(--ink-soft);
-  /* Its own line under the heading. flex-basis alone would let it shrink back
-     up beside the title on a wide figure. */
-  flex: none;
-  width: 100%;
   max-width: 68ch;
 }
 
