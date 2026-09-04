@@ -15,13 +15,26 @@
   touch-action: manipulation;
 }
 
-/* The machine's territory, pressing up from below. Its height is the score. */
-.arena__machine-ground {
+/*
+ * The two layers. Both carry the whole face; the machine's is clipped to its
+ * own territory and paints its dark ground behind it. Wherever the dark has
+ * taken the screen you see the machine's copy, everywhere else the player's,
+ * and a readout can sit still while the boundary moves through it.
+ */
+.arena__layer {
   position: absolute;
   inset: 0;
-  top: var(--split);
-  background: var(--machine);
+}
+
+.arena__layer--yours {
+  color: var(--yours-ink);
+}
+
+.arena__layer--machine {
   color: var(--machine-ink);
+  background: var(--machine);
+  clip-path: inset(var(--split) 0 0 0);
+  pointer-events: none;
 }
 
 /*
@@ -52,9 +65,8 @@
 }
 
 .arena__side--machine {
-  bottom: 152px;
-  justify-content: flex-end;
-  color: var(--machine-ink);
+  bottom: 140px;
+  flex-wrap: wrap;
 }
 
 .arena__label {
@@ -70,29 +82,25 @@
 .arena__rate {
   font: var(--t-small);
   opacity: 0.75;
-  margin-left: auto;
-  text-align: right;
-  max-width: 24ch;
-}
-
-.arena__side--machine .arena__rate {
-  margin-left: 0;
   margin-right: auto;
-  text-align: left;
 }
 
-/* Round marks: a strip on the boundary, oldest scrolling off the left. */
+/* Round marks: a strip on the boundary, oldest scrolling off the left. The
+   strip is clipped rather than counted, so it fills whatever width there is. */
 .arena__marks {
   position: absolute;
-  left: 0;
-  right: 0;
+  left: var(--s3);
+  /* The strip ends just left of the seal, so the newest mark lands where the
+     move came from rather than at the far edge of a wide screen. */
+  right: calc(50% + 34px);
   top: var(--split);
-  height: 0;
+  height: 40px;
+  margin-top: -20px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 3px;
-  padding: 0 var(--s3);
+  overflow: hidden;
   pointer-events: none;
 }
 
@@ -115,11 +123,11 @@
 
 /* A stretch of neutral marks during warm-up tells the truth: nothing is
    happening yet. Those rounds are not a contest, and marking them as wins or
-   losses would misrepresent what the machine is claiming. */
+   losses would misrepresent what the machine is claiming. They sit on the line,
+   belonging to neither side. */
 .arena__mark--random {
   background: var(--random);
   --offset: 0px;
-  height: 2px;
 }
 
 .arena__mark--newest {
@@ -149,6 +157,8 @@
   pointer-events: none;
 }
 
+/* Opened, the seal shows the machine's committed move. Always in the machine's
+   own colours: the move was the machine's, whatever ground it lands on. */
 .arena__seal-move {
   position: absolute;
   inset: 0;
@@ -168,6 +178,10 @@
   background: var(--yours);
   border: 1px solid var(--boundary);
   transition: transform var(--seal-open) var(--ease-seal);
+}
+
+.arena__layer--machine .arena__seal-half {
+  background: var(--machine);
 }
 
 .arena__seal-half--left {
@@ -216,14 +230,18 @@
   display: grid;
   place-items: center;
   font: var(--t-h2);
-  color: var(--machine-ink);
+  color: inherit;
   background: transparent;
-  border: 2px solid var(--machine-ink);
+  border: 2px solid currentColor;
   border-radius: 2px;
 }
 
-.arena__target:active {
-  background: color-mix(in srgb, var(--machine-ink) 14%, transparent);
+.arena__layer--yours .arena__target:active {
+  background: color-mix(in srgb, var(--yours-ink) 12%, transparent);
+}
+
+.arena__layer--machine .arena__target {
+  border-color: var(--machine-ink);
 }
 
 .arena__title {
@@ -232,16 +250,6 @@
   top: max(var(--s3), env(safe-area-inset-top));
   font: var(--t-small);
   opacity: 0.55;
-}
-
-.arena__hint {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 128px;
-  font: var(--t-small);
-  color: var(--machine-ink);
-  opacity: 0.45;
 }
 
 @media (max-width: 420px) {

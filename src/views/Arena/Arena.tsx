@@ -5,38 +5,34 @@ import type { Move, Round } from '../../engine/types';
 import { formatRate } from '../../stats/interval';
 import './Arena.css';
 
-const MARKS_SHOWN = 72;
+const MARKS_SHOWN = 96;
 
 /**
  * The boundary's position, as a fraction from the top of the arena.
  *
  * Not the raw win rate. After one round the raw rate is 0 or 1, and a boundary
- * that slams to an edge on the first press would be claiming a result the
+ * that slammed to an edge on the first press would be claiming a result the
  * sample cannot support (PRD §7.4) — the opposite of what this readout is for.
  * The estimate is shrunk towards centre by a prior worth a few rounds, so the
  * boundary drifts and jitters near the middle early, exactly as a noisy 50%
  * process looks, and commits only once there is something to commit to.
+ *
+ * Clamped at the ends, where the exact position has stopped carrying
+ * information — a boundary at 2% and one at 6% say the same thing, and the two
+ * scores say it precisely. The clamp is what keeps the readouts on their own
+ * ground rather than sliding under each other.
  */
 const PRIOR = 5;
+const MIN_SPLIT = 0.16;
+const MAX_SPLIT = 0.78;
 
-function split(machineWins: number, rounds: number): number {
+export function split(machineWins: number, rounds: number): number {
   const rate = (machineWins + PRIOR) / (rounds + 2 * PRIOR);
-  return 1 - rate;
+  return Math.min(MAX_SPLIT, Math.max(MIN_SPLIT, 1 - rate));
 }
 
-interface MarkProps {
-  round: Round;
-  newest: boolean;
-}
-
-function Mark({ round, newest }: MarkProps) {
-  const kind = round.wasRandom ? 'random' : round.machineWon ? 'hit' : 'miss';
-  return (
-    <span
-      className={`arena__mark arena__mark--${kind}${newest ? ' arena__mark--newest' : ''}`}
-      aria-hidden="true"
-    />
-  );
+function markKind(round: Round): 'hit' | 'miss' | 'random' {
+  return round.wasRandom ? 'random' : round.machineWon ? 'hit' : 'miss';
 }
 
 /**
@@ -60,6 +56,71 @@ function Target({ label, onPress }: { label: string; onPress: () => void }) {
   );
 }
 
+interface FaceProps {
+  yourWins: number;
+  machineWins: number;
+  rounds: readonly Round[];
+  open: boolean;
+  committed: Move | null;
+  onPress: (move: Move) => void;
+}
+
+/**
+ * Everything in the arena except the grounds themselves.
+ *
+ * Rendered twice — once in the player's ink and once in the machine's, the
+ * second clipped to the machine's territory. Wherever the dark has taken the
+ * screen you see the machine's copy; everywhere else the player's. That is what
+ * lets a readout sit still while the boundary moves through it, which a single
+ * layer cannot do: text pinned above the tap targets would otherwise be the
+ * wrong colour on its own ground half the time.
+ */
+function Face({ yourWins, machineWins, rounds, open, committed, onPress }: FaceProps) {
+  const visible = rounds.slice(Math.max(0, rounds.length - MARKS_SHOWN));
+  const newest = rounds.length - 1;
+
+  return (
+    <>
+      <h1 className="arena__title">Mind reader (?)</h1>
+
+      <div className="arena__side arena__side--yours">
+        <span className="arena__label">you</span>
+        <span className="arena__score">{yourWins}</span>
+      </div>
+
+      <div className="arena__marks">
+        {visible.map((round) => (
+          <span
+            key={round.index}
+            className={`arena__mark arena__mark--${markKind(round)}${
+              round.index === newest ? ' arena__mark--newest' : ''
+            }`}
+          />
+        ))}
+      </div>
+
+      <div className={`arena__seal${open ? ' arena__seal--open' : ''}`}>
+        <span className="arena__seal-move">
+          {committed === null ? '' : committed === 0 ? 'left' : 'right'}
+        </span>
+        <span className="arena__seal-half arena__seal-half--left" />
+        <span className="arena__seal-half arena__seal-half--right" />
+      </div>
+
+      <div className="arena__side arena__side--machine">
+        <span className="arena__label">machine</span>
+        <span className="arena__score">{machineWins}</span>
+        <span className="arena__rate">{formatRate(machineWins, rounds.length)}</span>
+      </div>
+
+      <div className="arena__targets">
+        <Target label="left" onPress={() => onPress(0)} />
+        <Target label="right" onPress={() => onPress(1)} />
+      </div>
+    </>
+  );
+}
+
 export function Arena() {
   const store = useGame();
   const rounds = store.rounds;
@@ -68,7 +129,13 @@ export function Arena() {
   const [open, setOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const machineWins = useMemo(() => rounds.reduce((n, r) => n + (r.machineWon ? 1 : 0), 0), [rounds]);
+  // The referee appends to one array, so its identity never changes. Keying the
+  // count off the store's version is what makes this recompute at all.
+  const machineWins = useMemo(
+    () => rounds.reduce((n, r) => n + (r.machineWon ? 1 : 0), 0),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [rounds, store.version],
+  );
   const yourWins = rounds.length - machineWins;
 
   const press = useCallback(
@@ -77,82 +144,62 @@ export function Arena() {
       setOpen(true);
       if (closeTimer.current) clearTimeout(closeTimer.current);
       // The seal for the next round already exists; this only closes the lid.
-      closeTimer.current = setTimeout(() => setOpen(false), 520);
+      closeTimer.current = setTimeout(() => setOpen(false), 480);
     },
     [store],
   );
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement | null;
-      // Space and Enter belong to whatever has focus; the arrows are global.
-      if (target && (target.tagName === 'BUTTON' || target.tagName === 'INPUT')) {
-        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
-      }
-      if (event.key === 'ArrowLeft') {
-        event.preventDefault();
-        press(0);
-      } else if (event.key === 'ArrowRight') {
-        event.preventDefault();
-        press(1);
-      }
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      event.preventDefault();
+      press(event.key === 'ArrowLeft' ? 0 : 1);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [press]);
 
-  useEffect(() => () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+    },
+    [],
+  );
 
-  const visible = rounds.slice(Math.max(0, rounds.length - MARKS_SHOWN));
-  const committed = open && reveal ? reveal.round.prediction : null;
+  const face: FaceProps = {
+    yourWins,
+    machineWins,
+    rounds,
+    open,
+    committed: open && reveal ? reveal.round.prediction : null,
+    onPress: press,
+  };
 
   return (
     <section
       className="arena"
-      style={{ '--split': `${(split(machineWins, rounds.length) * 100).toFixed(3)}%` } as CSSProperties}
+      style={
+        { '--split': `${(split(machineWins, rounds.length) * 100).toFixed(3)}%` } as CSSProperties
+      }
       aria-label="Arena"
     >
-      <div className="arena__machine-ground" aria-hidden="true" />
+      <div className="arena__layer arena__layer--yours">
+        <Face {...face} />
+      </div>
+      <div className="arena__layer arena__layer--machine" aria-hidden="true">
+        <Face {...face} />
+      </div>
       <div className="arena__boundary" aria-hidden="true" />
-
-      <h1 className="arena__title">Mind reader (?)</h1>
-
-      <div className="arena__side arena__side--yours">
-        <span className="arena__label">you</span>
-        <span className="arena__score">{yourWins}</span>
-      </div>
-
-      <div className="arena__marks" aria-hidden="true">
-        {visible.map((round) => (
-          <Mark key={round.index} round={round} newest={round.index === rounds.length - 1} />
-        ))}
-      </div>
-
-      <div className={`arena__seal${open ? ' arena__seal--open' : ''}`}>
-        <span className="arena__seal-move">{committed === null ? '' : committed === 0 ? 'left' : 'right'}</span>
-        <span className="arena__seal-half arena__seal-half--left" />
-        <span className="arena__seal-half arena__seal-half--right" />
-      </div>
-
-      <div className="arena__side arena__side--machine">
-        <span className="arena__rate">{formatRate(machineWins, rounds.length)}</span>
-        <span className="arena__label">machine</span>
-        <span className="arena__score">{machineWins}</span>
-      </div>
-
-      <p className="arena__hint">left and right, or the arrow keys</p>
-
-      <div className="arena__targets">
-        <Target label="left" onPress={() => press(0)} />
-        <Target label="right" onPress={() => press(1)} />
-      </div>
 
       {/* The machine reports. It does not comment. */}
       <p className="visually-hidden" role="status" aria-live="polite">
         {reveal
-          ? `Round ${reveal.round.index + 1}. You pressed ${reveal.round.actual === 0 ? 'left' : 'right'}. The machine had sealed ${reveal.round.prediction === 0 ? 'left' : 'right'}${reveal.round.wasRandom ? ', played at random' : ''}. Machine ${machineWins}, you ${yourWins}.`
+          ? `Round ${reveal.round.index + 1}. You pressed ${
+              reveal.round.actual === 0 ? 'left' : 'right'
+            }. The machine had sealed ${reveal.round.prediction === 0 ? 'left' : 'right'}${
+              reveal.round.wasRandom ? ', played at random' : ''
+            }. Machine ${machineWins}, you ${yourWins}.`
           : 'A prediction is sealed. Press left or right.'}
       </p>
     </section>
