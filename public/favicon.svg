@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- The app in one mark: two grounds, opposed, and the boundary between them. -->
+  <rect width="32" height="32" fill="#E8E6E1"/>
+  <rect y="17" width="32" height="15" fill="#14171A"/>
+  <rect y="15" width="32" height="2" fill="#8C9094"/>
+  <!-- The seal, sitting on the boundary because it belongs to neither side. -->
+  <rect x="11" y="11" width="10" height="10" fill="#E8E6E1" stroke="#8C9094" stroke-width="1.5"/>
+</svg>

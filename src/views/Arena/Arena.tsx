@@ -41,14 +41,27 @@ function markKind(round: Round): 'hit' | 'miss' | 'random' {
  * arrives as a click with no detail, and is the only click that fires a press —
  * otherwise a mouse would press twice.
  */
-function Target({ label, onPress }: { label: string; onPress: () => void }) {
+function Target({
+  label,
+  onPress,
+  decorative,
+}: {
+  label: string;
+  onPress: () => void;
+  decorative: boolean;
+}) {
   return (
     <button
       className="arena__target"
       type="button"
-      onPointerDown={onPress}
+      // The machine layer's copy is paint, not a control. Leaving it focusable
+      // put two buttons in the tab order that announce nothing, because they sit
+      // inside an aria-hidden subtree.
+      tabIndex={decorative ? -1 : 0}
+      aria-hidden={decorative || undefined}
+      onPointerDown={decorative ? undefined : onPress}
       onClick={(event) => {
-        if (event.detail === 0) onPress();
+        if (!decorative && event.detail === 0) onPress();
       }}
     >
       {label}
@@ -63,6 +76,8 @@ interface FaceProps {
   open: boolean;
   committed: Move | null;
   onPress: (move: Move) => void;
+  /** True for the machine layer's copy, which is paint rather than interface. */
+  decorative: boolean;
 }
 
 /**
@@ -75,7 +90,7 @@ interface FaceProps {
  * layer cannot do: text pinned above the tap targets would otherwise be the
  * wrong colour on its own ground half the time.
  */
-function Face({ yourWins, machineWins, rounds, open, committed, onPress }: FaceProps) {
+function Face({ yourWins, machineWins, rounds, open, committed, onPress, decorative }: FaceProps) {
   const visible = rounds.slice(Math.max(0, rounds.length - MARKS_SHOWN));
   const newest = rounds.length - 1;
 
@@ -88,7 +103,13 @@ function Face({ yourWins, machineWins, rounds, open, committed, onPress }: FaceP
       */}
       <div className="arena__boundary" />
 
-      <h1 className="arena__title">Mind reader (?)</h1>
+      {decorative ? (
+        <p className="arena__title" aria-hidden="true">
+          Mind reader (?)
+        </p>
+      ) : (
+        <h1 className="arena__title">Mind reader (?)</h1>
+      )}
 
       <div className="arena__side arena__side--yours">
         <span className="arena__label">you</span>
@@ -121,8 +142,8 @@ function Face({ yourWins, machineWins, rounds, open, committed, onPress }: FaceP
       </div>
 
       <div className="arena__targets">
-        <Target label="left" onPress={() => onPress(0)} />
-        <Target label="right" onPress={() => onPress(1)} />
+        <Target label="left" decorative={decorative} onPress={() => onPress(0)} />
+        <Target label="right" decorative={decorative} onPress={() => onPress(1)} />
       </div>
     </>
   );
@@ -174,7 +195,7 @@ export function Arena() {
     [],
   );
 
-  const face: FaceProps = {
+  const face = {
     yourWins,
     machineWins,
     rounds,
@@ -192,10 +213,10 @@ export function Arena() {
       aria-label="Arena"
     >
       <div className="arena__layer arena__layer--yours">
-        <Face {...face} />
+        <Face {...face} decorative={false} />
       </div>
       <div className="arena__layer arena__layer--machine" aria-hidden="true">
-        <Face {...face} />
+        <Face {...face} decorative />
       </div>
 
       {/* The machine reports. It does not comment. */}
