@@ -1,0 +1,261 @@
+/*
+ * The screen does not have one ground. It has two, and they are opposed.
+ * The player's side is light, the machine's is dark, and the boundary between
+ * them moves with the score.
+ */
+
+.arena {
+  position: relative;
+  height: 100svh;
+  min-height: 480px;
+  overflow: hidden;
+  background: var(--yours);
+  color: var(--yours-ink);
+  user-select: none;
+  touch-action: manipulation;
+}
+
+/* The machine's territory, pressing up from below. Its height is the score. */
+.arena__machine-ground {
+  position: absolute;
+  inset: 0;
+  top: var(--split);
+  background: var(--machine);
+  color: var(--machine-ink);
+}
+
+/*
+ * The boundary is a readout, not a transition: it tracks the running win rate
+ * continuously with no easing (DESIGN.md §6.1).
+ */
+.arena__boundary {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--split);
+  height: 2px;
+  margin-top: -1px;
+  background: var(--boundary);
+}
+
+.arena__side {
+  position: absolute;
+  left: var(--s3);
+  right: var(--s3);
+  display: flex;
+  align-items: baseline;
+  gap: var(--s2);
+}
+
+.arena__side--yours {
+  top: calc(max(var(--s3), env(safe-area-inset-top)) + 26px);
+}
+
+.arena__side--machine {
+  bottom: 152px;
+  justify-content: flex-end;
+  color: var(--machine-ink);
+}
+
+.arena__label {
+  font: var(--t-small);
+  opacity: 0.75;
+}
+
+.arena__score {
+  font: var(--t-score);
+  font-variant-numeric: tabular-nums;
+}
+
+.arena__rate {
+  font: var(--t-small);
+  opacity: 0.75;
+  margin-left: auto;
+  text-align: right;
+  max-width: 24ch;
+}
+
+.arena__side--machine .arena__rate {
+  margin-left: 0;
+  margin-right: auto;
+  text-align: left;
+}
+
+/* Round marks: a strip on the boundary, oldest scrolling off the left. */
+.arena__marks {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--split);
+  height: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 3px;
+  padding: 0 var(--s3);
+  pointer-events: none;
+}
+
+.arena__mark {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  transform: translateY(var(--offset));
+}
+
+.arena__mark--hit {
+  background: var(--hit);
+  --offset: 10px;
+}
+
+.arena__mark--miss {
+  background: var(--miss);
+  --offset: -10px;
+}
+
+/* A stretch of neutral marks during warm-up tells the truth: nothing is
+   happening yet. Those rounds are not a contest, and marking them as wins or
+   losses would misrepresent what the machine is claiming. */
+.arena__mark--random {
+  background: var(--random);
+  --offset: 0px;
+  height: 2px;
+}
+
+.arena__mark--newest {
+  animation: mark-land var(--move-fly) var(--ease-fly);
+}
+
+@keyframes mark-land {
+  from {
+    transform: translateY(0) scale(2.4);
+    opacity: 0.35;
+  }
+  to {
+    transform: translateY(var(--offset)) scale(1);
+    opacity: 1;
+  }
+}
+
+/* The seal sits on the boundary, because it belongs to neither side until it
+   opens. */
+.arena__seal {
+  position: absolute;
+  left: 50%;
+  top: var(--split);
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  pointer-events: none;
+}
+
+.arena__seal-move {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font: var(--t-small);
+  color: var(--machine-ink);
+  background: var(--machine);
+  border: 1px solid var(--boundary);
+}
+
+.arena__seal-half {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  background: var(--yours);
+  border: 1px solid var(--boundary);
+  transition: transform var(--seal-open) var(--ease-seal);
+}
+
+.arena__seal-half--left {
+  left: 0;
+  border-right: none;
+}
+
+.arena__seal-half--right {
+  right: 0;
+  border-left: none;
+}
+
+/* Closed, the seal is filled with a fine cross-hatch: something is in there and
+   you cannot see it. */
+.arena__seal-half::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(45deg, var(--boundary) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(-45deg, var(--boundary) 0 1px, transparent 1px 4px);
+  opacity: 0.5;
+}
+
+.arena__seal--open .arena__seal-half--left {
+  transform: translateX(-100%);
+}
+
+.arena__seal--open .arena__seal-half--right {
+  transform: translateX(100%);
+}
+
+/* Two tap targets, side by side, generous enough for a thumb without looking.
+   They never change appearance based on the prediction. Ever. */
+.arena__targets {
+  position: absolute;
+  left: var(--s3);
+  right: var(--s3);
+  bottom: max(var(--s3), env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s2);
+}
+
+.arena__target {
+  min-height: 88px;
+  display: grid;
+  place-items: center;
+  font: var(--t-h2);
+  color: var(--machine-ink);
+  background: transparent;
+  border: 2px solid var(--machine-ink);
+  border-radius: 2px;
+}
+
+.arena__target:active {
+  background: color-mix(in srgb, var(--machine-ink) 14%, transparent);
+}
+
+.arena__title {
+  position: absolute;
+  left: var(--s3);
+  top: max(var(--s3), env(safe-area-inset-top));
+  font: var(--t-small);
+  opacity: 0.55;
+}
+
+.arena__hint {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 128px;
+  font: var(--t-small);
+  color: var(--machine-ink);
+  opacity: 0.45;
+}
+
+@media (max-width: 420px) {
+  .arena__score {
+    font: 700 48px/0.95 var(--font);
+  }
+
+  .arena__side,
+  .arena__targets {
+    left: var(--s2);
+    right: var(--s2);
+  }
+
+  .arena__title {
+    left: var(--s2);
+  }
+}

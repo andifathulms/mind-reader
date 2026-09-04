@@ -1,0 +1,109 @@
+@import '@fontsource-variable/public-sans/index.css';
+@import '@fontsource/courier-prime/400.css';
+@import '@fontsource/courier-prime/700.css';
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* The arena fills the viewport and the analysis scrolls under it. */
+  background: var(--machine);
+}
+
+body {
+  margin: 0;
+  font: var(--t-body);
+  /* The score changes every press and must not shift width. */
+  font-variant-numeric: tabular-nums;
+  color: var(--yours-ink);
+  background: var(--yours);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+p,
+figure,
+ul,
+ol,
+dl {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 2.4 Restraint: selection is a 2px outline in the local ink, nothing else. */
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+table {
+  border-collapse: collapse;
+  font: var(--t-data);
+  font-variant-numeric: tabular-nums;
+}
+
+th,
+td {
+  text-align: right;
+  padding: 4px var(--s2) 4px 0;
+  border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
+}
+
+th:first-child,
+td:first-child {
+  text-align: left;
+}
+
+th {
+  font-weight: 600;
+}
+
+/* Chart table equivalents: reachable by keyboard, out of the way otherwise. */
+.table-equivalent > summary {
+  font: var(--t-small);
+  cursor: pointer;
+  opacity: 0.7;
+  padding: 4px 0;
+}
+
+.table-equivalent[open] > summary {
+  opacity: 1;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
