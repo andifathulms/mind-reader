@@ -116,6 +116,27 @@
   .index__short {
     display: none;
   }
+
+  /*
+   * Collapsed to numbers and ticks, so the rail cannot crowd a wide figure at
+   * the right edge of the measure. The names arrive on hover or on focus, which
+   * is the only time they are wanted: the rest of the time the number and the
+   * active tick already say where you are.
+   */
+  .index__label {
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition:
+      max-width 320ms var(--ease-out),
+      opacity 200ms linear;
+  }
+
+  .index:hover .index__label,
+  .index:focus-within .index__label {
+    max-width: 12rem;
+    opacity: 1;
+  }
 }
 
 /* Below that the rail lies along the top edge and scrolls sideways, with the

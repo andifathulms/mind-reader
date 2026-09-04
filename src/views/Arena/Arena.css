@@ -7,12 +7,14 @@
 .arena {
   position: relative;
   height: 100svh;
-  min-height: 480px;
+  min-height: 520px;
   overflow: hidden;
   background: var(--yours);
   color: var(--yours-ink);
   user-select: none;
   touch-action: manipulation;
+  /* Contains the layout and paint of a surface that repaints on every press. */
+  contain: layout paint;
 }
 
 /*
@@ -51,74 +53,238 @@
   background: var(--boundary);
 }
 
-.arena__side {
+/*
+ * The verdict. One pulse runs the width of the boundary on reveal, in the
+ * colour of the mark that was just laid: the line the two sides share is where
+ * a round is settled, so that is where the settlement shows. It carries no
+ * information the marks and the scores do not already carry — it is the beat,
+ * not the report.
+ */
+.arena__pulse {
   position: absolute;
-  left: var(--s3);
-  right: var(--s3);
+  inset: -1px 0;
+  transform-origin: 50% 50%;
+  opacity: 0;
+}
+
+.arena__pulse--hit,
+.arena__pulse--miss,
+.arena__pulse--random {
+  animation: boundary-pulse 380ms var(--ease-out);
+}
+
+.arena__pulse--hit {
+  background: var(--hit);
+}
+
+.arena__pulse--miss {
+  background: var(--miss);
+}
+
+.arena__pulse--random {
+  background: var(--random);
+}
+
+@keyframes boundary-pulse {
+  from {
+    opacity: calc(0.9 * (1 - var(--still)));
+    transform: scaleX(0.06) scaleY(2.5);
+  }
+  to {
+    opacity: 0;
+    transform: scaleX(1) scaleY(1);
+  }
+}
+
+/*
+ * The boundary's past, arriving from the left and meeting the line exactly
+ * where it now sits. Neutral ink, because the history belongs to neither side.
+ */
+.arena__trail {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.arena__trail polyline {
+  fill: none;
+  stroke: var(--boundary);
+  stroke-width: 1.25;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  opacity: 0.42;
+}
+
+/* ------------------------------------------------------------------- head */
+
+.arena__head {
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  top: max(var(--s3), env(safe-area-inset-top));
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
+  justify-content: space-between;
   gap: var(--s2);
 }
 
+.arena__title {
+  font: var(--t-h2);
+  letter-spacing: 0.02em;
+}
+
+/* Shannon's question mark, once, and given the room to be the thing it is. */
+.arena__query {
+  color: var(--hit);
+  font-weight: 700;
+}
+
+.arena__layer--machine .arena__query {
+  color: var(--p-mrm);
+}
+
+.arena__round {
+  color: inherit;
+  opacity: 0.62;
+}
+
+/* ------------------------------------------------------------- the scores */
+
+.arena__side {
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .arena__side--yours {
-  top: calc(max(var(--s3), env(safe-area-inset-top)) + 26px);
+  top: calc(max(var(--s3), env(safe-area-inset-top)) + 46px);
 }
 
 .arena__side--machine {
-  bottom: 140px;
-  flex-wrap: wrap;
+  bottom: 168px;
 }
 
 .arena__label {
-  font: var(--t-small);
-  opacity: 0.75;
+  color: inherit;
+  opacity: 0.62;
 }
 
 .arena__score {
   font: var(--t-score);
+  letter-spacing: var(--track-score);
   font-variant-numeric: tabular-nums;
+  /* The number is the loudest thing on the screen and must not move the layout
+     when it gains a digit; the box is sized for three. */
+  min-width: 2.4ch;
+}
+
+.arena__readout {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+  max-width: 34rem;
 }
 
 .arena__rate {
   font: var(--t-small);
   opacity: 0.75;
-  margin-right: auto;
+}
+
+.arena__last {
+  font: var(--t-micro);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+/*
+ * The interval, drawn to scale across 0 to 100%. A band this wide next to a
+ * confident number is the honest statement about a short sample.
+ */
+.arena__interval {
+  position: relative;
+  display: block;
+  width: min(280px, 60vw);
+  height: 8px;
+  border-top: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  border-color: color-mix(in srgb, currentColor 22%, transparent);
+}
+
+.arena__interval-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--low);
+  right: calc(100% - var(--high));
+  background: color-mix(in srgb, currentColor 26%, transparent);
+  transition: all var(--weight-change) var(--ease-out);
+}
+
+/* 50%, a coin. The one reference the number needs. */
+.arena__interval-half {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  left: 50%;
+  width: 1px;
+  background: color-mix(in srgb, currentColor 40%, transparent);
+}
+
+.arena__interval-point {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  left: var(--point);
+  width: 2px;
+  margin-left: -1px;
+  background: currentColor;
+  transition: left var(--weight-change) var(--ease-out);
 }
 
 /* Round marks: a strip on the boundary, oldest scrolling off the left. The
    strip is clipped rather than counted, so it fills whatever width there is. */
 .arena__marks {
   position: absolute;
-  left: var(--s3);
+  left: var(--gutter);
   /* The strip ends just left of the seal, so the newest mark lands where the
      move came from rather than at the far edge of a wide screen. */
-  right: calc(50% + 34px);
+  right: calc(50% + 40px);
   top: var(--split);
-  height: 40px;
-  margin-top: -20px;
+  height: 48px;
+  margin-top: -24px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 3px;
   overflow: hidden;
   pointer-events: none;
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000);
 }
 
 .arena__mark {
   width: 6px;
   height: 6px;
   flex: none;
+  border-radius: 1px;
   transform: translateY(var(--offset));
 }
 
 .arena__mark--hit {
   background: var(--hit);
-  --offset: 10px;
+  --offset: 12px;
 }
 
 .arena__mark--miss {
   background: var(--miss);
-  --offset: -10px;
+  --offset: -12px;
 }
 
 /* A stretch of neutral marks during warm-up tells the truth: nothing is
@@ -147,14 +313,29 @@
 
 /* The seal sits on the boundary, because it belongs to neither side until it
    opens. */
-.arena__seal {
+.arena__committed {
   position: absolute;
   left: 50%;
   top: var(--split);
-  width: 44px;
-  height: 44px;
-  margin: -22px 0 0 -22px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s1);
   pointer-events: none;
+}
+
+.arena__seal {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  margin-top: -26px;
+}
+
+.arena__caption {
+  color: inherit;
+  opacity: 0.5;
+  white-space: nowrap;
 }
 
 /* Opened, the seal shows the machine's committed move. Always in the machine's
@@ -164,7 +345,9 @@
   inset: 0;
   display: grid;
   place-items: center;
-  font: var(--t-small);
+  font: var(--t-micro);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
   color: var(--machine-ink);
   background: var(--machine);
   border: 1px solid var(--boundary);
@@ -179,7 +362,10 @@
   height: 100%;
   background: var(--yours);
   border: 1px solid var(--boundary);
-  transition: transform var(--seal-open) var(--ease-seal);
+  opacity: 1;
+  transition:
+    transform var(--seal-open) var(--ease-seal),
+    opacity var(--seal-open) var(--ease-seal);
 }
 
 .arena__layer--machine .arena__seal-half {
@@ -209,13 +395,6 @@
 
 /* Opening, the halves draw apart and go with them. Leaving them parked either
    side of the opening reads as a seal still closed in two places. */
-.arena__seal-half {
-  opacity: 1;
-  transition:
-    transform var(--seal-open) var(--ease-seal),
-    opacity var(--seal-open) var(--ease-seal);
-}
-
 .arena__seal--open .arena__seal-half--left {
   transform: translateX(-100%);
   opacity: 0;
@@ -230,53 +409,193 @@
    They never change appearance based on the prediction. Ever. */
 .arena__targets {
   position: absolute;
-  left: var(--s3);
-  right: var(--s3);
-  bottom: max(var(--s3), env(safe-area-inset-bottom));
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: calc(max(var(--s3), env(safe-area-inset-bottom)) + 26px);
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--s2);
 }
 
 .arena__target {
-  min-height: 88px;
+  position: relative;
+  min-height: 92px;
   display: grid;
   place-items: center;
+  gap: 4px;
   font: var(--t-h2);
+  letter-spacing: 0.06em;
   color: inherit;
   background: transparent;
-  border: 2px solid currentColor;
-  border-radius: 2px;
+  border: 1.5px solid currentColor;
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: transform var(--tap) var(--ease-out);
 }
 
+.arena__target-hint {
+  font: var(--t-micro);
+  letter-spacing: var(--track-eyebrow);
+  opacity: 0.45;
+}
+
+/*
+ * The press. A wash rises through the target and the target gives a little
+ * under the finger — the acknowledgement has to land before the reveal does,
+ * which is why it is a transform on an element that is already composited.
+ */
 .arena__layer--yours .arena__target:active {
-  background: color-mix(in srgb, var(--yours-ink) 12%, transparent);
+  transform: scale(0.985);
+  background: color-mix(in srgb, var(--yours-ink) 10%, transparent);
+}
+
+.arena__layer--yours .arena__target::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 100%;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  transform: scaleY(0);
+  transform-origin: 50% 100%;
+  transition: transform 220ms var(--ease-out);
+}
+
+@media (hover: hover) {
+  .arena__layer--yours .arena__target:hover::after {
+    transform: scaleY(1);
+  }
 }
 
 .arena__layer--machine .arena__target {
   border-color: var(--machine-ink);
 }
 
-.arena__title {
+.arena__cue {
   position: absolute;
-  left: var(--s3);
-  top: max(var(--s3), env(safe-area-inset-top));
-  font: var(--t-small);
-  opacity: 0.72;
+  left: 50%;
+  bottom: max(var(--s1), env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  opacity: 0.42;
+  white-space: nowrap;
+  animation: cue-breathe var(--drift) ease-in-out infinite;
+}
+
+@keyframes cue-breathe {
+  0%,
+  100% {
+    opacity: calc(0.42 - 0.14 * (1 - var(--still)));
+  }
+  50% {
+    opacity: 0.42;
+  }
+}
+
+/* ------------------------------------------------------- the arena opening */
+
+/*
+ * One entrance, played once, on a surface that is interactive from the first
+ * frame. The targets are last because they are the invitation; the score is
+ * first because it is the subject.
+ */
+.arena__title,
+.arena__round,
+.arena__side,
+.arena__targets,
+.arena__cue,
+.arena__marks,
+.arena__trail {
+  opacity: calc(0.001 + var(--still));
+  transition:
+    opacity 620ms var(--ease-out) var(--in, 0ms),
+    transform 620ms var(--ease-out) var(--in, 0ms);
+}
+
+.arena__side {
+  transform: translateY(calc(12px * (1 - var(--still))));
+}
+
+.arena__targets {
+  transform: translateY(calc(18px * (1 - var(--still))));
+  --in: 240ms;
+}
+
+.arena__title {
+  --in: 40ms;
+}
+
+.arena__round {
+  --in: 120ms;
+}
+
+.arena__side--yours {
+  --in: 80ms;
+}
+
+.arena__side--machine {
+  --in: 160ms;
+}
+
+.arena__marks,
+.arena__trail {
+  --in: 320ms;
+}
+
+.arena__cue {
+  --in: 500ms;
+}
+
+.arena--ready .arena__title,
+.arena--ready .arena__round,
+.arena--ready .arena__side,
+.arena--ready .arena__targets,
+.arena--ready .arena__cue,
+.arena--ready .arena__marks,
+.arena--ready .arena__trail {
+  opacity: 1;
+  transform: none;
+}
+
+.arena--ready .arena__cue {
+  opacity: 0.42;
+}
+
+/* The boundary itself never animates in. It is a readout and it is correct from
+   the first frame; sliding it into place would be a claim about a score that
+   had not been played. */
+
+@media (max-width: 720px) {
+  .arena__side--machine {
+    bottom: 152px;
+  }
+
+  .arena__last {
+    display: none;
+  }
+
+  .arena__marks {
+    right: calc(50% + 34px);
+  }
 }
 
 @media (max-width: 420px) {
-  .arena__score {
-    font: 700 48px/0.95 var(--font);
+  .arena {
+    min-height: 480px;
   }
 
-  .arena__side,
-  .arena__targets {
-    left: var(--s2);
-    right: var(--s2);
+  .arena__side--machine {
+    bottom: 146px;
   }
 
-  .arena__title {
-    left: var(--s2);
+  .arena__target {
+    min-height: 82px;
+  }
+}
+
+/* A short viewport has no room for the trail's full height or a breathing cue;
+   the game survives, the decoration does not. */
+@media (max-height: 620px) {
+  .arena__cue,
+  .arena__interval {
+    display: none;
   }
 }
