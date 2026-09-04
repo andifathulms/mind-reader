@@ -1,0 +1,95 @@
+.ensemble {
+  display: grid;
+  gap: var(--s3);
+}
+
+.ensemble__track {
+  display: grid;
+  grid-template-columns: 92px 56px minmax(120px, 420px) 168px;
+  justify-content: start;
+  align-items: center;
+  gap: var(--s2);
+}
+
+.ensemble__name {
+  font: var(--t-data);
+  color: var(--tint);
+}
+
+.ensemble__bar {
+  position: relative;
+  height: 12px;
+  background: color-mix(in srgb, var(--machine-ink) 10%, transparent);
+}
+
+.ensemble__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--tint);
+  width: var(--weight);
+  transition: width var(--weight-change) var(--ease-fly);
+}
+
+.ensemble__weight {
+  font: var(--t-figure);
+  text-align: right;
+}
+
+/* What this model would have played this round, and whether it was right —
+   so a currently unweighted model can be watched being correct, and its
+   weight watched climbing over the rounds that follow. */
+.ensemble__guess {
+  display: flex;
+  align-items: center;
+  gap: var(--s1);
+  font: var(--t-small);
+  opacity: 0.8;
+}
+
+.ensemble__verdict {
+  width: 8px;
+  height: 8px;
+  flex: none;
+}
+
+.ensemble__verdict--right {
+  background: var(--hit);
+}
+
+.ensemble__verdict--wrong {
+  background: color-mix(in srgb, var(--machine-ink) 30%, transparent);
+}
+
+.ensemble__legend {
+  font: var(--t-small);
+  opacity: 0.7;
+  margin-top: var(--s2);
+}
+
+/* On a phone the five weights become one stacked bar rather than five tracks. */
+.ensemble__stack {
+  display: none;
+  height: 28px;
+  width: 100%;
+}
+
+.ensemble__stack-part {
+  transition: width var(--weight-change) var(--ease-fly);
+}
+
+/* On a phone the five weights become one stacked bar rather than five tracks,
+   and each row keeps only its name, its weight and its last guess. */
+@media (max-width: 640px) {
+  .ensemble__stack {
+    display: flex;
+  }
+
+  .ensemble__bar {
+    display: none;
+  }
+
+  .ensemble__track {
+    grid-template-columns: 84px 48px 1fr;
+    gap: var(--s1) var(--s2);
+  }
+}

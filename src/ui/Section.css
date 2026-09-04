@@ -1,0 +1,93 @@
+.section {
+  padding: var(--s5) var(--s3);
+  border-top: 1px solid var(--rule);
+}
+
+.section--yours {
+  background: var(--yours);
+  color: var(--yours-ink);
+}
+
+/* The ensemble sits on the machine's ground, because it is the machine's own
+   account of itself. */
+.section--machine {
+  background: var(--machine);
+  color: var(--machine-ink);
+  border-top-color: var(--rule-dark);
+}
+
+/* The archive sits on a slightly warmer paper than the rest of the light side. */
+.section--archive {
+  background: var(--archive-paper);
+  color: var(--yours-ink);
+}
+
+.section__inner {
+  max-width: var(--measure);
+  margin: 0 auto;
+}
+
+.section__head {
+  margin-bottom: var(--s4);
+}
+
+.section__title {
+  font: var(--t-h2);
+}
+
+.section__intro {
+  font: var(--t-body);
+  max-width: 66ch;
+  margin-top: var(--s1);
+  opacity: 0.8;
+}
+
+.figure {
+  margin: 0 0 var(--s4);
+}
+
+.figure__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s2);
+  margin-bottom: var(--s2);
+}
+
+.figure__title {
+  font: var(--t-h2);
+  flex: none;
+}
+
+.figure__value {
+  font: var(--t-display);
+  margin-left: auto;
+}
+
+.figure__note {
+  font: var(--t-small);
+  opacity: 0.75;
+  flex-basis: 100%;
+  max-width: 66ch;
+}
+
+.figure__body {
+  overflow-x: auto;
+}
+
+/* A lab notebook: left-aligned prose, right-aligned figures. */
+.grid-two {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--s4) var(--s5);
+}
+
+@media (max-width: 640px) {
+  .section {
+    padding: var(--s4) var(--s2);
+  }
+
+  .figure__value {
+    font: var(--t-figure);
+  }
+}
