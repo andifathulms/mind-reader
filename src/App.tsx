@@ -2,6 +2,7 @@ import { Arena } from './views/Arena/Arena';
 import { Ensemble } from './views/Ensemble/Ensemble';
 import { Portrait } from './views/Portrait/Portrait';
 import { Lab } from './views/Lab/Lab';
+import { Rematch } from './views/Rematch/Rematch';
 import './styles/base.css';
 
 /**
@@ -18,6 +19,7 @@ export function App() {
         <Ensemble />
         <Portrait />
         <Lab />
+        <Rematch />
       </main>
     </>
   );

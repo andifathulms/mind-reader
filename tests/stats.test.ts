@@ -35,8 +35,8 @@ describe('conditional entropy', () => {
     const { bits } = conditionalEntropy(sequence, 1);
 
     // Independent count of the same sequence, done a different way.
-    let after0 = [0, 0];
-    let after1 = [0, 0];
+    const after0 = [0, 0];
+    const after1 = [0, 0];
     for (let i = 1; i < sequence.length; i += 1) {
       const target = sequence[i - 1] === 0 ? after0 : after1;
       target[sequence[i] as number] = (target[sequence[i] as number] ?? 0) + 1;

@@ -1,0 +1,88 @@
+.rematch {
+  max-width: 640px;
+}
+
+/* Two machines facing each other across the same boundary, the umpire between
+   them. The boundary drifting steadily toward SEER's side, over thousands of
+   rounds, is a result from 1953 happening in front of you. */
+.rematch__field {
+  position: relative;
+  height: 168px;
+  background: var(--yours);
+  border: 1px solid var(--rule);
+  overflow: hidden;
+}
+
+.rematch__ground {
+  position: absolute;
+  inset: 0;
+  top: var(--split);
+  background: var(--machine);
+}
+
+.rematch__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--split);
+  height: 2px;
+  margin-top: -1px;
+  background: var(--boundary);
+}
+
+.rematch__side {
+  position: absolute;
+  left: var(--s2);
+  right: var(--s2);
+  display: flex;
+  align-items: baseline;
+  gap: var(--s1);
+  font: var(--t-data);
+}
+
+.rematch__side--top {
+  top: var(--s1);
+}
+
+.rematch__side--bottom {
+  bottom: var(--s1);
+  justify-content: flex-end;
+  color: var(--machine-ink);
+}
+
+.rematch__score {
+  font: var(--t-figure);
+}
+
+.rematch__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  align-items: baseline;
+  margin-top: var(--s2);
+  font: var(--t-small);
+  opacity: 0.8;
+}
+
+.rematch__controls {
+  display: flex;
+  gap: var(--s2);
+  flex-wrap: wrap;
+  margin-top: var(--s3);
+}
+
+.rematch__button {
+  border: 1px solid var(--yours-ink);
+  padding: 6px var(--s2);
+  font: var(--t-data);
+  border-radius: 2px;
+}
+
+.rematch__quote {
+  font: var(--t-body);
+  max-width: 60ch;
+  margin-top: var(--s3);
+  padding-left: var(--s2);
+  border-left: 2px solid var(--rule);
+  opacity: 0.9;
+}

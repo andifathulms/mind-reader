@@ -50,17 +50,11 @@
   opacity: 0.4;
 }
 
-.lab__ci {
+.lab__ci,
+.lab__yours {
   font: var(--t-small);
   opacity: 0.7;
   text-align: right;
-  grid-column: 2 / -1;
-}
-
-.lab__yours {
-  font: var(--t-data);
-  text-align: right;
-  opacity: 0.85;
 }
 
 .lab__head {
@@ -89,10 +83,21 @@
 }
 
 .lab__actions {
-  margin-top: var(--s3);
+  grid-column: 1 / -1;
   display: flex;
   gap: var(--s2);
   flex-wrap: wrap;
+  margin-top: var(--s1);
+}
+
+.lab__actions--footer {
+  margin-top: var(--s3);
+}
+
+/* Selection is a 2px outline in the local ink. Nothing else is coloured. */
+.lab__run--live {
+  outline: 2px solid var(--yours-ink);
+  outline-offset: 2px;
 }
 
 @media (max-width: 640px) {
@@ -101,6 +106,7 @@
     grid-template-columns: 1fr auto;
   }
 
+  .lab__ci,
   .lab__yours {
     grid-column: 1 / -1;
     text-align: left;
