@@ -17,7 +17,7 @@ import './Archive.css';
  */
 export function Archive() {
   return (
-    <Section id="archive" title="The archive" ground="archive">
+    <Section id="archive" title="The archive" eyebrow="sources" ground="archive">
       <div className="archive">
         <div className="archive__disclosure">
           <p>
@@ -43,8 +43,12 @@ export function Archive() {
           design: the machine is not reading anything. It is exploiting a failure.
         </p>
 
+        <div className="archive__machines">
         <div className="archive__machine">
-          <h3 className="archive__name">SEER, 1956</h3>
+          <p className="archive__year" aria-hidden="true">
+            1956
+          </p>
+          <h3 className="archive__name">SEER</h3>
           <p>
             David Hagelbarger's SEquence Extrapolating Robot, built from relays at Bell
             Laboratories. Its entire memory is three yes-or-no facts about the last two plays —
@@ -66,7 +70,10 @@ export function Archive() {
         </div>
 
         <div className="archive__machine">
-          <h3 className="archive__name">MRM, 1953</h3>
+          <p className="archive__year" aria-hidden="true">
+            1953
+          </p>
+          <h3 className="archive__name">MRM</h3>
           <p>
             Claude Shannon's machine, described in a memorandum of 18 March 1953 that opens by
             crediting Hagelbarger and calling his own device a simplified version of it. It keeps
@@ -81,12 +88,14 @@ export function Archive() {
             Hagelbarger could write that Shannon “has built a machine using about half as many
             relays”.
           </p>
-          <p>It won.</p>
+          <p className="archive__verdict">It won.</p>
           <p className="archive__cite">
             C. E. Shannon, <em>A Mind-Reading (?) Machine</em>, Bell Laboratories memorandum, 18
             March 1953. Reprinted in <em>Claude Elwood Shannon: Collected Papers</em>, IEEE Press,
             1993, pp. 688–690.
           </p>
+        </div>
+
         </div>
 
         <div className="archive__seams">

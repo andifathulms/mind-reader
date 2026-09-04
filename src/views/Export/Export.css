@@ -1,37 +1,83 @@
 .export {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--s2);
-  align-items: center;
 }
 
-.export__button {
-  border: 1px solid var(--yours-ink);
-  padding: 6px var(--s2);
-  font: var(--t-data);
-  border-radius: 2px;
+/*
+ * Each format is a file, named. Three unlabelled buttons made the reader guess
+ * which one carried what, and the filename is the fastest way to say it.
+ */
+.export__file {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  text-align: left;
+  padding: var(--s3);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  transition:
+    border-color 160ms linear,
+    background 160ms linear,
+    transform var(--tap) var(--ease-out);
 }
 
-.export__button[disabled] {
-  opacity: 0.4;
+.export__file:hover:not(:disabled) {
+  border-color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+.export__file:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.export__file:disabled {
+  opacity: 0.45;
   cursor: default;
+}
+
+.export__kind {
+  color: var(--hit);
+}
+
+.export__title {
+  font: var(--t-h2);
 }
 
 .export__note {
   font: var(--t-small);
-  opacity: 0.75;
-  max-width: 66ch;
-  margin-top: var(--s3);
+  color: var(--ink-soft);
+}
+
+.export__name {
+  font: 400 12px/1.5 var(--font-archive);
+  color: var(--ink-soft);
+  margin-top: var(--s1);
+  padding-top: var(--s1);
+  border-top: 1px solid var(--rule);
+  word-break: break-all;
 }
 
 .export__sequence {
-  font: var(--t-data);
-  font-family: var(--font-archive);
-  word-break: break-all;
-  max-width: 66ch;
-  margin-top: var(--s2);
-  padding: var(--s2);
+  margin-top: var(--s4);
   border: 1px solid var(--rule);
-  max-height: 8em;
+}
+
+.export__sequence-head {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s2);
+  padding: var(--s1) var(--s2);
+  border-bottom: 1px solid var(--rule);
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+.export__bits {
+  font: 400 13px/1.9 var(--font-archive);
+  letter-spacing: 0.06em;
+  word-break: break-all;
+  padding: var(--s2);
+  max-height: 10em;
   overflow-y: auto;
+  color: var(--ink-soft);
 }

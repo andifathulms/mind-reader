@@ -6,34 +6,71 @@
  */
 .archive {
   font: var(--t-archive);
-  max-width: 62ch;
+}
+
+.archive > * {
+  max-width: 68ch;
 }
 
 .archive p {
   margin-bottom: var(--s2);
 }
 
+/*
+ * The disclosure. A machine that claims to predict a person owes them an exact
+ * account of what it can see, so it is the first thing in the section and it is
+ * given the weight of a statement rather than of a paragraph.
+ */
 .archive__disclosure {
-  border-left: 2px solid var(--yours-ink);
-  padding-left: var(--s2);
-  margin-bottom: var(--s4);
+  border-left: 3px solid var(--ink);
+  padding: var(--s1) 0 var(--s1) var(--s3);
+  margin-bottom: var(--s5);
+}
+
+.archive__disclosure p:first-child {
+  font: 400 clamp(16px, 1.4vw, 19px) / 1.5 var(--font-archive);
+}
+
+/* The two machines side by side: they were built four years and one memorandum
+   apart and the whole section is a comparison of them. */
+.archive__machines {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: var(--s5);
+  max-width: none;
+  margin: var(--s4) 0;
 }
 
 .archive__machine {
-  margin-bottom: var(--s4);
   padding-top: var(--s3);
-  border-top: 1px solid var(--rule);
+  border-top: 2px solid var(--ink);
+}
+
+.archive__year {
+  font: 700 clamp(34px, 4vw, 52px) / 1 var(--font);
+  letter-spacing: var(--track-display);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 2px;
 }
 
 .archive__name {
-  font: var(--t-h2);
-  margin-bottom: var(--s1);
+  font: var(--t-micro);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: var(--s3);
+}
+
+/* Three words, on their own, because they are the finding of the section. */
+.archive__verdict {
+  font: 400 clamp(17px, 1.6vw, 21px) / 1.4 var(--font-archive);
 }
 
 .archive__quote {
-  padding-left: var(--s2);
-  border-left: 2px solid var(--rule);
-  margin-bottom: var(--s2);
+  padding-left: var(--s3);
+  border-left: 2px solid var(--ink);
+  margin-bottom: var(--s3);
+  font: 400 clamp(15px, 1.3vw, 17px) / 1.6 var(--font-archive);
 }
 
 /* Courier here too: a citation on a typescript page is part of the document. */
@@ -56,7 +93,7 @@
 }
 
 .archive__seams {
-  margin-top: var(--s4);
+  margin-top: var(--s5);
   padding-top: var(--s3);
   border-top: 1px solid var(--rule);
 }
@@ -75,18 +112,29 @@
   color: inherit;
 }
 
+.archive__notes {
+  margin: var(--s3) 0;
+  border: 1px solid var(--rule-strong);
+}
+
 .archive__notes > summary {
   cursor: pointer;
-  padding: var(--s1) 0;
+  padding: var(--s2);
   font: var(--t-archive);
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+.archive__notes[open] > summary {
+  border-bottom: 1px solid var(--rule);
 }
 
 .archive__notes pre {
-  font: var(--t-archive);
+  font: 400 13px/1.7 var(--font-archive);
   white-space: pre-wrap;
   overflow-wrap: break-word;
-  margin: var(--s2) 0 0;
-  padding-left: var(--s2);
-  border-left: 1px solid var(--rule);
-  opacity: 0.9;
+  margin: 0;
+  padding: var(--s3);
+  max-height: 60vh;
+  overflow-y: auto;
+  color: var(--ink-soft);
 }

@@ -34,36 +34,67 @@ export function Export() {
   );
 
   const sequence = store.history.join('');
+  const stamp = `mind-reader-${store.currentSeed >>> 0}-${rounds}`;
+
+  const files = [
+    {
+      kind: 'json' as const,
+      name: `${stamp}.json`,
+      title: 'The session',
+      note: 'The seed, the settings and every round, so the session replays exactly.',
+    },
+    {
+      kind: 'csv' as const,
+      name: `${stamp}.csv`,
+      title: 'The rounds',
+      note: "One row per round, with each model's guess and weight, for analysis elsewhere.",
+    },
+    {
+      kind: 'txt' as const,
+      name: `${stamp}.txt`,
+      title: 'The presses',
+      note: 'Your presses and nothing else — the thing to hand to a compressor, which measures the same predictability from the other direction.',
+    },
+  ];
 
   return (
     <Section
       id="export"
       title="Export"
+      eyebrow="your session"
       intro="Nothing has left this device. If you want it somewhere else, take it yourself."
     >
       <div className="export">
-        <button className="export__button" type="button" disabled={rounds === 0} onClick={() => save('json')}>
-          Session as JSON
-        </button>
-        <button className="export__button" type="button" disabled={rounds === 0} onClick={() => save('csv')}>
-          Rounds as CSV
-        </button>
-        <button className="export__button" type="button" disabled={rounds === 0} onClick={() => save('txt')}>
-          Presses as text
-        </button>
+        {files.map((file) => (
+          <button
+            className="export__file"
+            key={file.kind}
+            type="button"
+            disabled={rounds === 0}
+            onClick={() => save(file.kind)}
+          >
+            <span className="export__kind eyebrow">{file.kind}</span>
+            <span className="export__title">{file.title}</span>
+            <span className="export__note">{file.note}</span>
+            <span className="export__name">
+              {rounds === 0 ? 'nothing to export yet' : file.name}
+            </span>
+          </button>
+        ))}
       </div>
 
-      <p className="export__note">
-        The JSON carries the seed and the settings alongside every round, so the session replays
-        exactly. The CSV is one row per round with each model's guess and weight, for analysis
-        elsewhere. The text file is just your presses — the thing to hand to a compressor, which
-        will measure the same predictability from the other direction.
-      </p>
-
       {rounds > 0 ? (
-        <p className="export__sequence" aria-label="Your press sequence, as bits">
-          {sequence}
-        </p>
+        <div className="export__sequence">
+          <p className="export__sequence-head eyebrow">
+            <span>your presses, as bits</span>
+            <span>
+              {rounds} {rounds === 1 ? 'press' : 'presses'}
+            </span>
+          </p>
+          <p className="export__bits" aria-label="Your press sequence, as bits">
+            {sequence}
+          </p>
+        </div>
       ) : null}
     </Section>
   );
