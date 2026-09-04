@@ -1,12 +1,13 @@
 .controls {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: var(--s3) var(--s5);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--s4) var(--s5);
 }
 
 .control {
   display: grid;
-  gap: 6px;
+  gap: var(--s1);
+  align-content: start;
 }
 
 .control__label {
@@ -14,66 +15,187 @@
   justify-content: space-between;
   align-items: baseline;
   gap: var(--s2);
-  font: var(--t-data);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule-dark);
+}
+
+.control__name {
+  font: var(--t-micro);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-soft);
 }
 
 .control__value {
   font: var(--t-figure);
 }
 
+/* ------------------------------------------------------------------ slider */
+
+/*
+ * The native control is a dot on a line and says nothing about how far along
+ * the range it sits. This one paints the travelled part of its own track, so
+ * the setting reads as a quantity at a glance, and gives the thumb a target
+ * large enough to hit with a thumb.
+ */
 .control input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
   width: 100%;
-  accent-color: currentColor;
+  height: 24px;
+  margin: 0;
+  cursor: pointer;
+  /*
+   * The travelled part of the track is painted on the input itself rather than
+   * on the track pseudo-element: Chromium does not inherit custom properties
+   * into that shadow node, so a gradient stop written as `var(--fill)` there
+   * silently resolves to nothing and the whole track comes out solid.
+   */
+  background:
+    linear-gradient(
+        90deg,
+        var(--ink) 0 var(--fill, 50%),
+        color-mix(in srgb, var(--ink) 16%, transparent) var(--fill, 50%) 100%
+      )
+      no-repeat center / 100% 4px;
+  border-radius: 2px;
+}
+
+.control input[type='range']::-webkit-slider-runnable-track {
+  height: 4px;
+  background: transparent;
+}
+
+.control input[type='range']::-moz-range-track {
+  height: 4px;
+  background: transparent;
+}
+
+.control input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: -7px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: 3px solid var(--ground);
+  box-shadow: 0 0 0 1px var(--ink);
+  transition: transform var(--tap) var(--ease-out);
+}
+
+.control input[type='range']::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: 3px solid var(--ground);
+  box-shadow: 0 0 0 1px var(--ink);
+}
+
+.control input[type='range']:active::-webkit-slider-thumb {
+  transform: scale(1.18);
 }
 
 .control__note {
   font: var(--t-small);
-  opacity: 0.7;
-  max-width: 44ch;
+  color: var(--ink-soft);
+  max-width: 46ch;
+}
+
+/* ------------------------------------------------------------------- chips */
+
+.control--models {
+  grid-column: 1 / -1;
 }
 
 .control__models {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--s1) var(--s2);
+  gap: var(--s1);
+  padding-top: 4px;
 }
 
+/*
+ * A chip rather than a checkbox. The native box is the wrong size for a touch
+ * target and carries the browser's accent colour rather than the model's, which
+ * is the one piece of information the control is actually about.
+ */
 .control__model {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--s1);
   font: var(--t-data);
+  padding: 8px var(--s2);
+  border: 1px solid var(--rule-dark);
+  border-radius: 999px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  user-select: none;
+  transition:
+    color 160ms linear,
+    border-color 160ms linear,
+    background 160ms linear;
 }
 
-.control__model input {
-  accent-color: var(--tint);
+.control__model:hover {
+  border-color: color-mix(in srgb, var(--ink) 40%, transparent);
+}
+
+.control__model:has(:focus-visible) {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+.control__model:has(:checked) {
+  color: var(--ink);
+  border-color: color-mix(in srgb, var(--tint) 70%, transparent);
+  background: color-mix(in srgb, var(--tint) 12%, transparent);
 }
 
 .control__swatch {
   width: 10px;
   height: 10px;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid var(--tint);
+  background: transparent;
+  transition: background 160ms linear;
+}
+
+.control__model:has(:checked) .control__swatch {
   background: var(--tint);
 }
+
+/* ------------------------------------------------------------------ footer */
 
 .controls__footer {
   display: flex;
   flex-wrap: wrap;
   gap: var(--s2);
   align-items: center;
-  margin-top: var(--s4);
+  margin-top: var(--s5);
   padding-top: var(--s3);
   border-top: 1px solid var(--rule-dark);
 }
 
 .controls__button {
-  border: 1px solid currentColor;
-  padding: 6px var(--s2);
+  border: 1px solid color-mix(in srgb, var(--ink) 40%, transparent);
+  padding: 10px var(--s3);
   font: var(--t-data);
-  border-radius: 2px;
+  border-radius: var(--radius);
+  transition:
+    background 160ms linear,
+    border-color 160ms linear;
+}
+
+.controls__button:hover {
+  border-color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
 }
 
 .controls__warning {
   font: var(--t-small);
-  opacity: 0.7;
-  max-width: 52ch;
+  color: var(--ink-soft);
+  max-width: 54ch;
 }

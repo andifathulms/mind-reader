@@ -29,11 +29,15 @@ function Slider({
   onChange: (value: number) => void;
 }) {
   const id = `control-${label.replace(/\W+/g, '-').toLowerCase()}`;
+  // The track paints its own fill, so the slider reads as a quantity rather
+  // than as a dot on a line. The browser gives no way to style the part of the
+  // track behind the thumb, so the position is handed to CSS as a percentage.
+  const fill = ((value - min) / (max - min)) * 100;
   return (
-    <div className="control">
+    <div className="control" style={{ '--fill': `${fill.toFixed(2)}%` } as CSSProperties}>
       <label className="control__label" htmlFor={id}>
-        <span>{label}</span>
-        <span className="control__value">{display}</span>
+        <span className="control__name">{label}</span>
+        <span className="control__value numeral">{display}</span>
       </label>
       <input
         id={id}
@@ -91,6 +95,7 @@ export function Controls() {
       id="controls"
       title="The machine's settings"
       ground="machine"
+      eyebrow="controls"
       intro="Every change here restarts the session: the weights were built under the old settings and reading them under new ones would be a different experiment."
     >
       <div className="controls">
@@ -135,9 +140,10 @@ export function Controls() {
           onChange={(ngramOrder) => apply({ ngramOrder })}
         />
 
-        <div className="control">
+        <div className="control control--models">
           <span className="control__label">
-            <span>Models in the mixture</span>
+            <span className="control__name">Models in the mixture</span>
+            <span className="control__value numeral">{config.active.length} of 5</span>
           </span>
           <div className="control__models">
             {PREDICTOR_IDS.map((id) => (
@@ -147,6 +153,7 @@ export function Controls() {
                 style={{ '--tint': PREDICTOR_TINTS[id] } as CSSProperties}
               >
                 <input
+                  className="visually-hidden"
                   type="checkbox"
                   checked={config.active.includes(id)}
                   onChange={() => toggle(id)}
