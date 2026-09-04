@@ -8,12 +8,8 @@ export default defineConfig({
   plugins: [react()],
   build: {
     target: 'es2022',
-    // Fonts are inlined as files, never fetched from a CDN: PRD 7.5 forbids
-    // any network request at runtime.
+    // Fonts ship as files in the bundle, never fetched from a CDN: PRD 7.5
+    // forbids any network request at runtime.
     assetsInlineLimit: 0,
-  },
-  test: {
-    environment: 'node',
-    include: ['tests/**/*.test.ts'],
   },
 });
