@@ -1,0 +1,37 @@
+.export {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  align-items: center;
+}
+
+.export__button {
+  border: 1px solid var(--yours-ink);
+  padding: 6px var(--s2);
+  font: var(--t-data);
+  border-radius: 2px;
+}
+
+.export__button[disabled] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.export__note {
+  font: var(--t-small);
+  opacity: 0.75;
+  max-width: 66ch;
+  margin-top: var(--s3);
+}
+
+.export__sequence {
+  font: var(--t-data);
+  font-family: var(--font-archive);
+  word-break: break-all;
+  max-width: 66ch;
+  margin-top: var(--s2);
+  padding: var(--s2);
+  border: 1px solid var(--rule);
+  max-height: 8em;
+  overflow-y: auto;
+}

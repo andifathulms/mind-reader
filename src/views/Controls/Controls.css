@@ -1,0 +1,74 @@
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--s3) var(--s5);
+}
+
+.control {
+  display: grid;
+  gap: 6px;
+}
+
+.control__label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s2);
+  font: var(--t-data);
+}
+
+.control__value {
+  font: var(--t-figure);
+}
+
+.control input[type='range'] {
+  width: 100%;
+  accent-color: currentColor;
+}
+
+.control__note {
+  font: var(--t-small);
+  opacity: 0.7;
+  max-width: 44ch;
+}
+
+.control__models {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s1) var(--s2);
+}
+
+.control__model {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: var(--t-data);
+  color: var(--tint);
+}
+
+.control__model input {
+  accent-color: currentColor;
+}
+
+.controls__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  align-items: center;
+  margin-top: var(--s4);
+  padding-top: var(--s3);
+  border-top: 1px solid var(--rule-dark);
+}
+
+.controls__button {
+  border: 1px solid currentColor;
+  padding: 6px var(--s2);
+  font: var(--t-data);
+  border-radius: 2px;
+}
+
+.controls__warning {
+  font: var(--t-small);
+  opacity: 0.7;
+  max-width: 52ch;
+}
