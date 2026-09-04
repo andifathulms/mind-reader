@@ -1,14 +1,54 @@
+/* ------------------------------------------------------------ the mixture */
+
+/*
+ * The mixture as one bar. It is the machine's actual composition — the thing
+ * that makes the move — so it goes above the five tracks that explain it
+ * rather than below them, and it is on every screen rather than being the
+ * phone's consolation for the tracks not fitting.
+ */
+.ensemble__mixture {
+  margin-bottom: var(--s4);
+}
+
+.ensemble__stack {
+  display: flex;
+  height: 44px;
+  width: 100%;
+  background: color-mix(in srgb, var(--machine-ink) 8%, transparent);
+  overflow: hidden;
+}
+
+.ensemble__stack-part {
+  transition: width var(--weight-change) var(--ease-fly);
+}
+
+.ensemble__mixture-note {
+  margin-top: var(--s1);
+}
+
+/* -------------------------------------------------------------- the tracks */
+
 .ensemble {
   display: grid;
-  gap: var(--s3);
+  gap: 1px;
+  background: var(--rule-dark);
+  border-block: 1px solid var(--rule-dark);
 }
 
 .ensemble__track {
   display: grid;
-  grid-template-columns: 92px 56px minmax(120px, 420px) 168px;
-  justify-content: start;
+  grid-template-columns: 120px 76px minmax(120px, 1fr) 190px;
   align-items: center;
   gap: var(--s2);
+  padding: var(--s2) 0;
+  background: var(--machine);
+  transition: background 300ms linear;
+}
+
+/* The model currently carrying the most weight is lifted a shade off the
+   ground. Which model is leading is the one thing a glance should answer. */
+.ensemble__track--leading {
+  background: var(--machine-raised);
 }
 
 /*
@@ -21,9 +61,11 @@
  */
 .ensemble__name {
   font: var(--t-data);
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: var(--s1);
+  padding-left: var(--s2);
 }
 
 .ensemble__swatch {
@@ -31,12 +73,14 @@
   height: 10px;
   flex: none;
   background: var(--tint);
+  border-radius: 1px;
 }
 
 .ensemble__bar {
   position: relative;
-  height: 12px;
-  background: color-mix(in srgb, var(--machine-ink) 10%, transparent);
+  height: 14px;
+  background: color-mix(in srgb, var(--machine-ink) 8%, transparent);
+  overflow: hidden;
 }
 
 .ensemble__fill {
@@ -44,11 +88,43 @@
   inset: 0 auto 0 0;
   background: var(--tint);
   width: var(--weight);
+  overflow: hidden;
   transition: width var(--weight-change) var(--ease-fly);
+}
+
+/*
+ * A quiet pulse travelling the length of the bar. It says the weights are live
+ * without saying anything about their values — the fill is the reading, this is
+ * only the sign that the reading is still being taken.
+ */
+.ensemble__track--leading .ensemble__fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, #fff 34%, transparent),
+    transparent
+  );
+  transform: translateX(-100%);
+  animation: weight-sheen 2.6s var(--ease-out) infinite;
+  opacity: calc(1 - var(--still));
+}
+
+@keyframes weight-sheen {
+  0% {
+    transform: translateX(-100%);
+  }
+  60%,
+  100% {
+    transform: translateX(220%);
+  }
 }
 
 .ensemble__weight {
   font: var(--t-figure);
+  letter-spacing: var(--track-display);
   text-align: right;
 }
 
@@ -60,13 +136,15 @@
   align-items: center;
   gap: var(--s1);
   font: var(--t-small);
-  opacity: 0.8;
+  color: var(--ink-soft);
+  padding-right: var(--s2);
 }
 
 .ensemble__verdict {
   width: 8px;
   height: 8px;
   flex: none;
+  border-radius: 1px;
 }
 
 .ensemble__verdict--right {
@@ -74,39 +152,140 @@
 }
 
 .ensemble__verdict--wrong {
-  background: color-mix(in srgb, var(--machine-ink) 30%, transparent);
+  background: color-mix(in srgb, var(--machine-ink) 26%, transparent);
 }
 
-.ensemble__legend {
+/* The one-line account of the model, on the second row of its own track. */
+.ensemble__note {
+  grid-column: 2 / -1;
   font: var(--t-small);
-  opacity: 0.7;
-  margin-top: var(--s2);
+  color: var(--ink-soft);
+  opacity: 0.66;
+  padding-right: var(--s2);
 }
 
-/* On a phone the five weights become one stacked bar rather than five tracks. */
-.ensemble__stack {
-  display: none;
-  height: 28px;
+/* ------------------------------------------------------- weights over time */
+
+.ensemble__heading {
+  font: var(--t-h2);
+  margin: var(--s5) 0 var(--s2);
+}
+
+.ensemble__weather {
+  position: relative;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: var(--s1);
+}
+
+.ensemble__weather-y {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: clamp(160px, 22vw, 240px);
+  padding: 2px 0;
+}
+
+.ensemble__weather-plot {
+  position: relative;
+  height: clamp(160px, 22vw, 240px);
+  border: 1px solid var(--rule-dark);
+  background: var(--machine-sunk);
+}
+
+.ensemble__weather svg {
+  display: block;
   width: 100%;
+  height: 100%;
 }
 
-.ensemble__stack-part {
-  transition: width var(--weight-change) var(--ease-fly);
+.ensemble__weather polyline {
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
 }
 
-/* On a phone the five weights become one stacked bar rather than five tracks,
-   and each row keeps only its name, its weight and its last guess. */
-@media (max-width: 640px) {
-  .ensemble__stack {
-    display: flex;
+/*
+ * The traces wipe in left to right, in the direction the session was played.
+ * A wipe rather than a dash offset because the plot is scaled non-uniformly —
+ * a dash length in a box stretched to the panel's width is not a dash length on
+ * the screen, and the lines came out in pieces.
+ */
+.ensemble__weather svg {
+  animation: trace-wipe var(--draw) var(--ease-out) forwards;
+}
+
+@keyframes trace-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.ensemble__even {
+  stroke: color-mix(in srgb, var(--machine-ink) 26%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+/* The label sits on its own line, on a chip of the panel's own ground, so a
+   trace crossing behind it cannot make it unreadable. */
+.ensemble__weather-even {
+  position: absolute;
+  right: 0;
+  transform: translateY(-130%);
+  padding: 2px 6px;
+  background: var(--machine-sunk);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.ensemble__weather-axis {
+  grid-column: 2;
+  display: flex;
+  justify-content: space-between;
+  padding-top: 6px;
+}
+
+.ensemble__empty {
+  font: var(--t-small);
+  color: var(--ink-soft);
+  padding: var(--s4) 0;
+  border-top: 1px solid var(--rule-dark);
+}
+
+@media (max-width: 900px) {
+  .ensemble__track {
+    grid-template-columns: 110px 64px minmax(80px, 1fr);
+    gap: var(--s1) var(--s2);
+  }
+
+  .ensemble__guess {
+    grid-column: 2 / -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .ensemble__track {
+    grid-template-columns: 1fr auto;
   }
 
   .ensemble__bar {
-    display: none;
+    grid-column: 1 / -1;
+    margin: 0 var(--s2);
   }
 
-  .ensemble__track {
-    grid-template-columns: 84px 48px 1fr;
-    gap: var(--s1) var(--s2);
+  .ensemble__guess,
+  .ensemble__note {
+    grid-column: 1 / -1;
+    padding-left: var(--s2);
+  }
+
+  .ensemble__weather-axis span:nth-child(2) {
+    display: none;
   }
 }
