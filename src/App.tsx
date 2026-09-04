@@ -1,6 +1,7 @@
 import { Arena } from './views/Arena/Arena';
 import { Ensemble } from './views/Ensemble/Ensemble';
 import { Portrait } from './views/Portrait/Portrait';
+import { Lab } from './views/Lab/Lab';
 import './styles/base.css';
 
 /**
@@ -16,6 +17,7 @@ export function App() {
       <main className="analysis">
         <Ensemble />
         <Portrait />
+        <Lab />
       </main>
     </>
   );

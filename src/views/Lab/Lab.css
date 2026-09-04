@@ -1,0 +1,108 @@
+.lab {
+  display: grid;
+  gap: 0;
+}
+
+.lab__row {
+  display: grid;
+  grid-template-columns: 1fr 148px 132px;
+  gap: var(--s2) var(--s3);
+  align-items: baseline;
+  padding: var(--s3) 0;
+  border-top: 1px solid var(--rule);
+}
+
+.lab__row:last-child {
+  border-bottom: 1px solid var(--rule);
+}
+
+/* The coin is marked distinctly and sits last, because it is the only one that
+   works, and finding that out after failing at four mental strategies is the
+   correct order to learn it. */
+.lab__row--control {
+  border-top: 2px solid var(--yours-ink);
+}
+
+.lab__name {
+  font: var(--t-h2);
+}
+
+.lab__instruction {
+  font: var(--t-body);
+  opacity: 0.8;
+  grid-column: 1;
+  max-width: 60ch;
+}
+
+.lab__verdict {
+  font: var(--t-small);
+  opacity: 0.8;
+  grid-column: 1 / -1;
+  max-width: 66ch;
+}
+
+.lab__rate {
+  font: var(--t-figure);
+  text-align: right;
+}
+
+.lab__rate--pending {
+  opacity: 0.4;
+}
+
+.lab__ci {
+  font: var(--t-small);
+  opacity: 0.7;
+  text-align: right;
+  grid-column: 2 / -1;
+}
+
+.lab__yours {
+  font: var(--t-data);
+  text-align: right;
+  opacity: 0.85;
+}
+
+.lab__head {
+  display: grid;
+  grid-template-columns: 1fr 148px 132px;
+  gap: var(--s3);
+  font: var(--t-small);
+  opacity: 0.7;
+  padding-bottom: var(--s1);
+}
+
+.lab__head > :not(:first-child) {
+  text-align: right;
+}
+
+.lab__run {
+  border: 1px solid var(--yours-ink);
+  padding: 6px var(--s2);
+  font: var(--t-data);
+  border-radius: 2px;
+}
+
+.lab__run[disabled] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.lab__actions {
+  margin-top: var(--s3);
+  display: flex;
+  gap: var(--s2);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .lab__row,
+  .lab__head {
+    grid-template-columns: 1fr auto;
+  }
+
+  .lab__yours {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
+}
