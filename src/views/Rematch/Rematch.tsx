@@ -20,6 +20,15 @@ interface Live {
   played: number;
 }
 
+/** Plays between samples of the boundary, for the match's own trail. */
+const SAMPLE_EVERY = 25;
+
+/**
+ * Hagelbarger's own figure: MRM about 55, SEER about 45. Drawn as a reference
+ * on the field so the reconstruction can be seen settling near it, or not.
+ */
+const RECORDED = 0.55;
+
 /**
  * Machine against machine, with the umpire between them.
  *
@@ -35,6 +44,8 @@ interface Live {
  */
 export function Rematch() {
   const [live, setLive] = useState<Live>({ mrm: 0, seer: 0, played: 0 });
+  const [trail, setTrail] = useState<readonly number[]>([]);
+  const samples = useRef<number[]>([]);
   const [running, setRunning] = useState(false);
   const frame = useRef<number | null>(null);
   const score = useRef<Live>({ mrm: 0, seer: 0, played: 0 });
@@ -52,7 +63,9 @@ export function Rematch() {
     mismatcher.reset();
     game.current = { matcher, mismatcher, seenByMatcher: [], seenByMismatcher: [] };
     score.current = { mrm: 0, seer: 0, played: 0 };
+    samples.current = [];
     setLive(score.current);
+    setTrail([]);
   }, []);
 
   useEffect(() => {
@@ -95,6 +108,12 @@ export function Rematch() {
       }
 
       score.current = { mrm, seer, played };
+      // One sample every SAMPLE_EVERY plays, so ten thousand plays leave a
+      // trail of a few hundred points rather than ten thousand.
+      if (samples.current.length < Math.floor(played / SAMPLE_EVERY)) {
+        samples.current.push(1 - (mrm + 5) / (played + 10));
+        setTrail(samples.current.slice());
+      }
       setLive(score.current);
       frame.current = requestAnimationFrame(step);
     };
@@ -115,6 +134,7 @@ export function Rematch() {
     <Section
       id="rematch"
       title="The rematch"
+      eyebrow="1953 v 1956"
       intro="Shannon's machine against Hagelbarger's, with an umpire between them, exactly as the two were connected at Bell Laboratories. Shannon's is the simpler of the two and it won."
     >
       <div className="rematch">
@@ -125,20 +145,53 @@ export function Rematch() {
           aria-label={`MRM ${live.mrm}, SEER ${live.seer}, after ${played} plays`}
         >
           <div className="rematch__ground" />
+
+          {/* The match's own history, on the same scale as the boundary, so the
+              settling can be watched rather than inferred from a moving line. */}
+          {trail.length > 1 ? (
+            <svg
+              className="rematch__trail"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <polyline
+                vectorEffect="non-scaling-stroke"
+                points={trail
+                  .map((y, i) => `${((i / (trail.length - 1)) * 100).toFixed(2)},${(y * 100).toFixed(2)}`)
+                  .join(' ')}
+              />
+            </svg>
+          ) : null}
+
+          {/* Hagelbarger's recorded 55-45. */}
+          <div className="rematch__recorded" style={{ top: `${(1 - RECORDED) * 100}%` }}>
+            <span className="eyebrow">recorded, 1956</span>
+          </div>
+
           <div className="rematch__line" />
           <div className="rematch__side rematch__side--top">
-            <span>SEER, 1956</span>
-            <span className="rematch__score">{live.seer}</span>
+            <span className="eyebrow">SEER, 1956</span>
+            <span className="rematch__score numeral">{live.seer}</span>
           </div>
           <div className="rematch__side rematch__side--bottom">
-            <span>MRM, 1953</span>
-            <span className="rematch__score">{live.mrm}</span>
+            <span className="eyebrow">MRM, 1953</span>
+            <span className="rematch__score numeral">{live.mrm}</span>
           </div>
+        </div>
+
+        <div
+          className="rematch__progress"
+          style={{ '--done': `${((played / TOTAL) * 100).toFixed(2)}%` } as CSSProperties}
+          aria-hidden="true"
+        >
+          <span />
         </div>
 
         <p className="rematch__meta">
           <span>
-            {played} of {TOTAL} plays
+            {played.toLocaleString('en')} of {TOTAL.toLocaleString('en')} plays
           </span>
           <span>MRM, {formatRate(live.mrm, played)}</span>
         </p>

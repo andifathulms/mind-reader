@@ -1,5 +1,5 @@
 .rematch {
-  max-width: 640px;
+  max-width: 900px;
 }
 
 /* Two machines facing each other across the same boundary, the umpire between
@@ -7,7 +7,7 @@
    rounds, is a result from 1953 happening in front of you. */
 .rematch__field {
   position: relative;
-  height: 168px;
+  height: clamp(220px, 30vw, 340px);
   background: var(--yours);
   border: 1px solid var(--rule);
   overflow: hidden;
@@ -18,6 +18,43 @@
   inset: 0;
   top: var(--split);
   background: var(--machine);
+}
+
+/*
+ * The match's own history, on the same scale as the boundary. It is drawn under
+ * the boundary and over both grounds in the neutral ink, because the line
+ * belongs to the match rather than to either machine.
+ */
+.rematch__trail {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.rematch__trail polyline {
+  fill: none;
+  stroke: var(--boundary);
+  stroke-width: 1.25;
+  stroke-linejoin: round;
+  opacity: 0.55;
+}
+
+/* Hagelbarger's recorded 55-45, as the line the reconstruction is trying to
+   land on. Stated, not implied: the label says which year it is from. */
+.rematch__recorded {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed color-mix(in srgb, var(--boundary) 80%, transparent);
+  pointer-events: none;
+}
+
+.rematch__recorded .eyebrow {
+  position: absolute;
+  right: var(--s2);
+  top: 4px;
+  color: var(--boundary);
 }
 
 .rematch__line {
@@ -32,57 +69,90 @@
 
 .rematch__side {
   position: absolute;
-  left: var(--s2);
-  right: var(--s2);
+  left: var(--s3);
+  right: var(--s3);
   display: flex;
   align-items: baseline;
-  gap: var(--s1);
-  font: var(--t-data);
+  gap: var(--s2);
 }
 
 .rematch__side--top {
-  top: var(--s1);
+  top: var(--s2);
 }
 
 .rematch__side--bottom {
-  bottom: var(--s1);
+  bottom: var(--s2);
   justify-content: flex-end;
   color: var(--machine-ink);
 }
 
 .rematch__score {
-  font: var(--t-figure);
+  font: var(--t-display);
+  letter-spacing: var(--track-display);
+}
+
+/* How far through the ten thousand plays the match is. */
+.rematch__progress {
+  height: 3px;
+  margin-top: var(--s1);
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+.rematch__progress span {
+  display: block;
+  height: 100%;
+  width: var(--done, 0%);
+  background: var(--ink);
 }
 
 .rematch__meta {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--s2);
-  align-items: baseline;
-  margin-top: var(--s2);
+  gap: var(--s1) var(--s3);
   font: var(--t-small);
-  opacity: 0.8;
+  color: var(--ink-soft);
+  margin-top: var(--s1);
 }
 
 .rematch__controls {
   display: flex;
-  gap: var(--s2);
   flex-wrap: wrap;
+  gap: var(--s1);
   margin-top: var(--s3);
 }
 
 .rematch__button {
-  border: 1px solid var(--yours-ink);
-  padding: 6px var(--s2);
+  border: 1px solid color-mix(in srgb, var(--ink) 35%, transparent);
+  padding: 10px var(--s3);
   font: var(--t-data);
-  border-radius: 2px;
+  border-radius: var(--radius);
+  transition:
+    background 160ms linear,
+    border-color 160ms linear;
 }
 
+.rematch__button:hover:not(:disabled) {
+  border-color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+.rematch__button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Kept short, as CLAUDE.md §10 asks: the machines are the artifact, not the
+   prose about them. */
 .rematch__quote {
   font: var(--t-body);
-  max-width: 60ch;
-  margin-top: var(--s3);
-  padding-left: var(--s2);
-  border-left: 2px solid var(--rule);
-  opacity: 0.9;
+  max-width: 56ch;
+  margin-top: var(--s4);
+  padding-left: var(--s3);
+  border-left: 2px solid var(--rule-strong);
+  color: var(--ink-soft);
+}
+
+.rematch__quote .rematch__meta {
+  display: block;
+  margin-top: var(--s1);
 }
