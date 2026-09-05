@@ -104,6 +104,21 @@ button {
   color: var(--ink-soft);
 }
 
+/*
+ * The note. Quiet, but read as a sentence rather than as a label.
+ *
+ * The eyebrow above it was doing both jobs, and uppercase at 11px with 0.16em
+ * of tracking is the slowest setting in the file: fine for `you` and `machine`,
+ * which are names, and wrong for `sealed before you press`, which is the thesis
+ * of the app. Anything that reads as a sentence belongs here; the eyebrow keeps
+ * the things that read as names.
+ */
+.note {
+  font: var(--t-note);
+  letter-spacing: var(--track-note);
+  color: var(--ink-soft);
+}
+
 .numeral {
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--track-display);
