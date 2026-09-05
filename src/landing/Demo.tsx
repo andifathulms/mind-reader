@@ -112,7 +112,7 @@ export function Demo() {
       </div>
 
       <div className="demo__seal" data-open={open || undefined}>
-        <span className="demo__seal-label eyebrow">
+        <span className="demo__seal-label note">
           {open ? 'It had committed to' : 'Committed, not yet opened'}
         </span>
         <span className="demo__seal-value" aria-live="polite">

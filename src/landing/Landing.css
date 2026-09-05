@@ -323,7 +323,8 @@
 }
 
 .demo__readout {
-  font: var(--t-small);
+  font: var(--t-note);
+  letter-spacing: var(--track-note);
   color: var(--machine-ink-soft);
   min-height: 2.8em;
 }
