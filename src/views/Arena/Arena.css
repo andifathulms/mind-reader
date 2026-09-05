@@ -15,6 +15,14 @@
   touch-action: manipulation;
   /* Contains the layout and paint of a surface that repaints on every press. */
   contain: layout paint;
+
+  /*
+   * How much room the head takes, so the score below it is positioned from one
+   * number rather than from a magic constant repeated per breakpoint. The head
+   * grew a second row when it gained the lede; this is what it grew to.
+   */
+  --head-top: max(var(--s3), env(safe-area-inset-top));
+  --head-h: 84px;
 }
 
 /*
@@ -125,22 +133,62 @@
   position: absolute;
   left: var(--gutter);
   right: var(--gutter);
-  top: max(var(--s3), env(safe-area-inset-top));
+  top: var(--head-top);
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
+  /* Row gap is tight: the lede belongs to the title, not to the layout. */
+  gap: 4px var(--s2);
+}
+
+/*
+ * Up one step, from the 17px h2 to the title. The name and Shannon's question
+ * mark were set smaller than the readout beside them and six times smaller
+ * than a zero, which left the first screen with no anchor to read first.
+ */
+.arena__title {
+  font: var(--t-title);
+  letter-spacing: var(--track-title);
+}
+
+.arena__meta {
+  display: flex;
+  align-items: baseline;
   gap: var(--s2);
 }
 
-.arena__title {
-  font: var(--t-h2);
-  letter-spacing: 0.02em;
+/*
+ * The premise. Body size, because it is the one sentence a first-time reader
+ * has to get, and a full row of its own so it never competes with the round
+ * counter for the baseline.
+ */
+.arena__lede {
+  order: 3;
+  flex-basis: 100%;
+  font: var(--t-body);
+  letter-spacing: var(--track-body);
+  color: var(--ink-soft);
+  max-width: 46ch;
+}
+
+.arena__about {
+  color: var(--ink-soft);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--rule-strong);
+  white-space: nowrap;
+  transition: color var(--tap) linear;
+}
+
+.arena__about:hover {
+  color: var(--ink);
+  text-decoration-color: currentColor;
 }
 
 /* Shannon's question mark, once, and given the room to be the thing it is. */
 .arena__query {
-  color: var(--hit);
+  color: var(--hit-ink);
   font-weight: 700;
 }
 
@@ -170,7 +218,7 @@
 }
 
 .arena__side--yours {
-  top: calc(max(var(--s3), env(safe-area-inset-top)) + 46px);
+  top: calc(var(--head-top) + var(--head-h));
 }
 
 .arena__side--machine {
@@ -202,14 +250,14 @@
 }
 
 .arena__rate {
-  font: var(--t-small);
+  font: var(--t-note);
+  letter-spacing: var(--track-note);
   color: var(--ink-soft);
 }
 
 .arena__last {
-  font: var(--t-micro);
-  letter-spacing: var(--track-eyebrow);
-  text-transform: uppercase;
+  font: var(--t-note);
+  letter-spacing: var(--track-note);
   color: var(--ink-soft);
 }
 
@@ -518,7 +566,8 @@
  * first because it is the subject.
  */
 .arena__title,
-.arena__round,
+.arena__meta,
+.arena__lede,
 .arena__side,
 .arena__targets,
 .arena__cue,
@@ -543,8 +592,12 @@
   --in: 40ms;
 }
 
-.arena__round {
+.arena__meta {
   --in: 120ms;
+}
+
+.arena__lede {
+  --in: 160ms;
 }
 
 .arena__side--yours {
@@ -565,7 +618,8 @@
 }
 
 .arena--ready .arena__title,
-.arena--ready .arena__round,
+.arena--ready .arena__meta,
+.arena--ready .arena__lede,
 .arena--ready .arena__side,
 .arena--ready .arena__targets,
 .arena--ready .arena__cue,
@@ -581,16 +635,10 @@
    had not been played. */
 
 @media (max-width: 720px) {
-  /* The title and the round line stack, so the score has to start below both
-     rather than below one of them. */
-  .arena__head {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
-
-  .arena__side--yours {
-    top: calc(max(var(--s3), env(safe-area-inset-top)) + 66px);
+  /* The lede wraps to two lines at this width, so the head is taller and the
+     score starts lower. One value, read by the rule above. */
+  .arena {
+    --head-h: 100px;
   }
 
   .arena__side--machine {
@@ -633,5 +681,15 @@
   .arena__cue,
   .arena__interval {
     display: none;
+  }
+
+  /* No room for the premise here. The link in the head still leads to it, and
+     the game keeps the layout it had before the lede existed. */
+  .arena__lede {
+    display: none;
+  }
+
+  .arena {
+    --head-h: 46px;
   }
 }

@@ -167,12 +167,42 @@ function Face({
             Mind reader <span className="arena__query">(?)</span>
           </h1>
         )}
-        <p className="arena__round eyebrow">
-          {played === 0 ? 'sealed, unpressed' : `round ${played}`}
-          {streak.side && streak.length > 2
-            ? ` · ${streak.side === 'machine' ? 'machine' : 'you'}, ${streak.length} in a row`
-            : ''}
-        </p>
+
+        <div className="arena__meta">
+          <p className="arena__round note">
+            {played === 0 ? 'Not yet pressed' : `Round ${played}`}
+            {streak.side && streak.length > 2
+              ? ` · ${streak.side === 'machine' ? 'machine' : 'you'}, ${streak.length} in a row`
+              : ''}
+          </p>
+          {/*
+            The way out to the explanation. The landing page answers every
+            question this screen deliberately does not, and until now nothing
+            linked to it — the arena was a dead end for anyone who arrived
+            without knowing what they had opened.
+          */}
+          <a
+            className="arena__about note"
+            href={`${import.meta.env.BASE_URL}landing.html`}
+            tabIndex={decorative ? -1 : undefined}
+            aria-hidden={decorative || undefined}
+          >
+            What this is
+          </a>
+        </div>
+
+        {/*
+          The premise, where a stranger meets it. DESIGN.md §4.5 keeps
+          onboarding out of the arena and this is not onboarding: it is one
+          sentence naming the game and the interaction, in the present tense
+          and in the machine's own register. Without it the first screen is two
+          zeros and two buttons, and nothing on it says the machine has already
+          moved.
+
+          It is the head's third child and takes a full row of its own, so the
+          title and the round line keep the baseline they shared before.
+        */}
+        <p className="arena__lede">Press left or right. The machine has already guessed which.</p>
       </div>
 
       <div className="arena__side arena__side--yours">
@@ -204,8 +234,10 @@ function Face({
           move exists before the press does, and the caption says so in the
           present tense while the seal is still shut.
         */}
-        <p className="arena__caption eyebrow">
-          {committed === null ? 'sealed before you press' : `it had sealed ${committed === 0 ? 'left' : 'right'}`}
+        <p className="arena__caption note">
+          {committed === null
+            ? 'Sealed before you press'
+            : `It had sealed ${committed === 0 ? 'left' : 'right'}`}
         </p>
       </div>
 
@@ -214,7 +246,16 @@ function Face({
         <span className="arena__score">{machineWins}</span>
         <span className="arena__readout">
           <span className="arena__rate">
-            {played === 0 ? 'no rounds played' : formatRate(machineWins, played)}
+            {/*
+              At round zero this branch already existed and spent itself saying
+              'no rounds played', which restates the two zeros above it. What a
+              stranger cannot work out from the screen is what a point is, so
+              that is what it says now. From round one it is the rate and its
+              interval, unchanged.
+            */}
+            {played === 0
+              ? 'The machine scores when it guesses your press.'
+              : formatRate(machineWins, played)}
           </span>
           {/*
             The interval, drawn. Early on it spans almost everything, and a band
@@ -241,8 +282,8 @@ function Face({
           {last ? (
             <span className="arena__last">
               {last.wasRandom
-                ? 'last round played at random'
-                : `last round sealed at ${Math.round(last.confidence * 100)}% confidence`}
+                ? 'Last round played at random.'
+                : `Last round sealed at ${Math.round(last.confidence * 100)}% confidence.`}
             </span>
           ) : null}
         </span>
@@ -253,8 +294,8 @@ function Face({
         <Target label="right" hint="→" decorative={decorative} onPress={() => onPress(1)} />
       </div>
 
-      <p className="arena__cue eyebrow" aria-hidden="true">
-        the analysis, below
+      <p className="arena__cue note" aria-hidden="true">
+        The analysis, below
       </p>
     </>
   );
