@@ -185,6 +185,9 @@
   font: var(--t-score);
   letter-spacing: var(--track-score);
   font-variant-numeric: tabular-nums;
+  /* Hugs its digits. As a stretched flex child its box ran the width of the
+     arena, which makes it impossible to reason about what it collides with. */
+  align-self: flex-start;
   /* The number is the loudest thing on the screen and must not move the layout
      when it gains a digit; the box is sized for three. */
   min-width: 2.4ch;
@@ -259,10 +262,22 @@
    strip is clipped rather than counted, so it fills whatever width there is. */
 .arena__marks {
   position: absolute;
-  left: var(--gutter);
-  /* The strip ends just left of the seal, so the newest mark lands where the
-     move came from rather than at the far edge of a wide screen. */
-  right: calc(50% + 40px);
+  /*
+   * The strip runs from the seal to the right edge.
+   *
+   * It used to end at the seal and run back to the left gutter, which put it
+   * straight through the scores: the strip rides the boundary, the boundary
+   * spends a one-sided session clamped against an edge, and that edge is
+   * exactly where a score sits. The marks painted across a 100px numeral and
+   * read as a rendering fault. Indenting past the score fixed a desktop and
+   * left a phone 19px of strip.
+   *
+   * Both scores are on the left, so the right of the seal is the one band that
+   * is clear at every width and in every state. Oldest at the seal, newest at
+   * the far edge, so time still runs left to right.
+   */
+  left: calc(50% + 40px);
+  right: var(--gutter);
   top: var(--split);
   height: 48px;
   margin-top: -24px;
@@ -587,7 +602,7 @@
   }
 
   .arena__marks {
-    right: calc(50% + 34px);
+    left: calc(50% + 34px);
   }
 }
 

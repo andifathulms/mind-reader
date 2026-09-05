@@ -132,6 +132,26 @@ function Weather({ rounds, active }: { rounds: readonly Round[]; active: readonl
 }
 
 /**
+ * The chart's key.
+ *
+ * The tracks carry the same five swatches, but by the time the plot is on
+ * screen they are most of a page above it, and a reader should not have to
+ * scroll back to find out whose line is whose.
+ */
+function Key({ active }: { active: readonly PredictorId[] }) {
+  return (
+    <ul className="ensemble__key">
+      {active.map((id) => (
+        <li key={id} style={{ '--tint': PREDICTOR_TINTS[id] } as CSSProperties}>
+          <span className="ensemble__key-line" aria-hidden="true" />
+          {PREDICTOR_NAMES[id]}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/**
  * Five competing models of the same player, each with a live weight based on
  * recent accuracy. What a user watches here is the machine changing its mind
  * about who they are: change strategy mid-session and the weights redistribute
@@ -230,7 +250,22 @@ export function Ensemble() {
 
       <Reveal delay={2}>
         <h3 className="ensemble__heading">Weights, over the session</h3>
+        <Key active={ordered} />
         <Weather rounds={rounds} active={ordered} />
+        {/*
+          A flat stretch in one colour is five lines, not one. Models that agree
+          and are right together are rewarded identically, so their weights stay
+          exactly even and the traces lie on top of each other — which looks like
+          one model doing everything when in fact nothing is happening. Said
+          here rather than fixed in the drawing, because nudging the lines apart
+          to make the overlap visible would be drawing weights that were never
+          held.
+        */}
+        <p className="ensemble__legend">
+          Where the models agree and are right together they are rewarded
+          identically, so their weights stay even and their traces lie exactly on
+          top of one another. A flat run in a single colour is all five, not one.
+        </p>
       </Reveal>
 
       <table className="visually-hidden">

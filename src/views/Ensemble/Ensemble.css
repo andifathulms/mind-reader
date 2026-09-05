@@ -240,7 +240,9 @@
   transform: translateY(-130%);
   padding: 2px 6px;
   background: var(--machine-sunk);
-  opacity: 0.7;
+  /* Softened by colour, not by opacity: an opacity here made the chip itself
+     translucent and the traces showed straight through the label. */
+  color: var(--ink-soft);
   pointer-events: none;
 }
 
@@ -288,4 +290,35 @@
   .ensemble__weather-axis span:nth-child(2) {
     display: none;
   }
+}
+
+/* The chart's key. The tracks carry the same swatches, but by the time the
+   plot is on screen they are most of a page above it. */
+.ensemble__key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s1) var(--s3);
+  margin-bottom: var(--s2);
+}
+
+.ensemble__key li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: var(--t-small);
+  color: var(--ink-soft);
+}
+
+.ensemble__key-line {
+  width: 18px;
+  height: 2px;
+  flex: none;
+  background: var(--tint);
+}
+
+.ensemble__legend {
+  font: var(--t-small);
+  color: var(--ink-soft);
+  max-width: 68ch;
+  margin-top: var(--s3);
 }

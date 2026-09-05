@@ -65,7 +65,7 @@
    * the viewport between a phone and a desktop, so the display sizes can be
    * genuinely large on a wide screen without breaking a 360px one.
    */
-  --size-score: clamp(56px, 13vw, 132px);
+  --size-score: clamp(56px, 11vw, 104px);
   --size-display: clamp(30px, 4.6vw, 54px);
   --size-title: clamp(21px, 2.2vw, 28px);
   --size-figure: clamp(20px, 1.9vw, 26px);
