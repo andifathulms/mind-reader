@@ -139,6 +139,11 @@ export function Lab() {
                       style={{ left: `${(mineRate * 100).toFixed(2)}%` }}
                     />
                   )}
+                  <span className="lab__gauge-axis eyebrow">
+                    <span>0%</span>
+                    <span>50%, a coin</span>
+                    <span>100%</span>
+                  </span>
                 </div>
 
                 <dl className="lab__figures">

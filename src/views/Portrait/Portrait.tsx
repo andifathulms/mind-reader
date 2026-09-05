@@ -162,7 +162,12 @@ function Entropy({ sequence }: { sequence: readonly Move[] }) {
       {points.map((p, i) => (
         <rect
           key={p.order}
-          className={`portrait__bar portrait__bar--${p.bits < 0.98 ? 'over' : 'even'}`}
+          // Ink, not the run chart's two colours. Over-and-under says
+          // something where a quantity can fall either side of what a coin
+          // does; conditional entropy cannot exceed 1 bit, so colouring by
+          // "below a coin" painted all six bars red and encoded nothing. The
+          // gridline at 1 bit is the comparison, and the height is the reading.
+          className="portrait__bar"
           style={{ '--bar-delay': `${i * 45}ms` } as CSSProperties}
           x={PAD.left + bandW * i + 4}
           y={y(p.bits)}

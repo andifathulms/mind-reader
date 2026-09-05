@@ -41,20 +41,14 @@
 }
 
 /* Hagelbarger's recorded 55-45, as the line the reconstruction is trying to
-   land on. Stated, not implied: the label says which year it is from. */
+   land on. Unlabelled here and named in the key below, because the boundary
+   crosses it and no one ink is legible on both grounds. */
 .rematch__recorded {
   position: absolute;
   left: 0;
   right: 0;
   border-top: 1px dashed color-mix(in srgb, var(--boundary) 80%, transparent);
   pointer-events: none;
-}
-
-.rematch__recorded .eyebrow {
-  position: absolute;
-  right: var(--s2);
-  top: 4px;
-  color: var(--boundary);
 }
 
 .rematch__line {
@@ -103,6 +97,18 @@
   height: 100%;
   width: var(--done, 0%);
   background: var(--ink);
+}
+
+.rematch__key {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rematch__key-dash {
+  width: 20px;
+  height: 0;
+  border-top: 1px dashed var(--boundary);
 }
 
 .rematch__meta {

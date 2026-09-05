@@ -165,10 +165,12 @@ export function Rematch() {
             </svg>
           ) : null}
 
-          {/* Hagelbarger's recorded 55-45. */}
-          <div className="rematch__recorded" style={{ top: `${(1 - RECORDED) * 100}%` }}>
-            <span className="eyebrow">recorded, 1956</span>
-          </div>
+          {/* Hagelbarger's recorded 55-45. Named in the key under the field
+              rather than on the line: the line is fixed and the boundary is
+              not, so a label on it lands on the light ground in one half of the
+              match and the dark ground in the other, and no single ink is
+              legible on both. */}
+          <div className="rematch__recorded" style={{ top: `${(1 - RECORDED) * 100}%` }} />
 
           <div className="rematch__line" />
           <div className="rematch__side rematch__side--top">
@@ -194,6 +196,10 @@ export function Rematch() {
             {played.toLocaleString('en')} of {TOTAL.toLocaleString('en')} plays
           </span>
           <span>MRM, {formatRate(live.mrm, played)}</span>
+          <span className="rematch__key">
+            <span className="rematch__key-dash" aria-hidden="true" />
+            Hagelbarger's recorded {Math.round(RECORDED * 100)}–{Math.round((1 - RECORDED) * 100)}
+          </span>
         </p>
 
         <div className="rematch__controls">

@@ -62,7 +62,31 @@
  */
 .lab__gauge {
   position: relative;
-  height: 26px;
+  height: 44px;
+}
+
+/*
+ * The scale, named. Without it the gauge is a rule with one tick on it, which
+ * tells a reader neither what the ends are nor what the tick means — and in the
+ * unrun state, which is how every row starts, it is all there is to look at.
+ */
+.lab__gauge-axis > span {
+  position: absolute;
+  top: 26px;
+  white-space: nowrap;
+}
+
+.lab__gauge-axis > span:first-child {
+  left: 0;
+}
+
+.lab__gauge-axis > span:nth-child(2) {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.lab__gauge-axis > span:last-child {
+  right: 0;
 }
 
 .lab__gauge-track {
@@ -72,12 +96,14 @@
   background: color-mix(in srgb, var(--ink) 14%, transparent);
 }
 
-/* 50%: where a sequence the machine cannot read would sit. */
+/* 50%: where a sequence the machine cannot read would sit. Sized to the track,
+   not to the gauge, so it stops above its own label instead of striking
+   through it. */
 .lab__gauge-even {
   position: absolute;
   left: 50%;
   top: 4px;
-  bottom: 4px;
+  height: 18px;
   width: 1px;
   background: color-mix(in srgb, var(--ink) 34%, transparent);
 }
