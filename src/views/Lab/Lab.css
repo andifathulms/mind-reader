@@ -238,3 +238,62 @@
     gap: var(--s3);
   }
 }
+
+/* ------------------------------------------------------------------- trace */
+
+/*
+ * Where an attempt left the rule. One tick per press, in the order they were
+ * made, marked where the press was not the one the rule called for. The marks
+ * borrow the arena's language: a departure is drawn in the same red the machine
+ * uses for a round it won, because a departure is usually how it won one.
+ */
+.trace {
+  grid-column: 1 / -1;
+  margin-top: var(--s2);
+  padding-top: var(--s2);
+  border-top: 1px solid var(--rule);
+}
+
+.trace__strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-bottom: var(--s1);
+}
+
+.trace__tick {
+  width: 5px;
+  height: 12px;
+  border-radius: 1px;
+  /*
+   * The presses that held the rule, and about nineteen in twenty of the strip.
+   * At 22% of the ink these measured 1.6:1 against the ground, well under the
+   * 3:1 a graphical object needs, so the strip read as a few red marks floating
+   * on nothing rather than as a run of presses with departures in it. At 52%
+   * they clear 3:1 on the player's ground and 4.7:1 on the machine's, which is
+   * what lets the extent be seen and the positions be counted.
+   */
+  background: color-mix(in srgb, var(--ink) 52%, transparent);
+}
+
+.trace__tick--broke {
+  background: var(--hit);
+}
+
+/* The opening press of a relational rule, which was taken as given rather than
+   checked. Hollow, so it is visibly not a claim either way. */
+.trace__tick--given {
+  background: none;
+  box-shadow: inset 0 0 0 1px var(--rule-strong);
+}
+
+.trace__account {
+  font: var(--t-body);
+  letter-spacing: var(--track-body);
+  color: var(--ink);
+}
+
+.trace__assumption {
+  margin-top: 4px;
+  max-width: 62ch;
+}
