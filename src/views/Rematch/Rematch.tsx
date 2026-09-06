@@ -50,7 +50,7 @@ function AgainstYou() {
 
   return (
     <Figure
-      title="And against you"
+      title="Each machine, against your sequence"
       note="Your presses, replayed against each machine on its own. Same warm-up, same confidence floor, same generator, so each row is the machine you would have met if you had selected that model alone."
     >
       <div className="against__actions">
