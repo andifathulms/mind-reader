@@ -485,6 +485,36 @@
   gap: var(--s2);
 }
 
+/*
+ * The focus ring, mirrored onto the machine's copy of the target.
+ *
+ * The two layers are siblings and the machine's is second, so it paints over
+ * the player's wherever its clip lets it through. Its clip runs from --split to
+ * the bottom and --split never exceeds 0.78, so the bottom fifth of the arena
+ * is always the machine's — and the targets live there. The real button is the
+ * one in the player's layer, underneath, which meant the outline was drawn and
+ * then covered on every round of every session: a keyboard player could not see
+ * which target they were on, on the only control the game has.
+ *
+ * Lifting the focused button above the machine's layer would carry the player's
+ * ink onto the machine's ground with it, and its label would go dark on dark.
+ * So the ring is painted where it can be seen instead. The machine's layer
+ * already mirrors the whole face; this mirrors one more thing, in whichever
+ * ink is local to the ground that is actually showing.
+ */
+.arena:has(.arena__layer--yours .arena__targets > :first-child:focus-visible)
+  .arena__layer--machine
+  .arena__targets
+  > :first-child,
+.arena:has(.arena__layer--yours .arena__targets > :last-child:focus-visible)
+  .arena__layer--machine
+  .arena__targets
+  > :last-child {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+  border-radius: 1px;
+}
+
 .arena__target {
   position: relative;
   min-height: 92px;
