@@ -40,9 +40,20 @@ function AgainstYou() {
   const [rows, setRows] = useState<Counterfactual[] | null>(null);
   const [replayed, setReplayed] = useState(0);
 
+  const [announcement, setAnnouncement] = useState('');
+
   const replay = useCallback(() => {
-    setRows(replayAgainstEach(history, config, seed));
+    const computed = replayAgainstEach(history, config, seed);
+    setRows(computed);
     setReplayed(history.length);
+    // The table appears in silence otherwise: a reader presses the button and,
+    // as far as anything tells them, nothing happens (WCAG 4.1.3).
+    const mixture = computed.find((r) => r.id === 'ensemble');
+    setAnnouncement(
+      `Replayed ${history.length} presses against six machines. The mixture you played scores ${
+        mixture ? Math.round(mixture.rate * 100) : 0
+      }%. The full table follows.`,
+    );
   }, [history, config, seed]);
 
   const stale = rows !== null && replayed !== history.length;
@@ -53,6 +64,10 @@ function AgainstYou() {
       title="Each machine, against your sequence"
       note="Your presses, replayed against each machine on its own. Same warm-up, same confidence floor, same generator, so each row is the machine you would have met if you had selected that model alone."
     >
+      <p className="visually-hidden" role="status">
+        {announcement}
+      </p>
+
       <div className="against__actions">
         <button className="rematch__button" type="button" onClick={replay} disabled={!ready}>
           {rows === null ? 'Replay my session' : 'Replay again'}

@@ -35,6 +35,7 @@ export function Lab() {
   const [results, setResults] = useState<Map<string, StrategyResult>>(new Map());
   const [attempts, setAttempts] = useState<Map<string, Attempt>>(new Map());
   const [attempting, setAttempting] = useState<string | null>(null);
+  const [announcement, setAnnouncement] = useState('');
 
   const config = store.currentConfig;
   const seed = store.currentSeed;
@@ -46,6 +47,13 @@ export function Lab() {
       if (!strategy) return;
       const result = runStrategy(strategy, config, seed + strategy.id.length, ROUNDS);
       setResults((previous) => new Map(previous).set(id, result));
+      // Running a script filled in a figure and said nothing, so a reader
+      // pressed the button and had no way to know it had worked (WCAG 4.1.3).
+      setAnnouncement(
+        `${strategy.name}, run as a script over ${ROUNDS} rounds: the machine scores ${Math.round(
+          result.rate * 100,
+        )}%.`,
+      );
     },
     [config, seed],
   );
@@ -56,6 +64,7 @@ export function Lab() {
       next.set(strategy.id, runStrategy(strategy, config, seed + strategy.id.length, ROUNDS));
     }
     setResults(next);
+    setAnnouncement(`All five scripts run over ${ROUNDS} rounds each. The table is filled in.`);
   }, [config, seed]);
 
   /** Mark the rounds from here on as an attempt at one strategy. */
@@ -96,6 +105,10 @@ export function Lab() {
         </>
       }
     >
+      <p className="visually-hidden" role="status">
+        {announcement}
+      </p>
+
       <div className="lab">
         {STRATEGIES.map((strategy, i) => {
           const result = results.get(strategy.id);
