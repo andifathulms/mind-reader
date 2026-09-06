@@ -162,3 +162,103 @@
   display: block;
   margin-top: var(--s1);
 }
+
+/* ----------------------------------------------------------- against you */
+
+/*
+ * The counterfactual table. Plain figures on the player's own ground, because
+ * this is a record of what happened to them rather than a match between two
+ * machines, and it should not borrow the rematch's staging.
+ */
+.against {
+  margin-top: var(--s5);
+  padding-top: var(--s3);
+  border-top: 1px solid var(--rule-strong);
+}
+
+/*
+ * A sub-heading, at the sub-heading step. This was set at --t-title, the same
+ * size the section's own h2 uses, so an h3 nested inside the rematch was as
+ * loud as the rematch and read as a second section that had lost its number.
+ * Every other heading at this level in the app is --t-h2: the figure's title
+ * and the ensemble's.
+ */
+.against__heading {
+  font: var(--t-h2);
+}
+
+.against__intro {
+  margin-top: var(--s1);
+  max-width: 62ch;
+  color: var(--ink-soft);
+}
+
+.against__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  margin-top: var(--s3);
+}
+
+.against__count {
+  color: var(--ink-soft);
+}
+
+.against__table {
+  margin-top: var(--s3);
+}
+
+.against__caption {
+  text-align: left;
+  font: var(--t-note);
+  letter-spacing: var(--track-note);
+  color: var(--ink-soft);
+  padding-bottom: var(--s1);
+}
+
+/* The row the player actually met. Everything else in the table is a
+   counterfactual and this one is not, so it is the only one set in full ink. */
+.against__row--played th,
+.against__row--played td {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.against__ci {
+  font: var(--t-note);
+  letter-spacing: var(--track-note);
+  color: var(--ink-soft);
+  white-space: normal;
+}
+
+.against__stale {
+  margin-top: var(--s2);
+  color: var(--ink-soft);
+}
+
+/*
+ * The caveat. Set as body rather than as a footnote, because a footnote is what
+ * this would become if it were allowed to shrink, and the figure above is only
+ * honest while this is being read with it.
+ */
+.against__caveat {
+  margin-top: var(--s2);
+  max-width: 62ch;
+  color: var(--ink-soft);
+  border-left: 2px solid var(--rule-strong);
+  padding-left: var(--s2);
+}
+
+/*
+ * The interval stays on a phone. PRD §7.4 requires uncertainty to be shown and
+ * §8.12 makes this a phone app first, so hiding the interval at the width most
+ * people will read it at would drop the commitment exactly where it matters.
+ * It wraps instead.
+ */
+@media (max-width: 620px) {
+  .against__table th,
+  .against__table td {
+    padding-right: var(--s1);
+  }
+}
