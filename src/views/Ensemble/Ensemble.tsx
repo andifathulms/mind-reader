@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
 import type { CSSProperties } from 'react';
 import { useGameThrottled } from '../../state/context';
-import { Section } from '../../ui/Section';
+import { Figure, Section } from '../../ui/Section';
 import { Reveal } from '../../ui/Reveal';
-import type { PerPredictorRecord, PredictorId, Round } from '../../engine/types';
+import type { Config, PerPredictorRecord, PredictorId, Round } from '../../engine/types';
 import { PREDICTOR_IDS } from '../../engine/types';
+import { derive } from '../../engine/derive';
 import './Ensemble.css';
 
 export const PREDICTOR_NAMES: Record<PredictorId, string> = {
@@ -151,6 +152,103 @@ function Key({ active }: { active: readonly PredictorId[] }) {
   );
 }
 
+
+/** Signed to three places, so a contribution that leans left reads as leaning left. */
+const signed = (n: number) => `${n >= 0 ? '+' : '\u2212'}${Math.abs(n).toFixed(3)}`;
+const percent = (n: number) => `${Math.round(n * 100)}%`;
+
+/**
+ * The step between five guesses and one move.
+ *
+ * The tracks above show what each model played and the arena shows what the
+ * machine committed to. Nothing has ever shown the arithmetic in between, which
+ * is the only part of the machine a sceptical reader cannot reconstruct alone —
+ * and this app is written for a reader whose first hypothesis is that it is
+ * lying to them (PRD §4.3).
+ *
+ * Every number here was recorded at commit time and is multiplied out in the
+ * open. It is a table rather than a drawing because it is a table: six columns
+ * of figures that want to be read across, and read by a screen reader too
+ * (PRD §8.9).
+ */
+function Ledger({ round, config }: { round: Round; config: Config }) {
+  const d = derive(round, config);
+
+  const outcome = d.warmingUp
+    ? `Round ${round.index + 1} of the ${d.minRounds}-round warm-up, so the machine drew a fair bit from the generator and this vote did not apply.`
+    : d.belowFloor
+      ? `Confidence ${d.confidence.toFixed(3)} fell short of the floor at ${d.floor.toFixed(2)}, so the machine drew a fair bit from the generator instead of playing the vote.`
+      : `Confidence ${d.confidence.toFixed(3)} cleared the floor at ${d.floor.toFixed(2)}, so the machine played the vote.`;
+
+  return (
+    <div className="ledger">
+      <table className="ledger__table">
+        <caption className="visually-hidden">
+          How the machine reached its move for round {round.index + 1}
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Model</th>
+            <th scope="col">Said</th>
+            <th scope="col">Claimed</th>
+            <th scope="col">Edge</th>
+            <th scope="col">Weight</th>
+            <th scope="col">Contributes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {d.contributions.map((c) => (
+            <tr key={c.id}>
+              <th scope="row">
+                <span
+                  className="ledger__swatch"
+                  style={{ background: PREDICTOR_TINTS[c.id] }}
+                  aria-hidden="true"
+                />
+                {PREDICTOR_NAMES[c.id]}
+              </th>
+              <td>{side(c.guess)}</td>
+              <td>{percent(c.confidence)}</td>
+              <td>{percent(c.edge)}</td>
+              <td>{percent(c.weight)}</td>
+              <td className="ledger__signed">{signed(c.signed)}</td>
+            </tr>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr>
+            <th scope="row" colSpan={5}>
+              Vote, summed
+            </th>
+            <td className="ledger__signed">{signed(d.vote)}</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div className="ledger__rules">
+        <p className="ledger__rule">
+          A model is trusted no further than the weaker of what it claims and the edge it has
+          actually shown, so each row contributes its weight times the smaller of those two,
+          negative for left and positive for right.
+        </p>
+        <p className="ledger__rule">
+          Strength is {Math.abs(d.vote).toFixed(3)} over a total weight of{' '}
+          {d.totalWeight.toFixed(3)}, which is {d.strength.toFixed(3)}. Confidence is a half of
+          that above a half: {d.confidence.toFixed(3)}.
+        </p>
+        <p className="ledger__outcome">{outcome}</p>
+        {d.drift > 1e-9 ? (
+          <p className="ledger__drift">
+            This reading reaches {d.confidence.toFixed(6)} and the machine recorded{' '}
+            {round.confidence.toFixed(6)}. They should be the same number. Trust the recorded one
+            and treat this as a bug.
+          </p>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 /**
  * Five competing models of the same player, each with a live weight based on
  * recent accuracy. What a user watches here is the machine changing its mind
@@ -247,6 +345,16 @@ export function Ensemble() {
           );
         })}
       </Reveal>
+
+      {last ? (
+        <Figure
+          title="The step between five guesses and one move"
+          note={`Round ${last.index + 1}, multiplied out. Every number was recorded when the prediction was sealed, so this is a reading of what the machine did rather than a second opinion about it.`}
+          delay={2}
+        >
+          <Ledger round={last} config={store.currentConfig} />
+        </Figure>
+      ) : null}
 
       <Reveal delay={2}>
         <h3 className="ensemble__heading">Weights, over the session</h3>

@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
-import { Section } from '../../ui/Section';
+import { Figure, Section } from '../../ui/Section';
+import { useGameThrottled } from '../../state/context';
+import { replayAgainstEach } from '../../engine/counterfactual';
+import type { Counterfactual } from '../../engine/counterfactual';
+import { PREDICTOR_NAMES } from '../Ensemble/Ensemble';
 import { createRng } from '../../engine/rng';
 import { createSeer } from '../../engine/predictors/seer';
 import { createMrm } from '../../engine/predictors/mrm';
@@ -8,6 +12,108 @@ import type { Predictor } from '../../engine/predictors/predictor';
 import type { Move } from '../../engine/types';
 import { formatRate } from '../../stats/interval';
 import './Rematch.css';
+
+
+/** Below this the table is noise, and the intervals say so loudly enough to bother. */
+const ENOUGH = 25;
+
+/**
+ * The player's own presses, replayed against each machine alone.
+ *
+ * The section above settles which of the two 1953 machines was better at
+ * playing the other. The question it provokes and has never answered is which
+ * one is better at playing you, and the app has had the parts to answer it all
+ * along: the presses are recorded, the predictors are pure, and a session
+ * replays from its seed.
+ *
+ * The caveat is not decoration and is not shortenable. Your presses were partly
+ * a reply to what the mixture was doing to you; against SEER alone you would
+ * have produced a different sequence. This table is what each machine scores
+ * against the sequence you actually made, which is a real and checkable
+ * quantity, and it is not a prediction of how a session against SEER would go.
+ */
+function AgainstYou() {
+  const store = useGameThrottled();
+  const history = store.history;
+  const config = store.currentConfig;
+  const seed = store.currentSeed;
+  const [rows, setRows] = useState<Counterfactual[] | null>(null);
+  const [replayed, setReplayed] = useState(0);
+
+  const replay = useCallback(() => {
+    setRows(replayAgainstEach(history, config, seed));
+    setReplayed(history.length);
+  }, [history, config, seed]);
+
+  const stale = rows !== null && replayed !== history.length;
+  const ready = history.length >= ENOUGH;
+
+  return (
+    <Figure
+      title="And against you"
+      note="Your presses, replayed against each machine on its own. Same warm-up, same confidence floor, same generator, so each row is the machine you would have met if you had selected that model alone."
+    >
+      <div className="against__actions">
+        <button className="rematch__button" type="button" onClick={replay} disabled={!ready}>
+          {rows === null ? 'Replay my session' : 'Replay again'}
+        </button>
+        <span className="against__count note">
+          {ready
+            ? `${history.length} ${history.length === 1 ? 'press' : 'presses'} on record`
+            : `${ENOUGH - history.length} more ${ENOUGH - history.length === 1 ? 'press' : 'presses'} before this says anything`}
+        </span>
+      </div>
+
+      {rows ? (
+        <>
+          {stale ? (
+            <p className="against__stale note">
+              You have played {history.length - replayed} more{' '}
+              {history.length - replayed === 1 ? 'round' : 'rounds'} since this was run. The table
+              below is the session as it stood at {replayed}.
+            </p>
+          ) : null}
+
+          <table className="against__table">
+            <caption className="visually-hidden">
+              Each machine against your recorded sequence, over {replayed} presses
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Machine</th>
+                <th scope="col">Its score</th>
+                <th scope="col">With its interval</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr
+                  key={row.id}
+                  className={row.id === 'ensemble' ? 'against__row--played' : undefined}
+                >
+                  <th scope="row">
+                    {row.id === 'ensemble'
+                      ? 'The mixture, which you played'
+                      : PREDICTOR_NAMES[row.id]}
+                  </th>
+                  <td className="numeral">{Math.round(row.rate * 100)}%</td>
+                  <td className="against__ci">{formatRate(row.machineWins, row.rounds)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <p className="against__caveat">
+            These are scores against a frozen sequence, not predictions of how those sessions
+            would have gone. Your presses were partly a reply to what the mixture was doing to
+            you, so against a different machine you would have played differently. What the table
+            shows is which models could read the sequence you actually made.
+          </p>
+        </>
+      ) : null}
+    </Figure>
+  );
+}
 
 /** Rounds per animation frame. The exchange must stay legible. */
 const PER_FRAME = 6;
@@ -222,6 +328,8 @@ export function Rematch() {
             Reset
           </button>
         </div>
+
+        <AgainstYou />
 
         <p className="rematch__quote">
           “After much discussion an umpire machine was built which connected the two machines, and

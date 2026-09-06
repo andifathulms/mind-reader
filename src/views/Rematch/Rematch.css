@@ -166,33 +166,14 @@
 /* ----------------------------------------------------------- against you */
 
 /*
- * The counterfactual table. Plain figures on the player's own ground, because
- * this is a record of what happened to them rather than a match between two
- * machines, and it should not borrow the rematch's staging.
+ * The counterfactual table.
+ *
+ * It is a measurement of the player, so it is set as one: the figure supplies
+ * the head, the hairline under it and the rhythm below, the same as every
+ * chart in the portrait. It carried its own bespoke heading and spacing until
+ * this was noticed, which made it the only measurement in the app that did not
+ * look like the others.
  */
-.against {
-  margin-top: var(--s5);
-  padding-top: var(--s3);
-  border-top: 1px solid var(--rule-strong);
-}
-
-/*
- * A sub-heading, at the sub-heading step. This was set at --t-title, the same
- * size the section's own h2 uses, so an h3 nested inside the rematch was as
- * loud as the rematch and read as a second section that had lost its number.
- * Every other heading at this level in the app is --t-h2: the figure's title
- * and the ensemble's.
- */
-.against__heading {
-  font: var(--t-h2);
-}
-
-.against__intro {
-  margin-top: var(--s1);
-  max-width: 62ch;
-  color: var(--ink-soft);
-}
-
 .against__actions {
   display: flex;
   align-items: center;
@@ -207,14 +188,6 @@
 
 .against__table {
   margin-top: var(--s3);
-}
-
-.against__caption {
-  text-align: left;
-  font: var(--t-note);
-  letter-spacing: var(--track-note);
-  color: var(--ink-soft);
-  padding-bottom: var(--s1);
 }
 
 /* The row the player actually met. Everything else in the table is a

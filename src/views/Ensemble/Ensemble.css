@@ -322,3 +322,81 @@
   max-width: 68ch;
   margin-top: var(--s3);
 }
+
+/* ------------------------------------------------------------------ ledger */
+
+/*
+ * The mixer's arithmetic for one round, in the open.
+ *
+ * Set as a table because it is one. The columns are read across and the last
+ * one is the only figure that matters on its own, so it carries the weight and
+ * the rest stay quiet.
+ */
+.ledger__table {
+  width: 100%;
+  /* Six columns of figures need room; the figure's body scrolls them. */
+  min-width: 30rem;
+}
+
+.ledger__swatch {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+  margin-right: 8px;
+  vertical-align: baseline;
+}
+
+.ledger__table th[scope='row'] {
+  font-weight: 550;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.ledger__signed {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  font-weight: 550;
+}
+
+.ledger__table tfoot th,
+.ledger__table tfoot td {
+  border-bottom: none;
+  border-top: 1px solid var(--rule-strong);
+  padding-top: var(--s1);
+}
+
+.ledger__rules {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+  margin-top: var(--s2);
+  max-width: 62ch;
+}
+
+.ledger__rule {
+  font: var(--t-note);
+  letter-spacing: var(--track-note);
+  color: var(--ink-soft);
+}
+
+/* The branch actually taken. The only line here that is not arithmetic. */
+.ledger__outcome {
+  font: var(--t-body);
+  letter-spacing: var(--track-body);
+  color: var(--ink);
+  padding-top: var(--s1);
+}
+
+/*
+ * Shown only when the reading and the machine disagree, which cannot happen
+ * unless something is wrong. It is loud on purpose: a quiet mismatch would be
+ * the interface printing a number the machine cannot be held to.
+ */
+.ledger__drift {
+  font: var(--t-note);
+  letter-spacing: var(--track-note);
+  color: var(--hit-ink);
+  border-left: 2px solid var(--hit);
+  padding-left: var(--s2);
+}
