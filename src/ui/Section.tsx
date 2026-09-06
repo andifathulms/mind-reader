@@ -83,7 +83,14 @@ export function Figure({
       {children ? <div className="figure__body">{children}</div> : null}
       {table ? (
         <details className="table-equivalent">
-          <summary>Table</summary>
+          {/*
+            Named after the figure it belongs to. Every one of these said
+            "Table", so a reader listing the page's controls met six of them
+            with nothing to tell them apart and had to open each to find out
+            which chart it went with (WCAG 2.4.6). The title is already to
+            hand; it just was not being used.
+          */}
+          <summary>Table: {title}</summary>
           {table}
         </details>
       ) : null}
