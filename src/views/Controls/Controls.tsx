@@ -140,11 +140,16 @@ export function Controls() {
           onChange={(ngramOrder) => apply({ ngramOrder })}
         />
 
-        <div className="control control--models">
-          <span className="control__label">
+        {/*
+          A real fieldset. These five were five unrelated checkboxes with
+          nothing naming them as a set or saying what the set was for, because
+          the heading above them was a span (WCAG 1.3.1).
+        */}
+        <fieldset className="control control--models">
+          <legend className="control__label">
             <span className="control__name">Models in the mixture</span>
             <span className="control__value numeral">{config.active.length} of 5</span>
-          </span>
+          </legend>
           <div className="control__models">
             {PREDICTOR_IDS.map((id) => (
               <label
@@ -167,7 +172,7 @@ export function Controls() {
             Leave one checked to face a single machine alone. SEER or MRM on their own are the 1950s
             devices as built.
           </p>
-        </div>
+        </fieldset>
       </div>
 
       <div className="controls__footer">

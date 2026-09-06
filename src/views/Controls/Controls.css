@@ -105,8 +105,30 @@
 
 /* ------------------------------------------------------------------- chips */
 
+/*
+ * A fieldset, so the five model checkboxes are announced as the set they are.
+ *
+ * Laid out as a block rather than inheriting .control's grid: a legend is not
+ * a grid item, browsers render it outside the formatting context of a grid
+ * fieldset, and the layout would go with it. The gap .control provided is
+ * replaced with margins on the two children that needed it.
+ */
 .control--models {
+  display: block;
   grid-column: 1 / -1;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  /* A fieldset defaults to min-content, which stops it filling its column. */
+  min-inline-size: 0;
+}
+
+.control--models > .control__label {
+  width: 100%;
+}
+
+.control--models > .control__note {
+  margin-top: var(--s1);
 }
 
 .control__models {
