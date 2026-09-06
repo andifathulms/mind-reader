@@ -29,6 +29,7 @@ function Slider({
   onChange: (value: number) => void;
 }) {
   const id = `control-${label.replace(/\W+/g, '-').toLowerCase()}`;
+  const noteId = `${id}-note`;
   // The track paints its own fill, so the slider reads as a quantity rather
   // than as a dot on a line. The browser gives no way to style the part of the
   // track behind the thumb, so the position is handed to CSS as a percentage.
@@ -37,7 +38,16 @@ function Slider({
     <div className="control" style={{ '--fill': `${fill.toFixed(2)}%` } as CSSProperties}>
       <label className="control__label" htmlFor={id}>
         <span className="control__name">{label}</span>
-        <span className="control__value numeral">{display}</span>
+        {/*
+          Out of the accessible name. The label wrapped this, so the slider was
+          called "Confidence threshold 55%" and then announced 55% again as its
+          value — and the name changed on every step of a drag, which is the one
+          thing a name must not do. It stays visible; it is just no longer the
+          control's name.
+        */}
+        <span className="control__value numeral" aria-hidden="true">
+          {display}
+        </span>
       </label>
       <input
         id={id}
@@ -46,9 +56,19 @@ function Slider({
         max={max}
         step={step}
         value={value}
+        /*
+         * aria-valuetext, because the number the input holds is not the number
+         * on the screen: 0.55 is shown as 55%, and 20 as "20 rounds". There is
+         * no native way to say that, and without it the slider reads out a bare
+         * decimal that matches nothing the reader can see.
+         */
+        aria-valuetext={display}
+        aria-describedby={noteId}
         onChange={(event) => onChange(Number(event.target.value))}
       />
-      <p className="control__note">{note}</p>
+      <p className="control__note" id={noteId}>
+        {note}
+      </p>
     </div>
   );
 }
