@@ -349,6 +349,18 @@ export function Ensemble() {
       {last ? (
         <Figure
           title="The step between five guesses and one move"
+          /*
+           * The figure the table exists to reach. A confidence is only quoted
+           * where it was the thing that decided the move: on a round the
+           * machine played at random the number was recorded but not acted on,
+           * and printing it beside the committed side would credit it with a
+           * move it did not make.
+           */
+          value={
+            last.wasRandom
+              ? `${side(last.prediction)}, drawn`
+              : `${side(last.prediction)}, ${last.confidence.toFixed(2)}`
+          }
           note={`Round ${last.index + 1}, multiplied out. Every number was recorded when the prediction was sealed, so this is a reading of what the machine did rather than a second opinion about it.`}
           delay={2}
         >
