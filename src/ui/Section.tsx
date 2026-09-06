@@ -46,7 +46,13 @@ export function Section({
             <h2 className="section__title" id={`${id}-title`}>
               {title}
             </h2>
-            {intro ? <p className="section__intro">{intro}</p> : null}
+            {/* Identified, so a control inside the section can point a
+                description at it instead of restating it. */}
+            {intro ? (
+              <p className="section__intro" id={`${id}-intro`}>
+                {intro}
+              </p>
+            ) : null}
           </div>
         </Reveal>
         {children}

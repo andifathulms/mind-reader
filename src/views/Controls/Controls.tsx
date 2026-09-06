@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useGameThrottled } from '../../state/context';
 import { Section } from '../../ui/Section';
@@ -9,6 +9,13 @@ import { writeUrl } from '../../state/url';
 import { seedFrom } from '../../engine/rng';
 import './Controls.css';
 
+/*
+ * The id of the section's opening paragraph, which is the sentence saying that
+ * a change here restarts the session. Every control points its description at
+ * it rather than repeating the words five times.
+ */
+const RESTART_NOTE = 'controls-intro';
+
 function Slider({
   label,
   note,
@@ -18,6 +25,7 @@ function Slider({
   max,
   step,
   onChange,
+  describedBy,
 }: {
   label: string;
   note: string;
@@ -27,6 +35,7 @@ function Slider({
   max: number;
   step: number;
   onChange: (value: number) => void;
+  describedBy?: string;
 }) {
   const id = `control-${label.replace(/\W+/g, '-').toLowerCase()}`;
   const noteId = `${id}-note`;
@@ -63,7 +72,7 @@ function Slider({
          * decimal that matches nothing the reader can see.
          */
         aria-valuetext={display}
-        aria-describedby={noteId}
+        aria-describedby={describedBy ? `${noteId} ${describedBy}` : noteId}
         onChange={(event) => onChange(Number(event.target.value))}
       />
       <p className="control__note" id={noteId}>
@@ -92,11 +101,33 @@ export function Controls() {
   const seed = store.currentSeed;
   const played = store.rounds.length;
 
+  /*
+   * What just happened, for a reader who cannot see the session empty itself.
+   *
+   * Reaching a control by form navigation skips the section's prose entirely,
+   * so the warning above was reaching nobody who most needed it: they moved a
+   * slider and their session was gone with no indication anything had occurred.
+   *
+   * The discarded count is in the message because it is the part worth hearing,
+   * and because it settles by itself: after the first restart there is nothing
+   * left to discard, so dragging a slider announces once and then repeats a
+   * stable sentence rather than a new one per step.
+   */
+  const [announcement, setAnnouncement] = useState('');
+
   const apply = useCallback(
     (next: Partial<Config>, nextSeed = seed) => {
+      const discarded = store.rounds.length;
       const merged = { ...config, ...next };
       store.reconfigure(merged, nextSeed);
       window.history.replaceState(null, '', writeUrl({ config: merged, seed: nextSeed }));
+      setAnnouncement(
+        discarded > 0
+          ? `Settings changed. The session has restarted and ${discarded} ${
+              discarded === 1 ? 'round was' : 'rounds were'
+            } discarded.`
+          : 'Settings changed. The session has restarted.',
+      );
     },
     [config, seed, store],
   );
@@ -118,6 +149,10 @@ export function Controls() {
       eyebrow="controls"
       intro="Every change here restarts the session: the weights were built under the old settings and reading them under new ones would be a different experiment."
     >
+      <p className="visually-hidden" role="status">
+        {announcement}
+      </p>
+
       <div className="controls">
         <Slider
           label="Confidence threshold"
@@ -128,6 +163,7 @@ export function Controls() {
           max={0.95}
           step={0.01}
           onChange={(confidenceFloor) => apply({ confidenceFloor })}
+          describedBy={RESTART_NOTE}
         />
         <Slider
           label="Weight decay"
@@ -138,6 +174,7 @@ export function Controls() {
           max={0.995}
           step={0.005}
           onChange={(decay) => apply({ decay })}
+          describedBy={RESTART_NOTE}
         />
         <Slider
           label="Warm-up"
@@ -148,6 +185,7 @@ export function Controls() {
           max={100}
           step={1}
           onChange={(minRounds) => apply({ minRounds })}
+          describedBy={RESTART_NOTE}
         />
         <Slider
           label="N-gram order"
@@ -158,6 +196,7 @@ export function Controls() {
           max={8}
           step={1}
           onChange={(ngramOrder) => apply({ ngramOrder })}
+          describedBy={RESTART_NOTE}
         />
 
         {/*
@@ -165,7 +204,7 @@ export function Controls() {
           nothing naming them as a set or saying what the set was for, because
           the heading above them was a span (WCAG 1.3.1).
         */}
-        <fieldset className="control control--models">
+        <fieldset className="control control--models" aria-describedby={RESTART_NOTE}>
           <legend className="control__label">
             <span className="control__name">Models in the mixture</span>
             <span className="control__value numeral">{config.active.length} of 5</span>
