@@ -368,7 +368,9 @@ export function Ensemble() {
         </Figure>
       ) : null}
 
-      <Reveal delay={2}>
+      {/* Four blocks, four steps. The ledger took step two when it arrived and
+          this one was left sharing it, so the last two landed together. */}
+      <Reveal delay={3}>
         <h3 className="ensemble__heading">Weights, over the session</h3>
         <Key active={ordered} />
         <Weather rounds={rounds} active={ordered} />
