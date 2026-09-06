@@ -48,11 +48,19 @@
   padding-top: 8px;
 }
 
+/*
+ * The section's number, in the red that marks a machine win everywhere else.
+ *
+ * --hit is a mark colour and measures 4.44:1 against the player's ground, which
+ * is fine for a shape and short of the 4.5:1 this needs at eleven pixels.
+ * --hit-ink is the same red mixed a little further into the local ink for
+ * exactly this case, and takes it to 4.95:1 without touching the marks.
+ */
 .section__number {
   font: var(--t-micro);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--track-eyebrow);
-  color: var(--hit);
+  color: var(--hit-ink);
 }
 
 .section--machine .section__number {
