@@ -91,7 +91,10 @@ export function Export() {
               {rounds} {rounds === 1 ? 'press' : 'presses'}
             </span>
           </p>
-          <p className="export__bits" aria-label="Your press sequence, as bits">
+          {/* No aria-label. A paragraph is a generic element, ARIA prohibits
+              naming one, and the heading directly above already says "your
+              presses, as bits" to everybody. */}
+          <p className="export__bits">
             {sequence}
           </p>
         </div>

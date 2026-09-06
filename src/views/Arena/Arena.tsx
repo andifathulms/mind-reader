@@ -418,7 +418,9 @@ export function Arena() {
       </div>
 
       {/* The machine reports. It does not comment. */}
-      <p className="visually-hidden" role="status" aria-live="polite">
+      {/* role="status" is already a polite live region; the attribute said it
+          twice. */}
+      <p className="visually-hidden" role="status">
         {reveal
           ? `Round ${reveal.round.index + 1}. You pressed ${
               reveal.round.actual === 0 ? 'left' : 'right'
