@@ -30,19 +30,36 @@
 
 /* ------------------------------------------------------------------- rail */
 
+/*
+ * Hidden with `visibility`, not with opacity alone.
+ *
+ * An element at zero opacity is still in the tab order and still in the
+ * accessibility tree: `pointer-events: none` stops a mouse and does nothing
+ * for a keyboard. Until the arena had scrolled away, tabbing out of it landed
+ * on eight links that could not be seen (WCAG 2.4.7). `visibility: hidden`
+ * takes them out of both, and unlike `display: none` it still transitions,
+ * so the rail arrives the way it always did.
+ */
 .index {
   position: fixed;
   z-index: 39;
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
   transition:
     opacity 340ms var(--ease-out),
-    transform 340ms var(--ease-out);
+    transform 340ms var(--ease-out),
+    visibility 0s linear 340ms;
 }
 
 .index--shown {
   opacity: 1;
+  visibility: visible;
   pointer-events: auto;
+  transition:
+    opacity 340ms var(--ease-out),
+    transform 340ms var(--ease-out),
+    visibility 0s linear;
 }
 
 .index__list {
@@ -74,8 +91,11 @@
   flex: none;
   background: currentColor;
   opacity: 0.5;
+  /* The width is a size change and the only animation in the chrome that was
+     not gated. --tap is 0 under reduced motion, so it lands at its final
+     width before the first frame like everything else. */
   transition:
-    width 260ms var(--ease-out),
+    width calc(260ms * (1 - var(--still))) var(--ease-out),
     opacity 160ms linear;
 }
 
