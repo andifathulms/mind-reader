@@ -269,6 +269,43 @@ export function Ensemble() {
   );
   const active = store.currentConfig.active;
   const ordered = PREDICTOR_IDS.filter((id) => active.includes(id));
+
+  /*
+   * Which round the ledger reads.
+   *
+   * It read the last one, which meant that through the whole warm-up the only
+   * worked example in the app was a round where the arithmetic was recorded
+   * and then not used: the outcome line said the vote did not apply, on every
+   * round a newcomer was likely to be looking at. The explanation was absent
+   * exactly when someone was most likely to want it.
+   *
+   * So it prefers the most recent round the vote actually decided, and says
+   * plainly when that is not the round just played. During the warm-up there
+   * is no such round and it falls back to the latest one, with the count of
+   * how many presses remain before the vote can decide anything.
+   */
+  const decided = (() => {
+    for (let i = rounds.length - 1; i >= 0; i -= 1) {
+      const round = rounds[i];
+      if (round && !round.wasRandom) return round;
+    }
+    return null;
+  })();
+  const ledgerRound = decided ?? last ?? null;
+  const remaining = store.currentConfig.minRounds - rounds.length;
+  const ledgerNote = !ledgerRound
+    ? ''
+    : decided
+      ? `Round ${ledgerRound.index + 1}, multiplied out.${
+          last && ledgerRound.index !== last.index
+            ? ` That is the most recent round the vote decided; round ${last.index + 1} was drawn from the generator.`
+            : ''
+        } Every number was recorded when the prediction was sealed, so this is a reading of what the machine did rather than a second opinion about it.`
+      : `Round ${ledgerRound.index + 1}, multiplied out. No round has been decided by this vote yet: ${
+          remaining > 0
+            ? `${remaining} more ${remaining === 1 ? 'press' : 'presses'} of warm-up`
+            : 'the mixture has not cleared its confidence floor'
+        }, so what follows is the arithmetic as it stood rather than the arithmetic that chose a move.`;
   const leader = ordered.reduce(
     (best, id) => ((weights.get(id) ?? 0) > (weights.get(best) ?? 0) ? id : best),
     ordered[0] ?? 'ngram',
@@ -346,7 +383,7 @@ export function Ensemble() {
         })}
       </Reveal>
 
-      {last ? (
+      {ledgerRound ? (
         <Figure
           title="The step between five guesses and one move"
           /*
@@ -357,14 +394,14 @@ export function Ensemble() {
            * move it did not make.
            */
           value={
-            last.wasRandom
-              ? `${side(last.prediction)}, drawn`
-              : `${side(last.prediction)}, ${last.confidence.toFixed(2)}`
+            ledgerRound.wasRandom
+              ? `${side(ledgerRound.prediction)}, drawn`
+              : `${side(ledgerRound.prediction)}, ${ledgerRound.confidence.toFixed(2)}`
           }
-          note={`Round ${last.index + 1}, multiplied out. Every number was recorded when the prediction was sealed, so this is a reading of what the machine did rather than a second opinion about it.`}
+          note={ledgerNote}
           delay={2}
         >
-          <Ledger round={last} config={store.currentConfig} />
+          <Ledger round={ledgerRound} config={store.currentConfig} />
         </Figure>
       ) : null}
 
