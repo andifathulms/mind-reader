@@ -140,6 +140,10 @@ function Face({
   const newest = rounds.length - 1;
   const played = rounds.length;
   const interval = wilson(machineWins, played);
+  // The quantity the boundary actually draws, so the note beside it can state
+  // it rather than describe it.
+  const shrunkRate = (machineWins + PRIOR) / (played + 2 * PRIOR);
+  const atLimit = played > 0 && (1 - shrunkRate <= MIN_SPLIT || 1 - shrunkRate >= MAX_SPLIT);
 
   return (
     <>
@@ -279,6 +283,26 @@ function Face({
             <span className="arena__interval-point" />
           </span>
           )}
+          {/*
+            What the boundary is, said next to the number it disagrees with.
+            The boundary is the largest moving thing on the screen and it is
+            not the win rate: it is that rate shrunk toward even by a prior
+            worth PRIOR rounds, then clamped. A reader who takes the two scores
+            above, divides them, and looks at the line has until now found a
+            mismatch with nothing anywhere to reconcile it.
+
+            The shrinkage is also the lesson (PRD §7.4). Saying it here is the
+            difference between performing "an early lead is worth less than it
+            looks" and teaching it.
+          */}
+          {played > 0 ? (
+            <span className="arena__boundary-note note">
+              The boundary is at {Math.round(shrunkRate * 100)}%, not{' '}
+              {Math.round((machineWins / played) * 100)}%. It is an estimate pulled toward even by
+              a prior worth {PRIOR} rounds, so a short lead cannot throw it to an edge.
+              {atLimit ? ' It has also reached its stop, where the exact position no longer carries anything the two scores do not say better.' : ''}
+            </span>
+          ) : null}
           {last ? (
             <span className="arena__last">
               {last.wasRandom

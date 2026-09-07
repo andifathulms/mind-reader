@@ -255,10 +255,15 @@
   color: var(--ink-soft);
 }
 
-.arena__last {
+.arena__last,
+.arena__boundary-note {
   font: var(--t-note);
   letter-spacing: var(--track-note);
   color: var(--ink-soft);
+}
+
+.arena__boundary-note {
+  max-width: 42ch;
 }
 
 /*
@@ -675,7 +680,8 @@
     bottom: 152px;
   }
 
-  .arena__last {
+  .arena__last,
+  .arena__boundary-note {
     display: none;
   }
 
