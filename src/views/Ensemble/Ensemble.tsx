@@ -171,13 +171,42 @@ const percent = (n: number) => `${Math.round(n * 100)}%`;
  * of figures that want to be read across, and read by a screen reader too
  * (PRD §8.9).
  */
-function Ledger({ round, config }: { round: Round; config: Config }) {
+function Ledger({
+  round,
+  next,
+  config,
+}: {
+  round: Round;
+  /** The round after this one, whose recorded weights are this one's result. */
+  next: Round | null;
+  config: Config;
+}) {
   const d = derive(round, config);
   // The row carrying the most weight, which is the one worth deriving in full.
   const heaviest = d.contributions.reduce<(typeof d.contributions)[number] | null>(
     (best, c) => (best === null || c.weight > best.weight ? c : best),
     null,
   );
+
+  /*
+   * The weight that moved most across this round, read off the two records
+   * rather than recomputed: the weights the next round recorded at commit time
+   * are exactly what this round's learning produced.
+   */
+  const movement = (() => {
+    if (!next) return null;
+    const after = new Map(next.perPredictor.map((p) => [p.id, p.weight]));
+    let best: { id: PredictorId; before: number; after: number; correct: boolean } | null = null;
+    for (const p of round.perPredictor) {
+      const to = after.get(p.id);
+      if (to === undefined) continue;
+      const moved = Math.abs(to - p.weight);
+      if (best === null || moved > Math.abs(best.after - best.before)) {
+        best = { id: p.id, before: p.weight, after: to, correct: p.correct };
+      }
+    }
+    return best;
+  })();
 
   const outcome = d.warmingUp
     ? `Round ${round.index + 1} of the ${d.minRounds}-round warm-up, so the machine drew a fair bit from the generator and this vote did not apply.`
@@ -262,6 +291,25 @@ function Ledger({ round, config }: { round: Round; config: Config }) {
           that above a half: {d.confidence.toFixed(3)}.
         </p>
         <p className="ledger__outcome">{outcome}</p>
+        {/*
+          What the round did to the weights. The traces below show five lines
+          crossing and the section says you are watching the machine change its
+          mind, but the rule that moves them was in no place a reader could
+          reach, and the table above shows weights being spent rather than
+          earned. The next round's recorded weights are this round's result, so
+          the move can be shown rather than described.
+        */}
+        {movement ? (
+          <p className="ledger__rule">
+            Afterwards every weight was multiplied by the decay at {config.decay.toFixed(2)}, one
+            added to each model that had been right, and the five renormalised.{' '}
+            {PREDICTOR_NAMES[movement.id]} was {percent(movement.before)} going in and{' '}
+            {percent(movement.after)} coming out, having{' '}
+            {movement.correct ? 'guessed correctly' : 'missed'}. A model that was right ten presses
+            ago is worth less than one that was right two presses ago, which is the whole of what
+            the decay does.
+          </p>
+        ) : null}
         {d.drift > 1e-9 ? (
           <p className="ledger__drift">
             This reading reaches {d.confidence.toFixed(6)} and the machine recorded{' '}
@@ -426,7 +474,11 @@ export function Ensemble() {
           note={ledgerNote}
           delay={2}
         >
-          <Ledger round={ledgerRound} config={store.currentConfig} />
+          <Ledger
+            round={ledgerRound}
+            next={rounds[ledgerRound.index + 1] ?? null}
+            config={store.currentConfig}
+          />
         </Figure>
       ) : null}
 
