@@ -1,12 +1,18 @@
 import type { Rng } from './rng';
 import type { Move, PerPredictorRecord, PredictorId, MixerConfig } from './types';
 import type { Oracle } from './referee';
-import type { Predictor } from './predictors/predictor';
+import type { Explanation, Predictor } from './predictors/predictor';
 
 export interface MixerState {
   weights: ReadonlyMap<PredictorId, number>;
   /** How much better than a coin each predictor has recently been, 0 to 1. */
   edges: ReadonlyMap<PredictorId, number>;
+  /**
+   * What each model was looking at when it last committed, in its own terms.
+   * Read out of the predictors, never fed back into them: this exists for the
+   * reader and nothing in the engine consumes it (CLAUDE.md §3).
+   */
+  explanations: ReadonlyMap<PredictorId, Explanation | null>;
   rounds: number;
 }
 
@@ -139,6 +145,7 @@ export function createMixer(
     state: () => ({
       weights: new Map(weights),
       edges: new Map(predictors.map((p) => [p.id, edgeOf(p.id)])),
+      explanations: new Map(predictors.map((p) => [p.id, p.explain?.() ?? null])),
       rounds,
     }),
   };

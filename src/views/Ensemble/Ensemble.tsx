@@ -334,7 +334,7 @@ function Ledger({
  */
 export function Ensemble() {
   const store = useGameThrottled();
-  const { weights } = store.weights;
+  const { weights, explanations } = store.weights;
   const rounds = store.rounds;
   const last = rounds[rounds.length - 1];
   const perPredictor = new Map<PredictorId, PerPredictorRecord>(
@@ -390,7 +390,7 @@ export function Ensemble() {
       title="The ensemble"
       eyebrow="self-report"
       ground="machine"
-      intro="Five models of you, running at once against the same presses. Each is weighted by how well it has been doing lately, and the mixture makes the actual move. Change how you are playing and watch the weights move."
+      intro="Five models of you, running at once against the same presses. Each is weighted by how well it has been doing lately, and the mixture makes the actual move. Change how you are playing and watch the weights move. Each one also shows what it is looking at right now, which is the state behind the prediction already sealed for your next press."
     >
       <Reveal className="ensemble__mixture">
         <div className="ensemble__stack" aria-hidden="true">
@@ -451,6 +451,19 @@ export function Ensemble() {
                 )}
               </span>
               <span className="ensemble__note">{PREDICTOR_NOTES[id]}</span>
+              {/*
+                The inside of the machine, in its own terms. PRD §3 turned down
+                a stronger model because it "would win more and explain less",
+                and the five kept instead were then shown as a name, a colour
+                and a weight. This is the part that was being claimed and not
+                delivered.
+              */}
+              {explanations.get(id) ? (
+                <span className="ensemble__inside">
+                  <span className="ensemble__situation">{explanations.get(id)?.situation}</span>
+                  <span className="ensemble__evidence">{explanations.get(id)?.evidence}</span>
+                </span>
+              ) : null}
             </div>
           );
         })}

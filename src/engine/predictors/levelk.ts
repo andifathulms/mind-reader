@@ -1,6 +1,7 @@
 import type { Move } from '../types';
 import type { Guess, Predictor } from './predictor';
 import { abstain } from './predictor';
+import type { Explanation } from './predictor';
 
 /**
  * Level-k, from the cognitive hierarchy literature.
@@ -40,6 +41,8 @@ export function createLevelK(): Predictor {
   let habit: Habit = { repeats: 1, switches: 1 };
   /** Decayed hit counts, one per depth. */
   let scores = new Float64Array(DEPTHS.length).fill(1);
+  /** The rung it played from last, for the reader. */
+  let lastDepth: number | null = null;
 
   /**
    * The prediction at each depth. Level 0 is the habit; every level above it is
@@ -71,13 +74,18 @@ export function createLevelK(): Predictor {
       history = [];
       habit = { repeats: 1, switches: 1 };
       scores = new Float64Array(DEPTHS.length).fill(1);
+      lastDepth = null;
     },
 
     predict(h: readonly Move[]): Guess {
       const rungs = ladder(h);
-      if (!rungs) return abstain();
+      if (!rungs) {
+        lastDepth = null;
+        return abstain();
+      }
 
       const depth = best();
+      lastDepth = depth;
       const guess = rungs[depth];
       if (guess === undefined) return abstain();
 
@@ -91,6 +99,26 @@ export function createLevelK(): Predictor {
       // Level 0 is a habit, not a hierarchy. Say less about it: the n-gram and
       // backoff models describe habits better and should carry that weight.
       return { guess, confidence: depth === 0 ? lead * 0.6 : lead };
+    },
+
+    explain(): Explanation | null {
+      if (lastDepth === null) {
+        return {
+          situation: 'No press to reason about yet',
+          evidence: 'The ladder starts from your last press and there has not been one.',
+        };
+      }
+      const alternating = habit.switches > habit.repeats;
+      const totals = Array.from(scores, (v) => v.toFixed(1)).join(', ');
+      return {
+        situation:
+          lastDepth === 0
+            ? 'Level 0: playing your habit straight'
+            : `Level ${lastDepth}: assuming you are anticipating a level ${lastDepth - 1} machine`,
+        evidence: `Your habit lately is to ${
+          alternating ? 'switch' : 'repeat'
+        }. Each rung is the one below it inverted, and their recent records are ${totals}, so it is playing the rung in front.`,
+      };
     },
 
     observe(actual: Move) {

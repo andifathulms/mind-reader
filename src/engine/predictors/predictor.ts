@@ -22,6 +22,28 @@ export interface Predictor {
   /** History is the player's presses, oldest first. */
   predict(history: readonly Move[]): Guess;
   observe(actual: Move): void;
+  /** The state behind the most recent `predict`, for the reader. Optional: a
+      model with nothing to show returns null rather than inventing a story. */
+  explain?(): Explanation | null;
+}
+
+/**
+ * What a model was looking at when it last committed.
+ *
+ * PRD §3 rejects a stronger model on the grounds that it "would win more and
+ * explain less". The five kept instead were chosen for being explicable, and
+ * were then shown to the player as a name, a colour and a weight. This is the
+ * inside of one, in its own terms.
+ *
+ * Read-only, and read after the fact. Nothing here is passed to another model
+ * or back into `predict`: a predictor that could see this would be a different
+ * algorithm from the one it is named after (CLAUDE.md §3).
+ */
+export interface Explanation {
+  /** The internal case the model was in. */
+  situation: string;
+  /** The evidence it was holding there, with its numbers. */
+  evidence: string;
 }
 
 /** No basis for a guess. The bit is arbitrary and the mixer must ignore it. */

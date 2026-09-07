@@ -1,6 +1,6 @@
 import type { Rng } from '../rng';
 import type { Move } from '../types';
-import type { Guess, Predictor } from './predictor';
+import type { Explanation, Guess, Predictor } from './predictor';
 
 /**
  * SEER — D. W. Hagelbarger's SEquence Extrapolating Robot, 1956.
@@ -116,6 +116,31 @@ export function createSeer(rng: Rng): Predictor {
       const { move, state, strength } = decide(history.length);
       pending = { state, move, strength, length: history.length };
       return { guess: move, confidence: strength };
+    },
+
+    explain(): Explanation | null {
+      const state = pending?.state ?? null;
+      if (state === null) {
+        return {
+          situation: 'Fewer than two plays behind it',
+          evidence: 'No situation yet, so the move was a fair bit.',
+        };
+      }
+      const wonOld = (state >> 2) & 1;
+      const changed = (state >> 1) & 1;
+      const wonNew = state & 1;
+      const count = counters[state] ?? 0;
+      const wins = winHistory[state] ?? 0;
+      return {
+        situation: `Situation ${state} of 8: won the play before last ${
+          wonOld ? 'yes' : 'no'
+        }, played differently last time ${changed ? 'yes' : 'no'}, won the last play ${
+          wonNew ? 'yes' : 'no'
+        }`,
+        evidence: `Counter ${count > 0 ? '+' : ''}${count} of ±${MAX_COUNT}, and it has won ${
+          wins === 3 ? 'both' : wins === 0 ? 'neither' : 'one'
+        } of the last two plays here.`,
+      };
     },
 
     observe(actual: Move) {

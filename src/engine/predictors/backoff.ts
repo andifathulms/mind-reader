@@ -1,6 +1,7 @@
 import type { Move } from '../types';
 import type { Guess, Predictor } from './predictor';
 import { abstain } from './predictor';
+import type { Explanation } from './predictor';
 
 /**
  * Variable-order context model. Tries the longest context first and falls back
@@ -17,6 +18,8 @@ const DECAY = 0.995;
 export function createBackoff(maxOrder = MAX_ORDER): Predictor {
   let tables: Array<Map<string, [number, number]>> = [];
   let history: Move[] = [];
+  /** Which order the last prediction actually came from, and on what. */
+  let landed: { order: number; key: string; zero: number; one: number } | null = null;
 
   const fresh = () => Array.from({ length: maxOrder + 1 }, () => new Map<string, [number, number]>());
 
@@ -36,6 +39,7 @@ export function createBackoff(maxOrder = MAX_ORDER): Predictor {
     },
 
     predict(h: readonly Move[]): Guess {
+      landed = null;
       for (let n = maxOrder; n >= 0; n -= 1) {
         const k = context(h, n);
         if (k === null) continue;
@@ -50,9 +54,26 @@ export function createBackoff(maxOrder = MAX_ORDER): Predictor {
         // order 5 outranks a hit at order 1 even at the same frequency.
         const depth = (n + 1) / (maxOrder + 1);
         const support = total / (total + 2);
+        landed = { order: n, key: k, zero, one };
         return { guess: (one > zero ? 1 : 0) as Move, confidence: (2 * p - 1) * support * depth };
       }
       return abstain();
+    },
+
+    explain(): Explanation | null {
+      if (!landed) {
+        return {
+          situation: `Fell through all ${maxOrder + 1} orders`,
+          evidence: `No context from ${maxOrder} presses down to none had ${MIN_EVIDENCE} clear occurrences behind it, so it abstained.`,
+        };
+      }
+      const show = (k: string) => (k === '' ? 'no context' : k.replace(/0/g, 'L').replace(/1/g, 'R'));
+      return {
+        situation: `Stopped at order ${landed.order}, on ${show(landed.key)}`,
+        evidence: `It tries ${maxOrder} presses of context first and shortens until one has enough behind it. Here: left ${landed.zero.toFixed(
+          1,
+        )}, right ${landed.one.toFixed(1)}.`,
+      };
     },
 
     observe(actual: Move) {

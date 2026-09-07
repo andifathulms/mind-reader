@@ -1,6 +1,6 @@
 import type { Rng } from '../rng';
 import type { Move } from '../types';
-import type { Guess, Predictor } from './predictor';
+import type { Explanation, Guess, Predictor } from './predictor';
 
 /**
  * MRM — Claude Shannon's mind-reading machine, Bell Laboratories memorandum,
@@ -93,6 +93,26 @@ export function createMrm(rng: Rng): Predictor {
       const { move, state, strength } = decide(history);
       pending = { state, move, strength, length: history.length };
       return { guess: move, confidence: strength };
+    },
+
+    explain(): Explanation | null {
+      const state = pending?.state ?? null;
+      if (state === null) {
+        return {
+          situation: 'Fewer than two plays behind it',
+          evidence: 'No situation yet, so the move was a fair bit.',
+        };
+      }
+      const wonOld = (state >> 2) & 1;
+      const changed = (state >> 1) & 1;
+      const wonNew = state & 1;
+      const count = changeHistory[state] ?? 0;
+      return {
+        situation: `Situation ${state} of 8, read from your side of the table: you won the play before last ${
+          wonOld ? 'yes' : 'no'
+        }, you changed ${changed ? 'yes' : 'no'}, you won the last play ${wonNew ? 'yes' : 'no'}`,
+        evidence: `Record here: ${count}. Shannon's machine keeps the same eight situations as SEER and asks them about the opponent rather than about itself.`,
+      };
     },
 
     observe(actual: Move) {
