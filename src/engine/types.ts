@@ -25,6 +25,13 @@ export interface PerPredictorRecord {
   confidence: number;
   /** Its weight in the mixture at commit time. */
   weight: number;
+  /**
+   * How much better than a coin this model had recently been, 0 to 1, at commit
+   * time. The mixer trusts a vote no further than the weaker of this and the
+   * model's own confidence, so without it the mixture's arithmetic cannot be
+   * checked after the fact — only guessed at from an upper bound.
+   */
+  edge: number;
   /** Whether its own guess turned out to match the player. Filled in on resolve. */
   correct: boolean;
 }

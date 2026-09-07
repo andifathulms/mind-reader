@@ -3,8 +3,9 @@ import { useGameThrottled } from '../../state/context';
 import { Section } from '../../ui/Section';
 import { Reveal } from '../../ui/Reveal';
 import { STRATEGIES } from '../../strategies';
-import { runStrategy } from '../../strategies/run';
-import type { StrategyResult } from '../../strategies/run';
+import { runStrategy, traceAttempt } from '../../strategies/run';
+import type { StrategyResult, Trace } from '../../strategies/run';
+import type { Move } from '../../engine/types';
 import { formatRate } from '../../stats/interval';
 import './Lab.css';
 
@@ -14,6 +15,71 @@ const ROUNDS = 2000;
 interface Attempt {
   from: number;
   to: number | null;
+}
+
+
+/** A list of positions, read as prose rather than as an array. */
+function positions(steps: readonly number[]): string {
+  const shown = steps.slice(0, 6).map((n) => n + 1);
+  const rest = steps.length - shown.length;
+  const list =
+    shown.length === 1
+      ? `${shown[0]}`
+      : `${shown.slice(0, -1).join(', ')} and ${shown[shown.length - 1]}`;
+  return rest > 0 ? `${list}, and ${rest} more` : list;
+}
+
+/**
+ * Where the attempt left the rule.
+ *
+ * The two rates above say a gap exists between what a strategy is worth and
+ * what a player gets while trying to run it. This says where it opened, which
+ * is the part nobody expects: most people assume they broke once near the end,
+ * and the strip shows them otherwise.
+ *
+ * Only drawn for the rules whose next press is defined. Against the coin and
+ * against inverting an instinct there is no line to depart from, and drawing
+ * one would be inventing a mistake.
+ */
+function Departures({
+  trace,
+  presses,
+  anchored,
+}: {
+  trace: Trace;
+  presses: readonly Move[];
+  anchored: boolean;
+}) {
+  const broke = new Set(trace.departures.map((d) => d.step));
+
+  return (
+    <div className="trace">
+      <ul className="trace__strip" aria-hidden="true">
+        {presses.map((_, i) => (
+          <li
+            key={i}
+            className={`trace__tick${broke.has(i) ? ' trace__tick--broke' : ''}${
+              !anchored && i === 0 ? ' trace__tick--given' : ''
+            }`}
+          />
+        ))}
+      </ul>
+
+      <p className="trace__account">
+        {trace.departures.length === 0
+          ? `You held the rule for all ${trace.presses} ${trace.presses === 1 ? 'press' : 'presses'}.`
+          : `You held it for ${trace.heldFor} ${trace.heldFor === 1 ? 'press' : 'presses'}, then left it ${
+              trace.departures.length === 1 ? 'once' : `${trace.departures.length} times`
+            }: at ${positions(trace.departures.map((d) => d.step))}.`}
+      </p>
+
+      <p className="trace__assumption note">
+        {anchored
+          ? 'Read against the sequence from its beginning, so losing your place shows up as a run of departures rather than as one.'
+          : 'Your opening press is taken as given: the rule is about the relation between presses, so either foot starts it.'}
+      </p>
+    </div>
+  );
 }
 
 /**
@@ -90,6 +156,13 @@ export function Lab() {
     if (!range) return null;
     const slice = rounds.slice(range.from, range.to ?? rounds.length);
     return { wins: slice.reduce((n, r) => n + (r.machineWon ? 1 : 0), 0), played: slice.length };
+  };
+
+  /** The presses made during an attempt, in order, for the departure trace. */
+  const attemptPresses = (id: string): Move[] => {
+    const range = attempts.get(id);
+    if (!range) return [];
+    return rounds.slice(range.from, range.to ?? rounds.length).map((r) => r.actual);
   };
 
   return (
@@ -200,6 +273,20 @@ export function Lab() {
                   {live ? 'Stop attempting' : "I'll try this"}
                 </button>
               </div>
+
+              {(() => {
+                const presses = attemptPresses(strategy.id);
+                if (presses.length === 0) return null;
+                const trace = traceAttempt(strategy, presses);
+                if (!trace) return null;
+                return (
+                  <Departures
+                    trace={trace}
+                    presses={presses}
+                    anchored={strategy.anchored === true}
+                  />
+                );
+              })()}
 
               {result ? <p className="lab__verdict">{strategy.verdict}</p> : null}
             </Reveal>

@@ -1,0 +1,154 @@
+/*
+ * Print.
+ *
+ * The portrait is the one thing in this app somebody might want on paper: it is
+ * a measurement of a person, and measurements get kept. Everything that exists
+ * to be pressed, run or scrolled is dropped, and what is left is the record.
+ *
+ * The first rule here is the important one. Everything below the arena arrives
+ * through an IntersectionObserver and sits at nearly zero opacity until it has
+ * been scrolled into view, so a reader who opens the page and prints it without
+ * scrolling would otherwise get one screen and eight blank pages.
+ */
+
+@media print {
+  /* Arrival is a screen flourish. On paper everything has already arrived. */
+  [data-reveal],
+  [data-reveal='shown'],
+  .arena__title,
+  .arena__meta,
+  .arena__lede,
+  .arena__side,
+  .arena__targets,
+  .arena__marks,
+  .arena__trail {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /*
+   * One ground. The machine's dark side is the app's whole argument on screen
+   * and half a cartridge of toner on paper, so the ink flips back to the
+   * player's territory everywhere and the tokens follow it.
+   */
+  html,
+  body,
+  .on-machine,
+  .section--machine,
+  .section--archive,
+  .colophon {
+    background: #fff !important;
+    color: #16140f !important;
+    --ink: #16140f;
+    --ink-soft: #45423b;
+    --ground: #fff;
+    --ground-raised: #fff;
+    --ground-sunk: #fff;
+  }
+
+  /* The two-layer arena cannot survive losing its grounds: the machine's copy
+     is a second, clipped rendering of the same face, and on one ground it would
+     print directly on top of the player's. */
+  .arena__layer--machine {
+    display: none !important;
+  }
+
+  .arena {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    contain: none !important;
+    page-break-after: always;
+  }
+
+  /* The arena's parts are absolutely positioned against a viewport-tall box.
+     On paper they stack. */
+  .arena__head,
+  .arena__side,
+  .arena__committed,
+  .arena__targets,
+  .arena__marks,
+  .arena__boundary,
+  .arena__cue {
+    position: static !important;
+  }
+
+  .arena__boundary,
+  .arena__trail,
+  .arena__cue,
+  .arena__targets,
+  .arena__seal-half {
+    display: none !important;
+  }
+
+  /* Nothing that has to be operated to mean anything. */
+  .skip,
+  .index,
+  .progress,
+  .lab__actions,
+  .rematch__controls,
+  .against__actions,
+  button {
+    display: none !important;
+  }
+
+  /*
+   * The table equivalents are the data. On screen they are folded away behind a
+   * summary because the drawing is the primary reading; on paper a chart that
+   * cannot be measured with a ruler is worth less than its numbers, so they are
+   * opened and the summary that opened them is dropped.
+   */
+  .table-equivalent > summary {
+    display: none;
+  }
+
+  .table-equivalent,
+  details {
+    display: block !important;
+  }
+
+  details > *:not(summary) {
+    display: revert !important;
+  }
+
+  /* A hidden table is hidden for a screen reader's benefit, not a printer's,
+     and it is usually the only machine-readable form of a chart on the page. */
+  table.visually-hidden {
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: var(--s2) 0 !important;
+    clip-path: none !important;
+    overflow: visible !important;
+  }
+
+  /* Figures and sections should not be split across a fold. */
+  .figure,
+  .section__head,
+  .ledger,
+  .against,
+  .lab__row,
+  table {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .section {
+    padding: var(--s4) 0 !important;
+    break-before: auto;
+  }
+
+  /* A citation the reader cannot follow is not a citation once it is on paper. */
+  .archive a[href]::after,
+  .colophon a[href]::after {
+    content: ' (' attr(href) ')';
+    font: var(--t-note);
+    word-break: break-all;
+  }
+
+  @page {
+    margin: 18mm 16mm;
+  }
+}

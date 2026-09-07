@@ -11,6 +11,20 @@ export interface Strategy {
   /** The control. Marked distinctly and sitting last. */
   isControl?: boolean;
   /**
+   * True when the history alone fixes the next press, so a departure from the
+   * rule is a well-defined thing rather than a disagreement with a coin. Only
+   * these can be traced against what a player actually did.
+   */
+  deterministic?: boolean;
+  /**
+   * True when the rule names an absolute sequence, so its very first press is
+   * already determined: pi starts at 3 whatever you do. False for a rule about
+   * the relation between presses — alternation has no preferred starting foot,
+   * and a player who opens on the right has not broken it. The trace uses this
+   * to decide whether the opening press can be a departure at all.
+   */
+  anchored?: boolean;
+  /**
    * The scripted opponent. Given its own history and a seeded PRNG, it produces
    * the next press. Scripted rather than remembered, so the lab reports what the
    * strategy does rather than what a person managed to do while running it.
@@ -44,6 +58,7 @@ const letters = PASSAGE.replace(/[^a-z]/g, '');
 export const STRATEGIES: readonly Strategy[] = [
   {
     id: 'alternate',
+    deterministic: true,
     name: 'Alternate strictly',
     instruction: 'Left, right, left, right. Never break it.',
     verdict:
@@ -55,6 +70,8 @@ export const STRATEGIES: readonly Strategy[] = [
   },
   {
     id: 'book',
+    deterministic: true,
+    anchored: true,
     name: 'Copy letters from a book',
     instruction: 'Read a passage. Left for a letter in the first half of the alphabet, right for the second.',
     verdict:
@@ -66,6 +83,8 @@ export const STRATEGIES: readonly Strategy[] = [
   },
   {
     id: 'pi',
+    deterministic: true,
+    anchored: true,
     name: 'Digits of pi, mod 2',
     instruction: 'Left for an even digit, right for an odd one.',
     verdict:
