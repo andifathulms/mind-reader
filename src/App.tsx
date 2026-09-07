@@ -1,4 +1,5 @@
 import { Arena } from './views/Arena/Arena';
+import { Seal } from './views/Seal/Seal';
 import { Ensemble } from './views/Ensemble/Ensemble';
 import { Controls } from './views/Controls/Controls';
 import { Portrait } from './views/Portrait/Portrait';
@@ -21,18 +22,21 @@ import './styles/base.css';
  * rather than read about afterwards.
  *
  * The index rail is the one piece of chrome. It appears once the arena has left
- * the screen and names the seven sections underneath, which previously
+ * the screen and names the eight sections underneath, which previously
  * announced themselves only by being scrolled into.
  */
 export function App() {
   return (
     <>
-      <a className="skip" href="#ensemble">
+      <a className="skip" href="#seal">
         Skip to the analysis
       </a>
       <Arena />
       <SiteIndex />
       <main className="analysis">
+        {/* First, because it is the section that decides whether any of the
+            others are worth reading (PRD §4.3). */}
+        <Seal />
         <Ensemble />
         <Controls />
         <Portrait />

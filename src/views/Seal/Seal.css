@@ -1,0 +1,84 @@
+.seal__lead p + p {
+  margin-top: var(--s2);
+}
+
+.seal__lead p,
+.seal__note,
+.seal__limit {
+  max-width: 68ch;
+  color: var(--ink-soft);
+}
+
+.seal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s3);
+  margin: var(--s4) 0 var(--s3);
+}
+
+.seal__run {
+  padding: 10px 18px;
+  font: var(--t-h2);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  transition:
+    background var(--tap) linear,
+    transform var(--tap) var(--ease-out);
+}
+
+.seal__run:hover:not(:disabled) {
+  background: var(--ground-raised);
+}
+
+.seal__run:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.seal__run:disabled {
+  cursor: default;
+  color: var(--ink-soft);
+}
+
+.seal__verdict {
+  font: var(--t-figure);
+  letter-spacing: var(--track-title);
+  font-variant-numeric: tabular-nums;
+  color: var(--miss);
+}
+
+/* A failure here is not a styling opportunity. It is the app reporting that it
+   cannot substantiate its own central claim, and it says so in the mark colour
+   the machine's wins are drawn in. */
+.seal__verdict--broken {
+  color: var(--hit);
+}
+
+.seal__table {
+  margin-top: var(--s2);
+}
+
+.seal__yes {
+  color: var(--miss);
+}
+
+.seal__no {
+  color: var(--hit);
+}
+
+.seal__note {
+  margin-top: var(--s2);
+  font: var(--t-small);
+}
+
+.seal__limit {
+  margin-top: var(--s4);
+  padding-top: var(--s2);
+  border-top: 1px solid var(--rule);
+  font: var(--t-small);
+}
+
+.seal__limit code {
+  font: var(--t-archive);
+  color: var(--ink);
+}

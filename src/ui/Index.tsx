@@ -10,6 +10,7 @@ export interface IndexEntry {
 
 export const SECTIONS: IndexEntry[] = [
   { id: 'arena', label: 'The arena', short: 'Play' },
+  { id: 'seal', label: 'The seal', short: 'Seal' },
   { id: 'ensemble', label: 'The ensemble', short: 'Ensemble' },
   { id: 'controls', label: 'Settings', short: 'Settings' },
   { id: 'portrait', label: 'The portrait', short: 'Portrait' },
