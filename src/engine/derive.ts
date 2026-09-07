@@ -14,6 +14,13 @@ export interface Contribution {
   confidence: number;
   /** How much better than a coin it had recently been. */
   edge: number;
+  /** The decayed counts the edge came from, and the smoothed rate between them. */
+  hits: number;
+  tries: number;
+  /** `(hits + 1) / (tries + 2)`. Laplace-smoothed, so a short record is pulled
+      back toward having no edge rather than toward whatever its first few
+      guesses happened to do. */
+  accuracy: number;
   weight: number;
   /**
    * `min(confidence, edge)`. The mixer trusts a vote no further than the weaker
@@ -78,6 +85,9 @@ export function derive(round: Round, config: Config): Derivation {
       guess: p.guess,
       confidence: p.confidence,
       edge: p.edge,
+      hits: p.hits,
+      tries: p.tries,
+      accuracy: (p.hits + 1) / (p.tries + 2),
       weight: p.weight,
       trusted,
       signed: p.weight * trusted * (p.guess === 1 ? 1 : -1),

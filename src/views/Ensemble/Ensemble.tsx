@@ -173,6 +173,11 @@ const percent = (n: number) => `${Math.round(n * 100)}%`;
  */
 function Ledger({ round, config }: { round: Round; config: Config }) {
   const d = derive(round, config);
+  // The row carrying the most weight, which is the one worth deriving in full.
+  const heaviest = d.contributions.reduce<(typeof d.contributions)[number] | null>(
+    (best, c) => (best === null || c.weight > best.weight ? c : best),
+    null,
+  );
 
   const outcome = d.warmingUp
     ? `Round ${round.index + 1} of the ${d.minRounds}-round warm-up, so the machine drew a fair bit from the generator and this vote did not apply.`
@@ -231,6 +236,26 @@ function Ledger({ round, config }: { round: Round; config: Config }) {
           actually shown, so each row contributes its weight times the smaller of those two,
           negative for left and positive for right.
         </p>
+        {/*
+          Where the edge column comes from. It was the one number in the table
+          that arrived from nowhere, and it is the term that matters most: it
+          is all that stands between a confident-sounding model and the
+          mixture, and it is why this machine cannot beat a random opponent.
+          Derived on the heaviest row, with its own counts, rather than
+          described in general.
+        */}
+        {heaviest ? (
+          <p className="ledger__rule">
+            Edge is how much better than a coin a model has lately been.{' '}
+            {PREDICTOR_NAMES[heaviest.id]} had {heaviest.hits.toFixed(2)} correct from{' '}
+            {heaviest.tries.toFixed(2)} guesses, both counted under the same decay as the weights,
+            which smooths to ({heaviest.hits.toFixed(2)} + 1) / ({heaviest.tries.toFixed(2)} + 2) ={' '}
+            {heaviest.accuracy.toFixed(3)}, and doubles about a half to an edge of{' '}
+            {heaviest.edge.toFixed(3)}. A model right half the time lands on zero and contributes
+            nothing however sure it sounds. That is what holds this machine to a draw against a
+            sequence it cannot read.
+          </p>
+        ) : null}
         <p className="ledger__rule">
           Strength is {Math.abs(d.vote).toFixed(3)} over a total weight of{' '}
           {d.totalWeight.toFixed(3)}, which is {d.strength.toFixed(3)}. Confidence is a half of

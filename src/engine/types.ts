@@ -32,6 +32,16 @@ export interface PerPredictorRecord {
    * checked after the fact — only guessed at from an upper bound.
    */
   edge: number;
+  /**
+   * The two decayed counts the edge above was computed from: correct guesses,
+   * and guesses made, both under the same decay as the weights. Recorded so the
+   * edge can be shown as a derivation rather than as a number that appears from
+   * nowhere. `edge` is the only term standing between a confident-sounding model
+   * and the mixture, and it is what holds the machine to a draw against a
+   * random source, so it is worth being able to check.
+   */
+  hits: number;
+  tries: number;
   /** Whether its own guess turned out to match the player. Filled in on resolve. */
   correct: boolean;
 }

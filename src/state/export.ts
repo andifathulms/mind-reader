@@ -30,15 +30,18 @@ export function sessionToCsv(session: Session): string {
     'was_random',
     /*
      * Per model: what it guessed, how sure it was, how much better than a coin
-     * it had recently been, its weight, and whether it turned out right. The
-     * first four are what the mixer multiplies together to reach the committed
-     * move, so a reader with this file can reproduce the machine's arithmetic
-     * rather than take the confidence column on trust.
+     * it had recently been, the two decayed counts that edge was computed from,
+     * its weight, and whether it turned out right. Everything the mixer
+     * multiplies together to reach the committed move is here, down to the
+     * counts behind the edge, so a reader with this file can reproduce the
+     * machine's arithmetic rather than take the confidence column on trust.
      */
     ...models.flatMap((id) => [
       `${id}_guess`,
       `${id}_confidence`,
       `${id}_edge`,
+      `${id}_hits`,
+      `${id}_tries`,
       `${id}_weight`,
       `${id}_correct`,
     ]),
@@ -60,10 +63,12 @@ export function sessionToCsv(session: Session): string {
               p.guess,
               p.confidence.toFixed(4),
               p.edge.toFixed(4),
+              p.hits.toFixed(4),
+              p.tries.toFixed(4),
               p.weight.toFixed(4),
               p.correct ? 1 : 0,
             ]
-          : ['', '', '', '', ''];
+          : ['', '', '', '', '', '', ''];
       }),
     ].join(',');
   });

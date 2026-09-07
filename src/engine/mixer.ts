@@ -89,7 +89,15 @@ export function createMixer(
         const weight = weights.get(p.id) ?? 0;
         const { guess, confidence } = p.predict(history);
         const edge = edgeOf(p.id);
-        perPredictor.push({ id: p.id, guess, confidence, weight, edge });
+        perPredictor.push({
+          id: p.id,
+          guess,
+          confidence,
+          weight,
+          edge,
+          hits: hits.get(p.id) ?? 0,
+          tries: tries.get(p.id) ?? 0,
+        });
         const trusted = Math.min(confidence, edge);
         vote += weight * trusted * (guess === 1 ? 1 : -1);
         totalWeight += weight;
