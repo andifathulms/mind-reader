@@ -6,6 +6,8 @@ import { PREDICTOR_NAMES, PREDICTOR_TINTS } from '../Ensemble/Ensemble';
 import type { Config, PredictorId } from '../../engine/types';
 import { PREDICTOR_IDS } from '../../engine/types';
 import { writeUrl } from '../../state/url';
+import { sweepSettings } from '../../engine/counterfactual';
+import type { Sweep } from '../../engine/counterfactual';
 import { seedFrom } from '../../engine/rng';
 import './Controls.css';
 
@@ -114,6 +116,7 @@ export function Controls() {
    * stable sentence rather than a new one per step.
    */
   const [announcement, setAnnouncement] = useState('');
+  const [sweeps, setSweeps] = useState<Sweep[] | null>(null);
 
   const apply = useCallback(
     (next: Partial<Config>, nextSeed = seed) => {
@@ -232,6 +235,65 @@ export function Controls() {
             devices as built.
           </p>
         </fieldset>
+      </div>
+
+      {/*
+        The answer to "what would it have done at a lower floor", without
+        having to destroy the session that provoked the question. Every control
+        above restarts, for a good reason, and that reason was costing the
+        player the one experiment they most wanted to run.
+      */}
+      <div className="sweep">
+        <h3 className="sweep__heading">The same presses, at other settings</h3>
+        <p className="sweep__intro">
+          Your {played} {played === 1 ? 'press is' : 'presses are'} already fixed. They can be
+          played again against a machine tuned differently without restarting anything.
+        </p>
+        <button
+          className="controls__button"
+          type="button"
+          onClick={() => setSweeps(sweepSettings(store.history, config, seed))}
+          disabled={played === 0}
+        >
+          {played === 0 ? 'Play a round first' : 'Replay at other settings'}
+        </button>
+
+        {sweeps
+          ? sweeps.map((sweep) => (
+              <div className="sweep__group" key={sweep.setting}>
+                <h4 className="sweep__name">{sweep.label}</h4>
+                <ul className="sweep__points">
+                  {sweep.points.map((point) => (
+                    <li
+                      className={`sweep__point${point.current ? ' sweep__point--current' : ''}`}
+                      key={point.value}
+                    >
+                      <span className="sweep__value numeral">{point.display}</span>
+                      <span className="sweep__bar" aria-hidden="true">
+                        <span
+                          className="sweep__fill"
+                          style={{ width: `${(point.rate * 100).toFixed(2)}%` }}
+                        />
+                        <span className="sweep__even" />
+                      </span>
+                      <span className="sweep__rate numeral">{Math.round(point.rate * 100)}%</span>
+                      {point.current ? <span className="sweep__tag">as played</span> : null}
+                    </li>
+                  ))}
+                </ul>
+                <p className="sweep__note">{sweep.note}</p>
+              </div>
+            ))
+          : null}
+
+        {sweeps ? (
+          <p className="sweep__caveat">
+            These are scores against a frozen sequence, not scores against you. Facing a machine
+            tuned differently you would have pressed differently, because what you pressed was
+            partly a response to what this one was doing. The presses cannot be replayed as a
+            person; only as a recording.
+          </p>
+        ) : null}
       </div>
 
       <div className="controls__footer">

@@ -221,3 +221,110 @@
   color: var(--ink-soft);
   max-width: 54ch;
 }
+
+/* ------------------------------------------------------------------ sweep */
+
+.sweep {
+  margin-top: var(--s5);
+  padding-top: var(--s3);
+  border-top: 1px solid var(--rule-dark);
+}
+
+.sweep__heading {
+  font: var(--t-h2);
+}
+
+.sweep__intro,
+.sweep__note,
+.sweep__caveat {
+  color: var(--ink-soft);
+  max-width: 66ch;
+}
+
+.sweep__intro {
+  font: var(--t-small);
+  margin: var(--s1) 0 var(--s3);
+}
+
+.sweep__group {
+  margin-top: var(--s4);
+}
+
+.sweep__name {
+  font: var(--t-micro);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.sweep__points {
+  margin: var(--s2) 0 var(--s2);
+  display: grid;
+  gap: 6px;
+}
+
+.sweep__point {
+  display: grid;
+  grid-template-columns: 4rem minmax(0, 1fr) 3rem auto;
+  align-items: center;
+  gap: var(--s2);
+  font: var(--t-data);
+}
+
+.sweep__point--current {
+  color: var(--ink);
+}
+
+.sweep__bar {
+  position: relative;
+  height: 10px;
+  background: var(--ground-sunk);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.sweep__fill {
+  display: block;
+  height: 100%;
+  background: color-mix(in srgb, var(--ink) 42%, transparent);
+}
+
+.sweep__point--current .sweep__fill {
+  background: var(--hit);
+}
+
+/* Where a sequence the machine cannot read would put it. */
+.sweep__even {
+  position: absolute;
+  inset: 0 auto 0 50%;
+  width: 1px;
+  background: var(--ink-soft);
+}
+
+.sweep__tag {
+  font: var(--t-micro);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.sweep__note {
+  font: var(--t-small);
+}
+
+.sweep__caveat {
+  margin-top: var(--s4);
+  padding-top: var(--s2);
+  border-top: 1px solid var(--rule-dark);
+  font: var(--t-small);
+}
+
+@media (max-width: 560px) {
+  .sweep__point {
+    grid-template-columns: 3.4rem minmax(0, 1fr) 2.8rem;
+  }
+
+  .sweep__tag {
+    grid-column: 2 / -1;
+  }
+}
