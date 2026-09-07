@@ -249,7 +249,17 @@ export function Portrait() {
         <Figure
           title="Win rate"
           value={rounds.length ? pct(stats.wins / Math.max(1, rounds.length)) : '—'}
-          note={<>The machine, {formatRate(stats.wins, rounds.length)}. The lighter span is the interval; early on it covers almost everything, which is what a short sample is worth.</>}
+          note={
+            <>
+              The machine, {formatRate(stats.wins, rounds.length)}. The lighter span is the
+              interval: the range the true rate could plausibly sit in given this many rounds, at
+              95%, meaning intervals built this way contain the real value nineteen times in
+              twenty. Early on it covers almost everything, which is what a short sample is worth.
+              It is a Wilson score interval rather than the usual normal approximation, because the
+              approximation goes badly wrong near 0 and 1, which is exactly where a short session
+              lives.
+            </>
+          }
           table={
             <table>
               <tbody>
@@ -308,7 +318,7 @@ export function Portrait() {
         <Figure
           title="Conditional entropy"
           value={order1 && enough ? `${order1.bits.toFixed(2)} bits` : '—'}
-          note="Bits per press, given the last 0 to 5 presses. A fair coin is 1 bit at every order. Faded bars have too little sequence behind them to be worth reading."
+          note="Bits per press, given the last 0 to 5 presses. A bit is one fair coin flip's worth of uncertainty, so 1 bit means the next press is genuinely unguessable and anything under it means the last few presses have narrowed it. A fair coin is 1 bit at every order. Faded bars have too little sequence behind them to be worth reading."
           table={
             <table>
               <thead><tr><th scope="col">Order</th><th scope="col">Bits</th><th scope="col">Reliable</th></tr></thead>
@@ -329,7 +339,7 @@ export function Portrait() {
 
         <Figure
           title="Serial correlation"
-          note="Lags 1 to 10. The shaded band is two standard errors under an independent sequence: a stem inside it is noise, and only a stem outside it is a finding."
+          note="Lags 1 to 10, asking whether a press pulls the one that follows it. The shaded band is where stems land by chance alone in a sequence with no structure, two standard errors wide: a stem inside it is noise, and only a stem outside it is a finding."
           table={
             <table>
               <thead><tr><th scope="col">Lag</th><th scope="col">r</th><th scope="col">Outside the band</th></tr></thead>
@@ -352,7 +362,7 @@ export function Portrait() {
       <Figure
         title="Patterns you overproduce"
         value={enough ? (stats.chi.p < 0.0001 ? 'p < 0.0001' : `p = ${stats.chi.p.toFixed(4)}`) : '—'}
-        note={`Chi-square on the sixteen four-press patterns, ${stats.chi.degreesOfFreedom} degrees of freedom. The ranked list is the finding; a chart of sixteen near-equal bars would bury it.`}
+        note={`Chi-square on the sixteen four-press patterns, ${stats.chi.degreesOfFreedom} degrees of freedom. The p value is the chance a fair coin would produce a spread at least this uneven: small means the unevenness is unlikely to be luck, and says nothing about how large it is. The ranked list is the finding; a chart of sixteen near-equal bars would bury it.`}
         table={
           <table>
             <thead><tr><th scope="col">Pattern</th><th scope="col">Yours</th><th scope="col">Expected</th></tr></thead>
