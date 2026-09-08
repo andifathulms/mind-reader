@@ -4,6 +4,7 @@ import { Demo } from './Demo';
 import { rematch, settledWeights } from './figures';
 import type { WeightRow } from './figures';
 import type { PredictorId } from '../engine';
+import { LANDING_HEADLINE, LANDING_SUB } from '../meta';
 import '../styles/base.css';
 import './Landing.css';
 
@@ -105,13 +106,8 @@ export function Landing() {
           on the left, the machine's on the right, with the machine running. */}
       <section className="hero">
         <div className="hero__yours">
-          <h1 className="hero__headline">
-            The optimal move is public. You still cannot play it.
-          </h1>
-          <p className="hero__sub">
-            Matching pennies against five models of you. The machine seals its guess before your
-            press is read.
-          </p>
+          <h1 className="hero__headline">{LANDING_HEADLINE}</h1>
+          <p className="hero__sub">{LANDING_SUB}</p>
           <div className="hero__actions">
             <a className="button" href={ARENA}>
               Play a session

@@ -3,6 +3,9 @@ import type { CSSProperties } from 'react';
 import { useGame } from '../../state/context';
 import type { Move, Round } from '../../engine/types';
 import { formatRate, wilson } from '../../stats/interval';
+// The same two sentences the build uses for this route's description, so the
+// description cannot come loose from the page (src/meta.ts).
+import { ARENA_LEDE, ARENA_POINT } from '../../meta';
 import './Arena.css';
 
 const MARKS_SHOWN = 96;
@@ -206,7 +209,7 @@ function Face({
           It is the head's third child and takes a full row of its own, so the
           title and the round line keep the baseline they shared before.
         */}
-        <p className="arena__lede">Press left or right. The machine has already guessed which.</p>
+        <p className="arena__lede">{ARENA_LEDE}</p>
       </div>
 
       <div className="arena__side arena__side--yours">
@@ -257,9 +260,7 @@ function Face({
               that is what it says now. From round one it is the rate and its
               interval, unchanged.
             */}
-            {played === 0
-              ? 'The machine scores when it guesses your press.'
-              : formatRate(machineWins, played)}
+            {played === 0 ? ARENA_POINT : formatRate(machineWins, played)}
           </span>
           {/*
             The interval, drawn. Early on it spans almost everything, and a band
