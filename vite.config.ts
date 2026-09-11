@@ -2,7 +2,14 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
-import { DEFAULT_ORIGIN, ROUTES } from './src/meta';
+import {
+  DEFAULT_ORIGIN,
+  OG_IMAGE,
+  OG_IMAGE_ALT,
+  ROUTES,
+  SHORT_NAME,
+  SITE_NAME,
+} from './src/meta';
 import react from '@vitejs/plugin-react';
 
 const BASE = process.env.BASE_PATH ?? '/mind-reader/';
@@ -23,10 +30,10 @@ const escape = (value: string) =>
  * gets out of step; this one now has a single definition and the build goes and
  * reads it.
  */
-function themeColour(): string {
+function token(name: string): string {
   const tokens = readFileSync(new URL('./src/styles/tokens.css', import.meta.url), 'utf8');
-  const match = /--machine:\s*(#[0-9a-fA-F]{3,8})\s*;/.exec(tokens);
-  if (!match?.[1]) throw new Error('tokens.css no longer defines --machine; metadata cannot build');
+  const match = new RegExp(`--${name}:\\s*(#[0-9a-fA-F]{3,8})\\s*;`).exec(tokens);
+  if (!match?.[1]) throw new Error(`tokens.css no longer defines --${name}; metadata cannot build`);
   return match[1];
 }
 
@@ -38,7 +45,7 @@ function themeColour(): string {
  * font filename is content hashed and only exists once the bundle does.
  */
 function metadata(): Plugin {
-  const theme = themeColour();
+  const theme = token('machine');
   return {
     name: 'mind-reader-metadata',
     transformIndexHtml: {
@@ -66,16 +73,28 @@ function metadata(): Plugin {
           ? `<link rel="preload" href="${BASE}${sans}" as="font" type="font/woff2" crossorigin />`
           : '';
 
+        const image = `${ORIGIN}${BASE}${OG_IMAGE}`;
+
         const tags = [
           preload,
           `<link rel="canonical" href="${escape(url)}" />`,
+          `<link rel="icon" href="${BASE}favicon.svg" type="image/svg+xml" />`,
+          `<link rel="icon" href="${BASE}icons/icon-32.png" sizes="32x32" type="image/png" />`,
+          `<link rel="apple-touch-icon" href="${BASE}icons/apple-touch-icon.png" />`,
+          `<link rel="manifest" href="${BASE}manifest.webmanifest" />`,
           `<meta name="theme-color" content="${theme}" />`,
           `<meta property="og:type" content="website" />`,
           `<meta property="og:site_name" content="Mind reader" />`,
           `<meta property="og:title" content="${escape(route.title)}" />`,
           `<meta property="og:description" content="${escape(route.description)}" />`,
           `<meta property="og:url" content="${escape(url)}" />`,
-          `<meta name="twitter:card" content="summary" />`,
+          `<meta property="og:image" content="${escape(image)}" />`,
+          `<meta property="og:image:width" content="1200" />`,
+          `<meta property="og:image:height" content="630" />`,
+          `<meta property="og:image:alt" content="${escape(OG_IMAGE_ALT)}" />`,
+          `<meta name="twitter:card" content="summary_large_image" />`,
+          `<meta name="twitter:image" content="${escape(image)}" />`,
+          `<meta name="twitter:image:alt" content="${escape(OG_IMAGE_ALT)}" />`,
           `<meta name="twitter:title" content="${escape(route.title)}" />`,
           `<meta name="twitter:description" content="${escape(route.description)}" />`,
         ]
@@ -89,17 +108,56 @@ function metadata(): Plugin {
             `<meta name="description" content="${escape(route.description)}" />`,
           )
           .replace(/\s*<meta name="theme-color"[^>]*\/>/, '')
+          .replace(/\s*<link rel="icon"[^>]*\/>/, '')
           .replace('</head>', `  ${tags}\n  </head>`);
       },
     },
   };
 }
 
-/** robots.txt and a sitemap, so the two routes can be found and told apart. */
+/**
+ * robots.txt, a sitemap, and the web manifest.
+ *
+ * The manifest is what puts the mark on a home screen: an iOS or Android
+ * launcher, or an installed window on a desktop. No service worker goes with
+ * it. There is nothing to cache that the browser does not already cache, and
+ * PRD §7.5 wants no network at runtime, so a worker would be machinery in
+ * service of nothing.
+ */
 function discovery(): Plugin {
   return {
     name: 'mind-reader-discovery',
     generateBundle() {
+      const home = ROUTES[0];
+      this.emitFile({
+        type: 'asset',
+        fileName: 'manifest.webmanifest',
+        source: JSON.stringify(
+          {
+            name: SITE_NAME,
+            short_name: SHORT_NAME,
+            description: home?.description ?? '',
+            start_url: BASE,
+            scope: BASE,
+            display: 'standalone',
+            orientation: 'portrait',
+            background_color: token('yours'),
+            theme_color: token('machine'),
+            icons: [
+              { src: `${BASE}icons/icon-192.png`, sizes: '192x192', type: 'image/png' },
+              { src: `${BASE}icons/icon-512.png`, sizes: '512x512', type: 'image/png' },
+              {
+                src: `${BASE}icons/icon-maskable-512.png`,
+                sizes: '512x512',
+                type: 'image/png',
+                purpose: 'maskable',
+              },
+            ],
+          },
+          null,
+          2,
+        ),
+      });
       const urls = ROUTES.map(
         (route) =>
           `  <url>\n    <loc>${ORIGIN}${BASE}${route.path}</loc>\n    <priority>${route.priority}</priority>\n  </url>`,

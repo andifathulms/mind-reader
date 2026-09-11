@@ -30,6 +30,20 @@ export const LANDING_HEADLINE = 'The optimal move is public. You still cannot pl
 export const LANDING_SUB =
   'Matching pennies against five models of you. The machine seals its guess before your press is read.';
 
+/** The installed name, and the name under an icon where there is no room. */
+export const SITE_NAME = 'Mind reader';
+export const SHORT_NAME = 'Mind reader';
+
+/**
+ * The social card, and what it says for anyone who cannot see it.
+ *
+ * Described rather than left unlabelled: an alt text that says "logo" would be
+ * worth less than nothing, and the card carries the app's whole argument.
+ */
+export const OG_IMAGE = 'og.png';
+export const OG_IMAGE_ALT =
+  'Mind reader (?), split bone above and ink below. The descriptor reads: the optimal move is known, published, and simple. You still cannot make it. A run of presses is drawn underneath, the last one red.';
+
 export interface RouteMeta {
   /** File in the build output. */
   file: string;
