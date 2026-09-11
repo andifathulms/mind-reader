@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Reveal } from '../ui/Reveal';
+import { SiteFooter } from '../ui/SiteFooter';
 import { Demo } from './Demo';
 import { rematch, settledWeights } from './figures';
 import type { WeightRow } from './figures';
@@ -361,12 +362,10 @@ export function Landing() {
         </Reveal>
       </section>
 
-      <footer className="colophon">
-        <p>
-          Built from Shannon's 1953 memorandum and Hagelbarger's 1956 paper. No network at runtime,
-          no accounts, no storage. Nothing you press leaves this device.
-        </p>
-      </footer>
+      <SiteFooter>
+        Built from Shannon's 1953 memorandum and Hagelbarger's 1956 paper. No network at runtime,
+        no accounts, no storage. Nothing you press leaves this device.
+      </SiteFooter>
     </>
   );
 }

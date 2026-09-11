@@ -8,6 +8,7 @@ import { Rematch } from './views/Rematch/Rematch';
 import { Archive } from './views/Archive/Archive';
 import { Export } from './views/Export/Export';
 import { SiteIndex } from './ui/Index';
+import { SiteFooter } from './ui/SiteFooter';
 import './styles/base.css';
 
 /**
@@ -44,12 +45,10 @@ export function App() {
         <Rematch />
         <Archive />
         <Export />
-        <footer className="colophon">
-          <p>
-            Built from Shannon's 1953 memorandum and Hagelbarger's 1956 paper. Nothing you press
-            leaves this device.
-          </p>
-        </footer>
+        <SiteFooter>
+          Built from Shannon's 1953 memorandum and Hagelbarger's 1956 paper. Nothing you press
+          leaves this device.
+        </SiteFooter>
       </main>
     </>
   );

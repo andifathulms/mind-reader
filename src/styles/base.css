@@ -252,7 +252,13 @@ table.visually-hidden {
   font: var(--t-small);
 }
 
-.colophon p {
+/*
+ * The bar inside the footer does the centring now, so this no longer reaches
+ * every paragraph in there. It used to be the only one; the maker's mark added
+ * a second, and a blanket rule would have given it a 74rem measure and centred
+ * it against the notice it is supposed to sit opposite.
+ */
+.colophon .colophon__bar {
   max-width: var(--measure);
   margin: 0 auto;
 }

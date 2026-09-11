@@ -1,0 +1,110 @@
+/*
+ * The maker's mark. Quiet: it sits at the end of the footer's own bar, in the
+ * ground's soft ink, and nothing about it is louder than the colophon it sits
+ * beside. No rule of its own, no corner sticker, no badge.
+ *
+ * Colours come from --ink and --ink-soft rather than from the machine's tokens
+ * directly, so the component works on either ground. The footer carries
+ * `on-machine`, which is what supplies them there.
+ */
+.maker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s1) var(--s2);
+}
+
+.maker__line {
+  font: var(--t-small);
+  color: var(--ink-soft);
+}
+
+.maker__name {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--rule-strong);
+  transition:
+    color var(--tap) linear,
+    text-decoration-color var(--tap) linear;
+}
+
+.maker__name:hover {
+  color: var(--p-mrm);
+  text-decoration-color: currentColor;
+}
+
+.maker__sep {
+  color: var(--ink-soft);
+  opacity: 0.7;
+}
+
+/* Courier Prime, tabular. It is already loaded for the archive and the
+   citations, so the year costs no extra font. */
+.maker__year {
+  font-family: var(--font-archive);
+  font-variant-numeric: tabular-nums;
+}
+
+.maker__links {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/*
+ * 18px of glyph in a 34px target. The icon stays small and quiet; the thing a
+ * finger has to find is larger than the thing an eye reads, which is the only
+ * way both of those are true at once.
+ */
+.maker__icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius);
+  color: var(--ink-soft);
+  transition:
+    color var(--tap) linear,
+    background var(--tap) linear;
+}
+
+.maker__icon svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.maker__icon:hover {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 10%, transparent);
+}
+
+/* ------------------------------------------------------------ the footer bar */
+
+/*
+ * One seam for the whole footer. The colophon already has a rule above it and
+ * that is the only one: the mark sits at the far end of the same bar rather
+ * than under a second divider.
+ */
+.colophon__bar {
+  max-width: var(--measure);
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s3) var(--s4);
+}
+
+.colophon__notice {
+  max-width: 62ch;
+}
+
+@media (max-width: 760px) {
+  .colophon__bar {
+    /* The mark stacks under the notice rather than squeezing beside it. */
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
