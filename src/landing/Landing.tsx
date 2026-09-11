@@ -92,7 +92,24 @@ export function Landing() {
       </a>
 
       <header className="masthead">
-        <span className="masthead__name">Mind reader</span>
+        {/*
+          The mark, and the wordmark as the brand sets it: the red question
+          mark is part of the name rather than punctuation after it. It is
+          Shannon's, and it is the app's scepticism about its own title.
+        */}
+        <span className="masthead__brand">
+          <img
+            className="masthead__mark"
+            src={`${ARENA}icons/mark.svg`}
+            alt=""
+            width="26"
+            height="26"
+            decoding="async"
+          />
+          <span className="masthead__name">
+            Mind reader <span className="masthead__query">(?)</span>
+          </span>
+        </span>
         <nav className="masthead__nav">
           <a href="#machines">The machines</a>
           <a href="#commitment">The seal</a>

@@ -26,9 +26,44 @@
   color: var(--machine-ink);
 }
 
+.masthead__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/*
+ * Sized in rems so it grows with the type rather than staying a fixed chip
+ * beside text that has scaled. Square from the start, so nothing reflows when
+ * it arrives.
+ */
+.masthead__mark {
+  width: 1.6rem;
+  height: 1.6rem;
+  flex: none;
+  border-radius: 5px;
+}
+
 .masthead__name {
   font: var(--t-h2);
   letter-spacing: var(--track-title);
+  white-space: nowrap;
+}
+
+/*
+ * The question mark is red in the brand masters, and on the machine's ground
+ * it cannot be. #B33A26 measures 3.12:1 there, which is fine for a mark in an
+ * exported image and short of the 4.5:1 live text has to clear.
+ *
+ * The app already met this and answered it: the arena paints the same glyph in
+ * --hit-ink on the player's ground and in --p-mrm on the machine's. The
+ * masthead sits on the machine's ground, so it takes the machine's answer. One
+ * rule for one glyph, rather than a third colour invented for a third surface.
+ */
+.masthead__query {
+  color: var(--p-mrm);
+  font-weight: 700;
 }
 
 .masthead__nav {
