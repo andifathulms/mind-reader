@@ -127,25 +127,6 @@
   margin-top: var(--s3);
 }
 
-.rematch__button {
-  border: 1px solid color-mix(in srgb, var(--ink) 35%, transparent);
-  padding: 10px var(--s3);
-  font: var(--t-data);
-  border-radius: var(--radius);
-  transition:
-    background 160ms linear,
-    border-color 160ms linear;
-}
-
-.rematch__button:hover:not(:disabled) {
-  border-color: var(--ink);
-  background: color-mix(in srgb, var(--ink) 7%, transparent);
-}
-
-.rematch__button:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
 
 /* Kept short, as CLAUDE.md §10 asks: the machines are the artifact, not the
    prose about them. */

@@ -125,6 +125,57 @@ button {
   letter-spacing: var(--track-display);
 }
 
+/* ----------------------------------------------------------------- buttons */
+
+/*
+ * One button, two weights. Every action in the analysis is one of these: the
+ * primary is the one thing a view is asking you to do, the rest are quiet.
+ * They read the local ink, so the same class works on either ground.
+ */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 10px;
+  font: 560 14px / 1.2 var(--font);
+  letter-spacing: 0;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 16%, transparent);
+  transition:
+    background 160ms linear,
+    box-shadow 160ms linear,
+    transform var(--tap) var(--ease-out);
+}
+
+.button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ink) 11%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 28%, transparent);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(calc(1px * (1 - var(--still))));
+}
+
+.button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.button--primary {
+  color: var(--ground);
+  background: var(--ink);
+  box-shadow: none;
+}
+
+.button--primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ink) 86%, var(--ground));
+  box-shadow: none;
+}
+
 /* ------------------------------------------------------------------ tables */
 
 table {

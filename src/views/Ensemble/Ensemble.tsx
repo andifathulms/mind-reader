@@ -1,10 +1,11 @@
-import { useMemo } from 'react';
+import { Fragment, useMemo } from 'react';
 import type { CSSProperties } from 'react';
 import { useGameThrottled } from '../../state/context';
 import { Figure, Section } from '../../ui/Section';
 import { Reveal } from '../../ui/Reveal';
 import type { Config, PerPredictorRecord, PredictorId, Round } from '../../engine/types';
-import { PREDICTOR_IDS } from '../../engine/types';
+import { PREDICTOR_ERA, PREDICTOR_IDS } from '../../engine/types';
+import type { PredictorEra } from '../../engine/types';
 import { derive } from '../../engine/derive';
 import { EDGE_DECAY, EDGE_MARGIN } from '../../engine/mixer';
 import './Ensemble.css';
@@ -29,6 +30,12 @@ export const PREDICTOR_TINTS: Record<PredictorId, string> = {
   context: 'var(--p-context)',
   runs: 'var(--p-runs)',
   reaction: 'var(--p-reaction)',
+};
+
+const ERA_NAMES: Record<PredictorEra, string> = {
+  '1950s': 'The relay machines, 1953 and 1956',
+  classic: 'Classic models',
+  modern: 'Modern models',
 };
 
 /** A one-line account of what each model is actually doing. */
@@ -162,7 +169,6 @@ function Key({ active }: { active: readonly PredictorId[] }) {
   );
 }
 
-
 /** Signed to three places, so a contribution that leans left reads as leaning left. */
 const signed = (n: number) => `${n >= 0 ? '+' : '\u2212'}${Math.abs(n).toFixed(3)}`;
 const percent = (n: number) => `${Math.round(n * 100)}%`;
@@ -287,20 +293,19 @@ function Ledger({
           <p className="ledger__rule">
             Edge is how much better than a coin a model has lately been.{' '}
             {PREDICTOR_NAMES[heaviest.id]} had {heaviest.hits.toFixed(2)} correct from{' '}
-            {heaviest.tries.toFixed(2)} guesses, counted with old guesses fading at{' '}
-            {EDGE_DECAY} a round. That smooths to ({heaviest.hits.toFixed(2)} + 1) / (
-            {heaviest.tries.toFixed(2)} + 2) = {heaviest.accuracy.toFixed(3)}. It is then pulled
-            down by {EDGE_MARGIN} standard errors to {heaviest.lower.toFixed(3)}, because a short
-            lucky run should not count as skill, and doubled about a half to an edge of{' '}
-            {heaviest.edge.toFixed(3)}. A model right half the time lands on zero and contributes
-            nothing however sure it sounds. That is what holds this machine to a draw against a
-            sequence it cannot read.
+            {heaviest.tries.toFixed(2)} guesses, counted with old guesses fading at {EDGE_DECAY} a
+            round. That smooths to ({heaviest.hits.toFixed(2)} + 1) / ({heaviest.tries.toFixed(2)} +
+            2) = {heaviest.accuracy.toFixed(3)}. It is then pulled down by {EDGE_MARGIN} standard
+            errors to {heaviest.lower.toFixed(3)}, because a short lucky run should not count as
+            skill, and doubled about a half to an edge of {heaviest.edge.toFixed(3)}. A model right
+            half the time lands on zero and contributes nothing however sure it sounds. That is what
+            holds this machine to a draw against a sequence it cannot read.
           </p>
         ) : null}
         <p className="ledger__rule">
           Strength is {Math.abs(d.vote).toFixed(3)} over a total weight of{' '}
-          {d.totalWeight.toFixed(3)}, which is {d.strength.toFixed(3)}. Confidence is a half of
-          that above a half: {d.confidence.toFixed(3)}.
+          {d.totalWeight.toFixed(3)}, which is {d.strength.toFixed(3)}. Confidence is a half of that
+          above a half: {d.confidence.toFixed(3)}.
         </p>
         <p className="ledger__outcome">{outcome}</p>
         {/*
@@ -427,56 +432,64 @@ export function Ensemble() {
         {ordered.map((id, i) => {
           const weight = weights.get(id) ?? 0;
           const record = perPredictor.get(id);
+          const era = PREDICTOR_ERA[id];
+          const previous = ordered[i - 1];
+          // The eight come from three eras, and the list says so where one
+          // ends and the next begins, so the reconstructions are never read as
+          // modern models or the reverse.
+          const opensEra = previous === undefined || PREDICTOR_ERA[previous] !== era;
           return (
-            <div
-              className={`ensemble__track${id === leader && rounds.length ? ' ensemble__track--leading' : ''}`}
-              key={id}
-              style={
-                {
-                  '--tint': PREDICTOR_TINTS[id],
-                  '--weight': `${(weight * 100).toFixed(2)}%`,
-                  '--in': `${i * 45}ms`,
-                } as CSSProperties
-              }
-            >
-              <span className="ensemble__name">
-                <span className="ensemble__swatch" aria-hidden="true" />
-                {PREDICTOR_NAMES[id]}
-              </span>
-              <span className="ensemble__weight numeral">{(weight * 100).toFixed(0)}%</span>
-              <span className="ensemble__bar" aria-hidden="true">
-                <span className="ensemble__fill" />
-              </span>
-              <span className="ensemble__guess">
-                {record ? (
-                  <>
-                    <span
-                      className={`ensemble__verdict ensemble__verdict--${
-                        record.correct ? 'right' : 'wrong'
-                      }`}
-                      aria-hidden="true"
-                    />
-                    said {side(record.guess)}, {record.correct ? 'correct' : 'missed'}
-                  </>
-                ) : (
-                  'no round yet'
-                )}
-              </span>
-              <span className="ensemble__note">{PREDICTOR_NOTES[id]}</span>
-              {/*
+            <Fragment key={id}>
+              {opensEra ? <p className="ensemble__era eyebrow">{ERA_NAMES[era]}</p> : null}
+              <div
+                className={`ensemble__track${id === leader && rounds.length ? ' ensemble__track--leading' : ''}`}
+                style={
+                  {
+                    '--tint': PREDICTOR_TINTS[id],
+                    '--weight': `${(weight * 100).toFixed(2)}%`,
+                    '--in': `${i * 45}ms`,
+                  } as CSSProperties
+                }
+              >
+                <span className="ensemble__name">
+                  <span className="ensemble__swatch" aria-hidden="true" />
+                  {PREDICTOR_NAMES[id]}
+                </span>
+                <span className="ensemble__weight numeral">{(weight * 100).toFixed(0)}%</span>
+                <span className="ensemble__bar" aria-hidden="true">
+                  <span className="ensemble__fill" />
+                </span>
+                <span className="ensemble__guess">
+                  {record ? (
+                    <>
+                      <span
+                        className={`ensemble__verdict ensemble__verdict--${
+                          record.correct ? 'right' : 'wrong'
+                        }`}
+                        aria-hidden="true"
+                      />
+                      said {side(record.guess)}, {record.correct ? 'correct' : 'missed'}
+                    </>
+                  ) : (
+                    'no round yet'
+                  )}
+                </span>
+                <span className="ensemble__note">{PREDICTOR_NOTES[id]}</span>
+                {/*
                 The inside of the machine, in its own terms. PRD §3 turned down
                 a stronger model because it "would win more and explain less",
                 and the five kept instead were then shown as a name, a colour
                 and a weight. This is the part that was being claimed and not
                 delivered.
               */}
-              {explanations.get(id) ? (
-                <span className="ensemble__inside">
-                  <span className="ensemble__situation">{explanations.get(id)?.situation}</span>
-                  <span className="ensemble__evidence">{explanations.get(id)?.evidence}</span>
-                </span>
-              ) : null}
-            </div>
+                {explanations.get(id) ? (
+                  <span className="ensemble__inside">
+                    <span className="ensemble__situation">{explanations.get(id)?.situation}</span>
+                    <span className="ensemble__evidence">{explanations.get(id)?.evidence}</span>
+                  </span>
+                ) : null}
+              </div>
+            </Fragment>
           );
         })}
       </Reveal>
@@ -523,9 +536,9 @@ export function Ensemble() {
           held.
         */}
         <p className="ensemble__legend">
-          Where the models agree and are right together they are rewarded
-          identically, so their weights stay even and their traces lie exactly on
-          top of one another. A flat run in a single colour is several at once, not one.
+          Where the models agree and are right together they are rewarded identically, so their
+          weights stay even and their traces lie exactly on top of one another. A flat run in a
+          single colour is several at once, not one.
         </p>
       </Reveal>
 

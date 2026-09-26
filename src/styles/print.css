@@ -12,16 +12,25 @@
  */
 
 @media print {
+  /* Every view prints, not only the one on screen, and the tab bar does not. */
+  .view[hidden] {
+    display: block !important;
+  }
+
+  .tabs {
+    display: none !important;
+  }
+
   /* Arrival is a screen flourish. On paper everything has already arrived. */
   [data-reveal],
   [data-reveal='shown'],
-  .arena__title,
-  .arena__meta,
-  .arena__lede,
+  .arena__head,
   .arena__side,
+  .arena__committed,
   .arena__targets,
   .arena__marks,
-  .arena__trail {
+  .arena__trail,
+  .view--active {
     opacity: 1 !important;
     transform: none !important;
     animation: none !important;
@@ -65,6 +74,8 @@
 
   /* The arena's parts are absolutely positioned against a viewport-tall box.
      On paper they stack. */
+  .arena__top,
+  .arena__bottom,
   .arena__head,
   .arena__side,
   .arena__committed,
@@ -85,8 +96,6 @@
 
   /* Nothing that has to be operated to mean anything. */
   .skip,
-  .index,
-  .progress,
   .lab__actions,
   .rematch__controls,
   .against__actions,

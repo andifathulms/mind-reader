@@ -17,28 +17,6 @@
   margin: var(--s4) 0 var(--s3);
 }
 
-.seal__run {
-  padding: 10px 18px;
-  font: var(--t-h2);
-  border: 1px solid var(--rule-strong);
-  border-radius: var(--radius);
-  transition:
-    background var(--tap) linear,
-    transform var(--tap) var(--ease-out);
-}
-
-.seal__run:hover:not(:disabled) {
-  background: var(--ground-raised);
-}
-
-.seal__run:active:not(:disabled) {
-  transform: translateY(1px);
-}
-
-.seal__run:disabled {
-  cursor: default;
-  color: var(--ink-soft);
-}
 
 .seal__verdict {
   font: var(--t-figure);

@@ -7,49 +7,42 @@ import { Lab } from './views/Lab/Lab';
 import { Rematch } from './views/Rematch/Rematch';
 import { Archive } from './views/Archive/Archive';
 import { Export } from './views/Export/Export';
-import { SiteIndex } from './ui/Index';
+import { Analysis } from './ui/Index';
 import { SiteFooter } from './ui/SiteFooter';
 import './styles/base.css';
 
 /**
- * The arena, and the analysis scrolling under it. The arena fills the viewport
- * on load and everything else is below the fold deliberately, so the first
- * experience is playing rather than reading (DESIGN.md §4.5). There is no
- * onboarding, no modal and no tutorial; the explanation is available and is
- * never pushed.
+ * The arena, and the analysis under it. The arena fills the viewport on load
+ * and the analysis is below the fold deliberately, so the first experience is
+ * playing rather than reading (DESIGN.md §4.5). There is no onboarding, no
+ * modal and no tutorial; the explanation is available and is never pushed.
  *
- * Section order is DESIGN.md §4.3, with the machine's own controls kept beside
- * the machine's own view so the confidence threshold can be felt while playing
- * rather than read about afterwards.
- *
- * The index rail is the one piece of chrome. It appears once the arena has left
- * the screen and names the eight sections underneath, which previously
- * announced themselves only by being scrolled into.
+ * The analysis is a set of views behind one sticky tab bar. The order is
+ * DESIGN.md §4.3, with the seal first because it decides whether any of the
+ * others are worth reading (PRD §4.3), and the machine's own controls beside
+ * the machine's own view so the confidence threshold can be felt while playing.
  */
 export function App() {
   return (
     <>
-      <a className="skip" href="#seal">
+      <a className="skip" href="#analysis">
         Skip to the analysis
       </a>
       <Arena />
-      <SiteIndex />
-      <main className="analysis">
-        {/* First, because it is the section that decides whether any of the
-            others are worth reading (PRD §4.3). */}
-        <Seal />
-        <Ensemble />
-        <Controls />
-        <Portrait />
-        <Lab />
-        <Rematch />
-        <Archive />
-        <Export />
-        <SiteFooter>
-          Built from Shannon's 1953 memorandum and Hagelbarger's 1956 paper. Nothing you press
-          leaves this device.
-        </SiteFooter>
-      </main>
+      <Analysis>
+        <Seal key="seal" />
+        <Ensemble key="ensemble" />
+        <Controls key="controls" />
+        <Portrait key="portrait" />
+        <Lab key="lab" />
+        <Rematch key="rematch" />
+        <Archive key="archive" />
+        <Export key="export" />
+      </Analysis>
+      <SiteFooter>
+        Built from Shannon's 1953 memorandum and Hagelbarger's 1956 paper. Nothing you press leaves
+        this device.
+      </SiteFooter>
     </>
   );
 }

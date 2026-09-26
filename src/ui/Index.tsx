@@ -1,141 +1,167 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Children, isValidElement, useCallback, useLayoutEffect, useRef, useState } from 'react';
+import type { KeyboardEvent, ReactElement, ReactNode } from 'react';
 import './Index.css';
 
 export interface IndexEntry {
   id: string;
   label: string;
-  /** The short form, for the phone's rail where there is no room for prose. */
-  short: string;
 }
 
+/**
+ * The views below the arena, in order. The numbers the sections print come
+ * from this list, so the tabs and the pages can never disagree about what view
+ * four is.
+ */
 export const SECTIONS: IndexEntry[] = [
-  { id: 'arena', label: 'The arena', short: 'Play' },
-  { id: 'seal', label: 'The seal', short: 'Seal' },
-  { id: 'ensemble', label: 'The ensemble', short: 'Ensemble' },
-  { id: 'controls', label: 'Settings', short: 'Settings' },
-  { id: 'portrait', label: 'The portrait', short: 'Portrait' },
-  { id: 'lab', label: 'Strategy lab', short: 'Lab' },
-  { id: 'rematch', label: 'The rematch', short: 'Rematch' },
-  { id: 'archive', label: 'The archive', short: 'Archive' },
-  { id: 'export', label: 'Export', short: 'Export' },
+  { id: 'seal', label: 'Seal' },
+  { id: 'ensemble', label: 'Ensemble' },
+  { id: 'controls', label: 'Settings' },
+  { id: 'portrait', label: 'Portrait' },
+  { id: 'lab', label: 'Lab' },
+  { id: 'rematch', label: 'Rematch' },
+  { id: 'archive', label: 'Archive' },
+  { id: 'export', label: 'Export' },
 ];
 
 /**
- * The index, and the read-through line above it.
+ * The analysis, one view at a time.
  *
- * Seven sections sat below the fold with nothing naming them, which made a
- * scroll the only way to find out the app had a second half. The rail names
- * them and says where you are; it stays out of the arena entirely, because the
- * first screen is for playing and a navigation chrome over it would be the
- * onboarding this app deliberately does not have.
+ * It was eight sections in one 14,000-pixel scroll with a rail to jump
+ * between them. Each is now a view behind a tab: the tab bar sticks to the top
+ * while you read, and choosing a view brings you back to the top of it.
  *
- * Position comes from a scroll listener writing one custom property, not from
- * React state: the progress line moves every frame and re-rendering a component
- * tree at that rate to move a 2px rule would be absurd.
+ * Views that are not showing stay mounted, hidden. A rematch that is running
+ * keeps running when you look at something else, a lab result is still there
+ * when you come back, and on paper every view prints (print.css).
+ *
+ * The active view is component state rather than part of the URL: the hash
+ * already carries the machine's configuration (CLAUDE.md §9), and which page of
+ * the analysis you were reading is not part of a session anyone would share.
+ *
+ * `children` are the views, each keyed by its section id.
  */
-export function SiteIndex() {
-  const [active, setActive] = useState('arena');
-  const [past, setPast] = useState(false);
-  const line = useRef<HTMLDivElement | null>(null);
+export function Analysis({ children }: { children: ReactNode }) {
+  const views = Children.toArray(children).filter(
+    (child): child is ReactElement => isValidElement(child) && typeof child.key === 'string',
+  );
+  const idOf = (child: ReactElement) => String(child.key).replace(/^\.\$/, '');
 
-  useEffect(() => {
-    let frame = 0;
+  const [active, setActive] = useState(SECTIONS[0]?.id ?? '');
+  const root = useRef<HTMLElement | null>(null);
+  const list = useRef<HTMLDivElement | null>(null);
+  const indicator = useRef<HTMLSpanElement | null>(null);
 
-    const measure = () => {
-      frame = 0;
-      const doc = document.documentElement;
-      const span = doc.scrollHeight - window.innerHeight;
-      const progress = span <= 0 ? 0 : Math.min(1, Math.max(0, window.scrollY / span));
-      line.current?.style.setProperty('--progress', progress.toFixed(4));
-      // The rail appears once the arena is most of the way off the screen, so
-      // it never overlaps a tap target the player might be aiming at.
-      setPast(window.scrollY > window.innerHeight * 0.6);
+  // The indicator slides to the active tab. Measured rather than computed from
+  // an index, because the tabs are as wide as their words.
+  useLayoutEffect(() => {
+    const bar = list.current;
+    const mark = indicator.current;
+    if (!bar || !mark) return;
+    const place = () => {
+      const tab = bar.querySelector<HTMLElement>(`[data-view="${active}"]`);
+      if (!tab) return;
+      mark.style.setProperty('--x', `${tab.offsetLeft}px`);
+      mark.style.setProperty('--w', `${tab.offsetWidth}px`);
+      // On a phone the bar scrolls sideways; keep the chosen tab in sight.
+      const left = tab.offsetLeft - bar.scrollLeft;
+      if (left < 0 || left + tab.offsetWidth > bar.clientWidth) {
+        bar.scrollTo({ left: tab.offsetLeft - 16, behavior: 'smooth' });
+      }
     };
-
-    const onScroll = () => {
-      if (frame) return;
-      frame = requestAnimationFrame(measure);
-    };
-
-    measure();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
-    return () => {
-      if (frame) cancelAnimationFrame(frame);
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-    };
-  }, []);
-
-  useEffect(() => {
-    const targets = SECTIONS.map((s) => document.getElementById(s.id)).filter(
-      (element): element is HTMLElement => element !== null,
-    );
-    if (targets.length === 0 || typeof IntersectionObserver === 'undefined') return;
-
-    // The section owning the middle band of the viewport is the one you are
-    // reading. A plain "topmost visible" test flickers between two sections at
-    // every boundary.
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) setActive(entry.target.id);
-        }
-      },
-      { rootMargin: '-45% 0px -45% 0px' },
-    );
-    for (const target of targets) observer.observe(target);
+    place();
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(place);
+    observer.observe(bar);
     return () => observer.disconnect();
-  }, []);
-
-  // On the phone the rail is a strip that scrolls sideways, and the section you
-  // are in can be off the end of it. Keep the current one in view — horizontally
-  // only, which is what `block: nearest` guarantees.
-  const list = useRef<HTMLOListElement | null>(null);
-
-  useEffect(() => {
-    const element = list.current;
-    if (!element || element.scrollWidth <= element.clientWidth) return;
-    element
-      .querySelector('.index__link--active')
-      ?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
   }, [active]);
 
-  const jump = useCallback((id: string) => {
-    const target = document.getElementById(id);
-    if (!target) return;
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const choose = useCallback((id: string, focus = false) => {
+    setActive(id);
+    if (focus) list.current?.querySelector<HTMLElement>(`[data-view="${id}"]`)?.focus();
+    // A new view starts at its top. Only scroll when the reader is already
+    // below the top of the analysis; from the arena, stay put.
+    const top = root.current?.getBoundingClientRect().top ?? 0;
+    if (top < 0) {
+      const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: window.scrollY + top, behavior: still ? 'auto' : 'smooth' });
+    }
   }, []);
 
-  return (
-    <>
-      <div className="progress" ref={line} data-shown={past || undefined} aria-hidden="true">
-        <span className="progress__line" />
-      </div>
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const index = SECTIONS.findIndex((s) => s.id === active);
+    const last = SECTIONS.length - 1;
+    const to =
+      event.key === 'ArrowRight'
+        ? index === last
+          ? 0
+          : index + 1
+        : event.key === 'ArrowLeft'
+          ? index === 0
+            ? last
+            : index - 1
+          : event.key === 'Home'
+            ? 0
+            : event.key === 'End'
+              ? last
+              : null;
+    if (to === null) return;
+    event.preventDefault();
+    const next = SECTIONS[to];
+    if (next) choose(next.id, true);
+  };
 
-      <nav className={`index${past ? ' index--shown' : ''}`} aria-label="Sections">
-        <ol className="index__list" ref={list}>
-          {SECTIONS.map((entry, i) => (
-            <li className="index__item" key={entry.id}>
+  return (
+    <main className="analysis" id="analysis" ref={root}>
+      <nav className="tabs" aria-label="Analysis">
+        <div
+          className="tabs__list"
+          role="tablist"
+          aria-label="Analysis views"
+          ref={list}
+          onKeyDown={onKeyDown}
+        >
+          <span className="tabs__indicator" ref={indicator} aria-hidden="true" />
+          {SECTIONS.map((entry, i) => {
+            const selected = entry.id === active;
+            return (
               <button
+                key={entry.id}
                 type="button"
-                className={`index__link${active === entry.id ? ' index__link--active' : ''}`}
-                aria-current={active === entry.id ? 'true' : undefined}
-                onClick={() => jump(entry.id)}
+                role="tab"
+                id={`tab-${entry.id}`}
+                data-view={entry.id}
+                aria-selected={selected}
+                aria-controls={`view-${entry.id}`}
+                tabIndex={selected ? 0 : -1}
+                className={`tabs__tab${selected ? ' tabs__tab--active' : ''}`}
+                onClick={() => choose(entry.id)}
               >
-                <span className="index__tick" aria-hidden="true" />
-                <span className="index__number" aria-hidden="true">
-                  {String(i).padStart(2, '0')}
+                <span className="tabs__number" aria-hidden="true">
+                  {String(i + 1).padStart(2, '0')}
                 </span>
-                <span className="index__label">{entry.label}</span>
-                <span className="index__short" aria-hidden="true">
-                  {entry.short}
-                </span>
+                {entry.label}
               </button>
-            </li>
-          ))}
-        </ol>
+            );
+          })}
+        </div>
       </nav>
-    </>
+
+      {views.map((child) => {
+        const id = idOf(child);
+        const shown = id === active;
+        return (
+          <div
+            key={id}
+            className={`view${shown ? ' view--active' : ''}`}
+            role="tabpanel"
+            id={`view-${id}`}
+            aria-labelledby={`tab-${id}`}
+            hidden={!shown}
+          >
+            {child}
+          </div>
+        );
+      })}
+    </main>
   );
 }

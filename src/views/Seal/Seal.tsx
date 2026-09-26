@@ -67,7 +67,7 @@ export function Seal() {
       </Reveal>
 
       <Reveal className="seal__actions" delay={1}>
-        <button className="seal__run" type="button" onClick={run} disabled={rounds.length === 0}>
+        <button className="button button--primary seal__run" type="button" onClick={run} disabled={rounds.length === 0}>
           {rounds.length === 0 ? 'Play a round first' : `Re-seal all ${rounds.length} rounds`}
         </button>
         {audit ? (

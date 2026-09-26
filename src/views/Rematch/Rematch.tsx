@@ -69,7 +69,7 @@ function AgainstYou() {
       </p>
 
       <div className="against__actions">
-        <button className="rematch__button" type="button" onClick={replay} disabled={!ready}>
+        <button className="button button--primary rematch__button" type="button" onClick={replay} disabled={!ready}>
           {rows === null ? 'Replay my session' : 'Replay again'}
         </button>
         <span className="against__count note">
@@ -329,7 +329,7 @@ export function Rematch() {
 
         <div className="rematch__controls">
           <button
-            className="rematch__button"
+            className="button button--primary rematch__button"
             type="button"
             onClick={() => setRunning((r) => !r)}
             disabled={played >= TOTAL}
@@ -337,7 +337,7 @@ export function Rematch() {
             {running ? 'Pause' : played === 0 ? 'Start the match' : 'Continue'}
           </button>
           <button
-            className="rematch__button"
+            className="button rematch__button"
             type="button"
             onClick={() => {
               setRunning(false);

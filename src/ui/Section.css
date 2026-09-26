@@ -1,7 +1,6 @@
 .section {
   position: relative;
-  padding: var(--s6) var(--gutter);
-  border-top: 1px solid var(--rule);
+  padding: var(--s5) var(--gutter) var(--s6);
   background: var(--ground);
   color: var(--ink);
 }
@@ -13,7 +12,9 @@
 /* The ensemble sits on the machine's ground, because it is the machine's own
    account of itself. The `on-machine` class carries the ink with it. */
 .section--machine {
-  border-top-color: var(--rule-dark);
+  background:
+    radial-gradient(rgb(255 255 255 / 0.035) 1px, transparent 1.2px) 0 0 / 20px 20px,
+    var(--machine);
 }
 
 /* The archive sits on a slightly warmer paper than the rest of the light side. */
@@ -49,12 +50,8 @@
 }
 
 /*
- * The section's number, in the red that marks a machine win everywhere else.
- *
- * --hit is a mark colour and measures 4.44:1 against the player's ground, which
- * is fine for a shape and short of the 4.5:1 this needs at eleven pixels.
- * --hit-ink is the same red mixed a little further into the local ink for
- * exactly this case, and takes it to 4.95:1 without touching the marks.
+ * The section's number, in the machine's amber: --hit-ink is its text-strength
+ * form on either ground (4.8:1 on paper, 7.5:1 on black).
  */
 .section__number {
   font: var(--t-micro);
@@ -63,9 +60,6 @@
   color: var(--hit-ink);
 }
 
-.section--machine .section__number {
-  color: var(--p-mrm);
-}
 
 .section__rule {
   display: block;
@@ -76,12 +70,14 @@
 }
 
 .section__title {
-  font: var(--t-title);
-  letter-spacing: var(--track-title);
+  font: var(--t-display);
+  font-size: clamp(30px, 3.8vw, 46px);
+  letter-spacing: var(--track-display);
 }
 
 .section__intro {
   font: var(--t-body);
+  font-size: clamp(16px, 0.5vw + 14px, 18px);
   letter-spacing: var(--track-body);
   max-width: 62ch;
   margin-top: var(--s2);
@@ -90,8 +86,18 @@
 
 /* ------------------------------------------------------------------ figure */
 
+/*
+ * A figure is a surface: the ground raised one step, a hairline edge and a
+ * 14px radius. Surfaces are how the analysis is broken into things to read;
+ * nothing below the arena casts a shadow.
+ */
 .figure {
-  margin: 0 0 var(--s5);
+  margin: 0 0 var(--s3);
+  padding: clamp(18px, 2.2vw, 28px);
+  border-radius: var(--radius-lg);
+  background: var(--ground-raised);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 9%, transparent);
+  min-width: 0;
 }
 
 .figure__head {
@@ -134,8 +140,13 @@
 /* A lab notebook: left-aligned prose, right-aligned figures. */
 .grid-two {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: var(--s4) var(--s5);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: var(--s3);
+  align-items: start;
+}
+
+.grid-two > .figure {
+  margin: 0;
 }
 
 @media (max-width: 820px) {
@@ -160,7 +171,7 @@
 
 @media (max-width: 640px) {
   .section {
-    padding: var(--s5) var(--gutter);
+    padding: var(--s4) var(--gutter) var(--s5);
   }
 
   .grid-two {

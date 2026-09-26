@@ -6,11 +6,11 @@ import './Section.css';
 /**
  * A section below the arena.
  *
- * Numbered, because seven of them in a single scroll want an order the reader
- * can hold; the numbers come from the index's own list so the rail and the page
- * can never disagree about what section four is. Still no cards and no shadows
- * — the head is a two-column arrangement of a marker and a heading, and the
- * hairline plus the change of ground does the separating (DESIGN.md §4.4).
+ * Numbered, because the eight views have an order the reader can hold; the
+ * numbers come from the tab bar's own list so the tabs and the page can never
+ * disagree about what view four is. Figures inside a section are surfaces — a
+ * raised ground with a hairline edge — and nothing below the arena casts a
+ * shadow (DESIGN.md §4.4).
  */
 export function Section({
   id,
@@ -27,7 +27,7 @@ export function Section({
   ground?: 'yours' | 'machine' | 'archive';
   children: ReactNode;
 }) {
-  const number = SECTIONS.findIndex((entry) => entry.id === id);
+  const number = SECTIONS.findIndex((entry) => entry.id === id) + 1;
 
   return (
     <section

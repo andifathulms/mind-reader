@@ -261,11 +261,11 @@ export function Lab() {
               </div>
 
               <div className="lab__actions">
-                <button className="lab__run" type="button" onClick={() => run(strategy.id)}>
+                <button className="button lab__run" type="button" onClick={() => run(strategy.id)}>
                   Run the script
                 </button>
                 <button
-                  className={`lab__run${live ? ' lab__run--live' : ''}`}
+                  className={`button lab__run${live ? ' lab__run--live' : ''}`}
                   type="button"
                   onClick={() => attempt(strategy.id)}
                   aria-pressed={live}
@@ -295,7 +295,7 @@ export function Lab() {
       </div>
 
       <div className="lab__actions lab__actions--footer">
-        <button className="lab__run" type="button" onClick={runAll}>
+        <button className="button button--primary lab__run" type="button" onClick={runAll}>
           Run all five scripts
         </button>
       </div>

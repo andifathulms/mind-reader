@@ -227,25 +227,38 @@ knows.
 
 ### 4.3 Below the arena
 
-Scrolls under it. The arena stays pinned at the top so a player can keep pressing while
-reading their own portrait — which is a genuinely interesting experience, since reading about
-your bias changes it, and the ensemble weights shift in response.
+The analysis is a set of views behind one sticky tab bar, not one long scroll: Seal ·
+Ensemble · Settings · Portrait · Lab · Rematch · Archive · Export. The bar is the machine's
+chrome — relay black with a paper pill sliding under the chosen view — and it stays at the
+top while a view is read. Choosing a view brings you to its top. Arrow keys move between tabs
+while one has focus; everywhere else they still play.
 
-Sections in order: ensemble, portrait, strategy lab, rematch, archive.
+Views that are not showing stay mounted, so a running rematch keeps running and a lab result
+is still there on return. On paper every view prints. The active view is not in the URL: the
+hash carries the machine's configuration, and which page of the analysis you were reading is
+not part of a session anyone would share.
+
+Each view opens with its heading and its main figures; derivations sit behind a disclosure.
 
 ### 4.4 Grid and rhythm
 
-8 px base. Spacing scale: 8 · 16 · 24 · 40 · 64. Max width 68 rem below the arena; the arena
+8 px base. Spacing scale: 8 · 16 · 24 · 40 · 64. Max width 74 rem below the arena; the arena
 itself is full-bleed.
 
-No panels, no cards, no shadows. Sections separate by a hairline and generous space.
+Figures are **surfaces**: the local ground raised one step, a 1 px hairline edge in the local
+ink, and a 14 px radius. Surfaces are how a view is broken into things to read. Nothing below
+the arena casts a shadow; the arena's keys and seal are the only objects that do, because they
+are the only objects with depth.
+
+Buttons are one system with two weights: a filled primary for the one thing a view asks you
+to do, and a quiet secondary for the rest. 40 px tall, 10 px radius, local ink.
 
 ### 4.5 Mobile
 
 This is the target platform. The arena fills the viewport on load, with the analysis below
 the fold — deliberately, so the first experience is playing rather than reading.
 
-Everything below the arena stacks to one column. The ensemble's five weights become a
+Everything below the arena stacks to one column. The ensemble's eight weights become a
 horizontal stacked bar rather than five tracks. The rematch runs at reduced speed so the
 machine-versus-machine exchange stays legible on a small screen.
 
@@ -267,7 +280,9 @@ app's entire trust claim and it does so without a word of explanation.
 
 ### 5.2 Ensemble
 
-Five horizontal tracks on the machine's ground, one per predictor, each showing its current
+Eight horizontal tracks on the machine's ground, one per predictor, grouped by era — the
+relay machines, the classic models, the modern ones — so a reconstruction is never read as a
+modern model, each showing its current
 weight as a filled bar.
 
 Each track also shows what that predictor guessed this round and whether it was right — so a

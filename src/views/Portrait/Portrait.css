@@ -20,20 +20,23 @@
 }
 
 /*
- * The bars. Ink for a quantity with no comparison to make; the arena's two
- * colours where the chart is a comparison against what a coin would have done,
- * so the finding is legible before the heights are read.
+ * The bars. These are all the player's runs, so none of them takes the
+ * machine's amber: amber and cobalt now say whose a mark is, and a bar coloured
+ * by whether it beat a coin's expectation would read as a bar belonging to one
+ * side. Full ink where a length is overproduced against a coin, a light ink
+ * where it is underproduced, so the finding is still legible before the heights
+ * are read.
  */
 .portrait__bar {
   fill: var(--ink);
 }
 
 .portrait__bar--over {
-  fill: var(--hit);
+  fill: var(--ink);
 }
 
 .portrait__bar--under {
-  fill: var(--miss);
+  fill: color-mix(in srgb, var(--ink) 32%, transparent);
 }
 
 .portrait__bar--even {

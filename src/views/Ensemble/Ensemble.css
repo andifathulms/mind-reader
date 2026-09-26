@@ -431,3 +431,13 @@
   font: var(--t-small);
   color: var(--machine-ink-soft);
 }
+
+/* Where one era of models ends and the next begins. */
+.ensemble__era {
+  padding: var(--s3) 0 var(--s1);
+  color: var(--ink-soft);
+}
+
+.ensemble__era:first-child {
+  padding-top: 0;
+}

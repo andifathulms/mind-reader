@@ -9,6 +9,7 @@ import { writeUrl } from '../../state/url';
 import { sweepSettings } from '../../engine/counterfactual';
 import type { Sweep } from '../../engine/counterfactual';
 import { seedFrom } from '../../engine/rng';
+import { PRESETS, presetOf } from '../../engine/presets';
 import './Controls.css';
 
 /*
@@ -135,6 +136,8 @@ export function Controls() {
     [config, seed, store],
   );
 
+  const current = presetOf(config);
+
   const toggle = (id: PredictorId) => {
     const active = config.active.includes(id)
       ? config.active.filter((other) => other !== id)
@@ -155,6 +158,39 @@ export function Controls() {
       <p className="visually-hidden" role="status">
         {announcement}
       </p>
+
+      {/*
+        Three named points on the sliders below. A preset is a shortcut, not a
+        mode: choosing one moves the sliders and restarts the session like any
+        other change. Radios, because exactly one or none of them is true —
+        none when the sliders have been moved somewhere else.
+      */}
+      <fieldset className="presets" aria-describedby={RESTART_NOTE}>
+        <legend className="control__label">
+          <span className="control__name">Strength</span>
+          <span className="control__value">
+            {current ? PRESETS.find((p) => p.id === current)?.name : 'Custom'}
+          </span>
+        </legend>
+        <div className="presets__options">
+          {PRESETS.map((preset) => (
+            <label
+              key={preset.id}
+              className={`presets__option${current === preset.id ? ' presets__option--on' : ''}`}
+            >
+              <input
+                type="radio"
+                name="preset"
+                value={preset.id}
+                checked={current === preset.id}
+                onChange={() => apply(preset.config)}
+              />
+              <span className="presets__name">{preset.name}</span>
+              <span className="presets__note">{preset.note}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
 
       <div className="controls">
         <Slider
@@ -210,7 +246,9 @@ export function Controls() {
         <fieldset className="control control--models" aria-describedby={RESTART_NOTE}>
           <legend className="control__label">
             <span className="control__name">Models in the mixture</span>
-            <span className="control__value numeral">{config.active.length} of {PREDICTOR_IDS.length}</span>
+            <span className="control__value numeral">
+              {config.active.length} of {PREDICTOR_IDS.length}
+            </span>
           </legend>
           <div className="control__models">
             {PREDICTOR_IDS.map((id) => (
@@ -250,7 +288,7 @@ export function Controls() {
           played again against a machine tuned differently without restarting anything.
         </p>
         <button
-          className="controls__button"
+          className="button controls__button"
           type="button"
           onClick={() => setSweeps(sweepSettings(store.history, config, seed))}
           disabled={played === 0}
@@ -297,11 +335,11 @@ export function Controls() {
       </div>
 
       <div className="controls__footer">
-        <button className="controls__button" type="button" onClick={() => apply({}, seed)}>
+        <button className="button controls__button" type="button" onClick={() => apply({}, seed)}>
           Restart, same seed
         </button>
         <button
-          className="controls__button"
+          className="button controls__button"
           type="button"
           onClick={() => apply({}, seedFrom(Date.now()))}
         >
