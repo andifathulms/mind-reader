@@ -58,20 +58,20 @@ function metadata(): Plugin {
         const url = `${ORIGIN}${BASE}${route.path}`;
 
         /*
-         * Preload the interface face, and only that one. It is referenced from
-         * CSS, so without this the browser cannot begin fetching it until the
-         * stylesheet has arrived and parsed: a whole round trip of the first
-         * text being invisible. Courier Prime is deliberately not preloaded.
-         * It appears in the archive and in citations, none of it above the
-         * fold, and pulling 18.6 kB forward to race the sans would make the
-         * thing people actually read arrive later.
+         * Preload the two faces the first screen is set in: the interface face
+         * and the display face the scores use. Both are referenced from CSS, so
+         * without this the browser cannot begin fetching them until the
+         * stylesheet has arrived and parsed. Geist Mono and Courier Prime are
+         * deliberately not preloaded; the readouts that use the mono are small
+         * and swap in unnoticed, and the archive is far below the fold.
          */
-        const sans = Object.keys(ctx.bundle ?? {}).find((name) =>
-          /public-sans.*\.woff2$/.test(name),
-        );
-        const preload = sans
-          ? `<link rel="preload" href="${BASE}${sans}" as="font" type="font/woff2" crossorigin />`
-          : '';
+        const preload = Object.keys(ctx.bundle ?? {})
+          .filter((name) => /(geist-latin|archivo-display).*\.woff2$/.test(name))
+          .map(
+            (name) =>
+              `<link rel="preload" href="${BASE}${name}" as="font" type="font/woff2" crossorigin />`,
+          )
+          .join('\n');
 
         const image = `${ORIGIN}${BASE}${OG_IMAGE}`;
 

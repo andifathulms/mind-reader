@@ -56,11 +56,11 @@ The analysis below it is left-aligned prose and right-aligned figures, like a la
 
 | Token | Value | Use |
 |---|---|---|
-| `--yours` | `#E8E6E1` | The player's ground. Warm off-white, paper. |
-| `--yours-ink` | `#1C1A17` | Text and marks on the player's side. |
-| `--machine` | `#14171A` | The machine's ground. Cool near-black. |
-| `--machine-ink` | `#DDE2E5` | Text and marks on the machine's side. |
-| `--boundary` | `#8C9094` | The dividing line itself. 2 px, neutral, belonging to neither. |
+| `--yours` | `#EEEBE4` | The player's ground. Warm off-white, paper. |
+| `--yours-ink` | `#15130F` | Text and marks on the player's side. 16.9:1. |
+| `--machine` | `#0B0E13` | The machine's ground. Relay black, cool and a little blue. |
+| `--machine-ink` | `#E6EAF0` | Text and marks on the machine's side. 16.2:1. |
+| `--boundary` | `#9097A0` | The dividing line itself. 2 px, neutral, belonging to neither. |
 
 Warm light against cool dark. The temperature difference does as much work as the value
 difference and it makes the two sides feel like different materials rather than an inverted
@@ -69,30 +69,40 @@ theme.
 The analysis section below the arena sits on `--yours`, because it is the player's record of
 what happened to them.
 
-### 2.2 Round marks
+### 2.2 One colour per side
 
 | Token | Value | Use |
 |---|---|---|
-| `--hit` | `#B8452E` | The machine predicted correctly. Drawn on the machine's side. |
-| `--miss` | `#3E6B54` | The machine was wrong. Drawn on the player's side. |
-| `--random` | `#8C9094` | The machine played randomly — warm-up or low confidence. Neutral, on the boundary. |
+| `--amber` / `--amber-deep` | `#FF7A2F` / `#D4581A` | The machine. A round it won, its trail, its seal's lock. |
+| `--cobalt` / `--cobalt-lit` | `#2A4FD6` / `#6F8CFF` | The player. A round you won, links, your accents. |
+| `--random` | `#7A8089` | The machine played randomly — warm-up or low confidence. Neutral. |
+
+`--hit` and `--miss` resolve to the bright form on the machine's ground and the deep form on
+the player's, so a mark clears 3:1 wherever the boundary puts it.
+
+Earlier versions used a win-red and a loss-green. Under deuteranopia those two collapse into
+olive greys and the tape — the round-by-round record — becomes one colour. Amber and cobalt
+stay apart under every common colour-vision type, and giving each side its own colour states
+the rivalry before a word is read.
 
 The neutral for random rounds matters. Those rounds are not a contest and marking them as
 wins or losses would misrepresent the machine's claim. A stretch of grey marks during warm-up
 tells the truth: nothing is happening yet.
 
-### 2.3 The five predictors
+### 2.3 The eight predictors
 
-Only used inside the ensemble view, which sits on the machine's dark ground, so the set is
-tuned for dark.
+Only used on the machine's dark ground, so the set is tuned for dark.
 
-| Predictor | Colour |
-|---|---|
-| SEER | `#C4703A` |
-| MRM | `#C9A227` |
-| N-gram | `#4F8FA8` |
-| Backoff | `#7B6BAF` |
-| Level-k | `#5D9E6B` |
+| Predictor | Colour | Era |
+|---|---|---|
+| SEER | `#E08A4E` | 1950s |
+| MRM | `#E3BC3A` | 1950s |
+| N-gram | `#5DB3D3` | classic |
+| Backoff | `#9C8AE0` | classic |
+| Level-k | `#6CC486` | classic |
+| Context mix | `#E36FA8` | modern |
+| Run length | `#B7C4D4` | modern |
+| Reaction | `#F2E3C6` | modern |
 
 SEER and MRM sit adjacent in hue because they are historically adjacent — one is a
 simplification of the other — and their weights are worth comparing directly.
@@ -109,42 +119,46 @@ uses ink for measured and a hairline for expected, no colour at all. It does not
 
 ## 3. Typography
 
-**Public Sans** for everything except the archive.
+Three faces with three jobs, all bundled — there is no network at runtime.
 
-Its lineage runs back through Libre Franklin to Franklin Gothic, an American grotesque that
-was the workhorse of mid-century American technical and government printing — the visual
-register of a Bell Labs memorandum, without dressing up as one. It has genuine tabular
-figures, which the app needs for a score that updates on every press.
+**Archivo**, stretched wide, for the scores and the headings. A grotesque with a width axis:
+at 125% its numerals read as readouts on a panel rather than as text, which makes the score
+the most memorable thing on the screen. The same face condensed sets the labels, so a label
+can go up a size without getting longer. Shipped cut down to width 62–125 and weight 600–900.
 
-**Courier Prime** in the Archive view only.
+**Geist** for everything read as prose or interface.
 
-Shannon's memorandum was a typescript. So was Hagelbarger's paper. Setting the reconstructed
-historical material in a well-drawn Courier is a quotation of a document form, not a costume
-— and it is confined to one view, which is what keeps it from being a gimmick. If it appears
-outside the Archive, delete it.
+**Geist Mono** for every live number that is not a score: rates, intervals, round counts, the
+ledger. Fixed-width digits, so nothing shifts as they change.
+
+**Courier Prime** in the Archive view only. Shannon's memorandum was a typescript. So was
+Hagelbarger's paper. Setting the reconstructed historical material in a well-drawn Courier is
+a quotation of a document form, not a costume — and it is confined to one view, which is what
+keeps it from being a gimmick. If it appears outside the Archive, delete it.
 
 ### 3.1 Scale
 
-Base 16 px.
-
-| Token | Size / line-height | Face | Use |
-|---|---|---|---|
-| `--t-score` | 64 / 0.95, 700 | Public Sans | The two scores in the arena |
-| `--t-display` | 36 / 1.05, 600 | Public Sans | Portrait headline figures |
-| `--t-figure` | 22 / 1.1, 600 | Public Sans | Chart values, predictor weights |
-| `--t-h2` | 18 / 1.3, 600 | Public Sans | Panel headings |
-| `--t-body` | 15 / 1.6, 400 | Public Sans | Copy. Max 66 characters. |
-| `--t-data` | 13 / 1.45, 400 | Public Sans | Tables, axis numbers |
-| `--t-small` | 12 / 1.35, 400 | Public Sans | Labels, legend, confidence intervals |
-| `--t-archive` | 14 / 1.7, 400 | Courier Prime | Archive view only |
+| Token | Face | Use |
+|---|---|---|
+| `--t-score` | Archivo 900, expanded, 64–120 px | The two scores in the arena |
+| `--t-display` | Archivo 850, semi-expanded, 32–58 px | Section titles, portrait figures |
+| `--t-title` / `--t-figure` | Archivo 800, semi-expanded, 22–30 px | Sub-headings, chart values |
+| `--t-h2` | Geist 620, 17 px | Panel headings |
+| `--t-body` | Geist 400, 16–17 px / 1.62 | Copy. Max 66 characters. |
+| `--t-note` | Geist 430, 14 px / 1.5 | Quiet sentences |
+| `--t-data` | Geist 450, 13.5 px | Tables |
+| `--t-readout` | Geist Mono 500, 13 px | Live numbers |
+| `--t-micro` | Geist Mono 520, 11.5 px, caps, +0.08em | Labels that name things |
+| `--t-archive` | Courier Prime 14 px / 1.7 | Archive view only |
 
 `font-variant-numeric: tabular-nums` throughout. The score changes every press and must not
 shift width.
 
 ### 3.2 Prohibitions
 
-No all-caps. No tracked-out labels. No italic for emphasis in the interface. Sentence case
-everywhere.
+No italic for emphasis in the interface. Sentence case in every sentence. Capitals are for
+labels that name a thing — `you`, `machine`, `confidence threshold` — and nothing that reads
+as a sentence.
 
 The score is large and that is the app's only typographic drama. It does not need a second.
 

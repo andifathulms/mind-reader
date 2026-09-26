@@ -2,18 +2,58 @@
  * Fonts ship in the bundle. There is no network at runtime (PRD §7.5), so a
  * webfont CDN is not an option even if it were a good idea.
  *
- * The @font-face rules are written out rather than imported from the packages'
- * own stylesheets, because those pull the Cyrillic, Greek and Vietnamese
- * subsets too. The interface is English; every other subset is bytes no reader
- * of this app will ever load.
+ * Three faces with three jobs, and Courier Prime in the archive:
+ *
+ *   Archivo   the scores and the headings, stretched wide. It is a grotesque
+ *             with a width axis, and at 125% its numerals read as readouts on
+ *             a panel rather than as text. Also the condensed labels.
+ *   Geist     everything read as prose or interface.
+ *   Geist Mono every live number that is not a score: rates, intervals,
+ *             round counts, the ledger.
+ *
+ * Latin subsets only. The interface is English; every other subset is bytes no
+ * reader of this app will ever load.
  */
 
+/*
+ * Archivo, cut down to the ranges the app uses: width 62–125 and weight
+ * 600–900. The full variable file is 90 kB; this is 64 kB. Made with
+ *
+ *   fontTools.varLib.instancer.instantiateVariableFont(
+ *     archivo-latin-wdth-normal.woff2, {wdth: (62, 125), wght: (600, 900)})
+ *
+ * from @fontsource-variable/archivo.
+ */
 @font-face {
-  font-family: 'Public Sans Variable';
+  font-family: 'Archivo Display';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600 900;
+  font-stretch: 62% 125%;
+  src: url('./fonts/archivo-display.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Geist Variable';
   font-style: normal;
   font-display: swap;
   font-weight: 100 900;
-  src: url('@fontsource-variable/public-sans/files/public-sans-latin-wght-normal.woff2')
+  src: url('@fontsource-variable/geist/files/geist-latin-wght-normal.woff2')
+    format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Geist Mono Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2')
     format('woff2-variations');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
     U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212,

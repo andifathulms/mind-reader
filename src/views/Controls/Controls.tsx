@@ -210,7 +210,7 @@ export function Controls() {
         <fieldset className="control control--models" aria-describedby={RESTART_NOTE}>
           <legend className="control__label">
             <span className="control__name">Models in the mixture</span>
-            <span className="control__value numeral">{config.active.length} of 5</span>
+            <span className="control__value numeral">{config.active.length} of {PREDICTOR_IDS.length}</span>
           </legend>
           <div className="control__models">
             {PREDICTOR_IDS.map((id) => (
