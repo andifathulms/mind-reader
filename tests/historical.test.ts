@@ -70,7 +70,7 @@ describe('both machines against a coin', () => {
       let wins = 0;
       const n = 50_000;
       for (let i = 0; i < n; i += 1) {
-        const guess = machine.predict(seen as never).guess;
+        const guess = machine.predict(seen as never, [] as never).guess;
         const actual = coin.bit();
         if (guess === actual) wins += 1;
         machine.observe(actual);

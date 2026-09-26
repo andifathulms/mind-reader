@@ -28,7 +28,7 @@ export const ARENA_POINT = 'The machine scores when it guesses your press.';
 /** Sentences the landing page renders. */
 export const LANDING_HEADLINE = 'The optimal move is public. You still cannot play it.';
 export const LANDING_SUB =
-  'Matching pennies against five models of you. The machine seals its guess before your press is read.';
+  'Matching pennies against eight models of you. The machine seals its guess before your press is read.';
 
 /** The installed name, and the name under an icon where there is no room. */
 export const SITE_NAME = 'Mind reader';

@@ -111,8 +111,21 @@ twenty seeds, and the figure is stable from 100 plays through 10,000. That is a 
 than either published result, which is what should be expected given the four assumptions
 above, and it reproduces the direction and the rough size of a result from 1953.
 
-## The other three predictors
+## The other six predictors
 
 N-gram, backoff and level-k are modern constructions with no single primary source, and they
 are marked as such in the interface. They are not reconstructions of anything and should not
 be read as historical.
+
+Context mix, run length and reaction were added later to make the machine harder to beat.
+Measured against scripted players with mild human biases, the original five won about 51–52%
+of rounds and played at random most of the time; the eight win noticeably more against the
+same players and still draw against a coin (`fairness.test.ts`, `strength.test.ts`). They
+belong to literatures rather than papers — context-tree weighting and PPM for the first, the
+run-avoidance findings in the psychology of generating random sequences for the second, and
+win-stay / lose-shift for the third — and each is a deliberately simple member of its family.
+
+Reaction is the only model that reads anything besides the player's presses: it is given the
+machine's own committed moves for rounds already revealed, so it can tell whether the player
+won or lost. This is disclosed in the Archive. The move sealed for the current round is never
+an input, and `strength.test.ts` checks that at every call.

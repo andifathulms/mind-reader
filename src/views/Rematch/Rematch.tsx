@@ -175,6 +175,8 @@ export function Rematch() {
     mismatcher: Predictor;
     seenByMatcher: Move[];
     seenByMismatcher: Move[];
+    playedByMatcher: Move[];
+    playedByMismatcher: Move[];
   } | null>(null);
 
   const reset = useCallback(() => {
@@ -182,7 +184,7 @@ export function Rematch() {
     const mismatcher = createSeer(createRng(19560101));
     matcher.reset();
     mismatcher.reset();
-    game.current = { matcher, mismatcher, seenByMatcher: [], seenByMismatcher: [] };
+    game.current = { matcher, mismatcher, seenByMatcher: [], seenByMismatcher: [], playedByMatcher: [], playedByMismatcher: [] };
     score.current = { mrm: 0, seer: 0, played: 0 };
     samples.current = [];
     setLive(score.current);
@@ -216,8 +218,8 @@ export function Rematch() {
 
       for (let i = 0; i < rounds; i += 1) {
         // Both moves are committed before either is revealed.
-        const a = state.matcher.predict(state.seenByMatcher).guess;
-        const b = state.mismatcher.predict(state.seenByMismatcher).guess;
+        const a = state.matcher.predict(state.seenByMatcher, state.playedByMatcher).guess;
+        const b = state.mismatcher.predict(state.seenByMismatcher, state.playedByMismatcher).guess;
         if (a === b) mrm += 1;
         else seer += 1;
         state.matcher.observe(b);
@@ -225,6 +227,8 @@ export function Rematch() {
         const inverted = (1 - a) as Move;
         state.mismatcher.observe(inverted);
         state.seenByMismatcher.push(inverted);
+        state.playedByMatcher.push(a);
+        state.playedByMismatcher.push((1 - b) as Move);
         played += 1;
       }
 

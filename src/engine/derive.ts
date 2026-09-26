@@ -1,4 +1,5 @@
 import type { Config, Move, PredictorId, Round } from './types';
+import { edgeFrom } from './mixer';
 
 /**
  * One model's contribution to a committed move.
@@ -21,6 +22,8 @@ export interface Contribution {
       back toward having no edge rather than toward whatever its first few
       guesses happened to do. */
   accuracy: number;
+  /** The accuracy less the mixer's margin of standard errors; the edge doubles this about a half. */
+  lower: number;
   weight: number;
   /**
    * `min(confidence, edge)`. The mixer trusts a vote no further than the weaker
@@ -87,7 +90,8 @@ export function derive(round: Round, config: Config): Derivation {
       edge: p.edge,
       hits: p.hits,
       tries: p.tries,
-      accuracy: (p.hits + 1) / (p.tries + 2),
+      accuracy: edgeFrom(p.hits, p.tries).accuracy,
+      lower: edgeFrom(p.hits, p.tries).lower,
       weight: p.weight,
       trusted,
       signed: p.weight * trusted * (p.guess === 1 ? 1 : -1),

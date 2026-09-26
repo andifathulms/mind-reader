@@ -7,9 +7,12 @@ Build instructions for Claude Code. PRD.md is what and why. DESIGN.md is how it 
 1. **The prediction is locked before input is read.** This is enforced by types and by test,
    not by convention. See §3. If a code path exists where the machine could see the press
    before committing, the app is fraudulent.
-2. **The machine sees press history only.** No timing, no coordinates, no tap position. The
-   input to every predictor is a `Move[]` and nothing else — enforced by the function
-   signature.
+2. **The machine sees presses only: the player's, and its own already-revealed moves.** No
+   timing, no coordinates, no tap position. The input to every predictor is two `Move[]`
+   arrays and nothing else — enforced by the function signature. The machine's own moves are
+   there so a model can tell whether the player just won or lost; each was shown to the player
+   when its seal opened, and the move sealed for the current round is never an input. This is
+   disclosed in the Archive.
 3. **Predictors cannot see each other.** Each gets the history and returns a guess. The
    mixer combines them. A predictor that could read another's output would be a different
    algorithm than the one named.
@@ -42,7 +45,11 @@ Zero runtime dependencies beyond React. This app should be tiny.
 │  │  │  ├─ mrm.ts            # Shannon 1953
 │  │  │  ├─ ngram.ts
 │  │  │  ├─ backoff.ts
-│  │  │  └─ levelk.ts
+│  │  │  ├─ levelk.ts
+│  │  │  ├─ context.ts        # context mixing over orders 0–8
+│  │  │  ├─ runs.ts           # switch rate by run length
+│  │  │  └─ reaction.ts       # win-stay / lose-shift; reads the machine's own moves
+│  │  ├─ presets.ts           # 1953 · Standard · Relentless
 │  │  ├─ mixer.ts             # weighting, confidence, random fallback
 │  │  ├─ referee.ts           # the commitment protocol — see §3
 │  │  ├─ umpire.ts            # machine vs machine
@@ -56,7 +63,7 @@ Zero runtime dependencies beyond React. This app should be tiny.
 │  ├─ strategies/             # the strategy lab's scripted opponents
 │  ├─ views/
 │  │  ├─ Arena/               # the split screen, the boundary, the seal
-│  │  ├─ Ensemble/            # five predictor weights, live
+│  │  ├─ Ensemble/            # eight predictor weights, live
 │  │  ├─ Portrait/            # the measurement charts
 │  │  ├─ Rematch/             # machine vs machine
 │  │  └─ Archive/             # the 1953 and 1956 reconstructions
@@ -67,6 +74,7 @@ Zero runtime dependencies beyond React. This app should be tiny.
    ├─ fairness.test.ts        # the big one — 100k rounds vs PRNG
    ├─ commitment.test.ts
    ├─ historical.test.ts      # MRM beats SEER
+   ├─ strength.test.ts        # beats mild human biases; own moves never leak
    └─ stats.test.ts
 ```
 
@@ -104,18 +112,23 @@ interface Predictor {
   name: string;
   citation: Citation | null;
   reset(): void;
-  /** History is the player's presses, oldest first. Nothing else is available. */
-  predict(history: readonly Move[]): { guess: Move; confidence: number };
+  /**
+   * History is the player's presses, oldest first. `own` is the machine's committed moves
+   * for the same rounds, all already revealed. Nothing else is available.
+   */
+  predict(history: readonly Move[], own: readonly Move[]): { guess: Move; confidence: number };
   observe(actual: Move): void;
 }
 ```
 
-`predict` takes `readonly Move[]` and no other argument. That signature is the enforcement
-of PRD §7.3: there is nowhere to pass timing or position even if someone wanted to.
+`predict` takes two `readonly Move[]` and no other argument. That signature is the
+enforcement of PRD §7.3: there is nowhere to pass timing or position even if someone wanted
+to. `own.length === history.length` at every call — `strength.test.ts` asserts it.
 
-`citation` is non-null for SEER and MRM and points at the primary sources. The n-gram,
-backoff and level-k predictors cite their literature where one exists and are marked as
-modern constructions where it does not.
+`citation` is non-null for SEER and MRM and points at the primary sources. The other six
+cite their literature where one exists and are marked as modern constructions where it does
+not. The ensemble groups the eight by era: 1950s (SEER, MRM), classic (n-gram, backoff,
+level-k) and modern (context mix, run length, reaction).
 
 ## 3. The referee — the commitment protocol
 
@@ -177,14 +190,16 @@ MRM finishes ahead. If it does not, the implementations are wrong.
 ```ts
 interface MixerConfig {
   decay: number;          // exponential weight decay, default 0.95
-  confidenceFloor: number; // below this, play randomly. default 0.55
-  minRounds: number;      // warm-up. default 20
+  confidenceFloor: number; // below this, play randomly. default 0.52
+  minRounds: number;      // warm-up. default 12
 }
 ```
 
 Weight update: each predictor's weight multiplies by `decay` and increments on a correct
 guess. Normalise. The mixture's confidence is the weighted agreement of the predictors — full
-agreement gives high confidence, an even split gives none.
+agreement gives high confidence, an even split gives none. Each vote is trusted no further
+than the model's *edge*: its accuracy on a slower memory (decay 0.98), pulled down by 0.4
+standard errors, so a lucky streak among eight models does not pass for skill.
 
 Below `minRounds`, or below `confidenceFloor`, the machine draws from the seeded PRNG and
 sets `wasRandom`. This is the honesty mechanism from PRD §4.4 and §4.5, and `fairness.test.ts`
@@ -281,6 +296,8 @@ prose about them.
 ## 11. Build order
 
 Do not build the arena before step 4 passes.
+
+Presets (`presets.ts`) are shortcuts over the same sliders, never a separate mode.
 
 1. RNG, types, referee, `commitment.test.ts`.
 2. N-gram and backoff predictors. Mixer with confidence and fallback.

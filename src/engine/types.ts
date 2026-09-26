@@ -4,9 +4,44 @@ export type Move = 0 | 1;
 export const LEFT: Move = 0;
 export const RIGHT: Move = 1;
 
-export type PredictorId = 'seer' | 'mrm' | 'ngram' | 'backoff' | 'levelk';
+export type PredictorId =
+  | 'seer'
+  | 'mrm'
+  | 'ngram'
+  | 'backoff'
+  | 'levelk'
+  | 'context'
+  | 'runs'
+  | 'reaction';
 
-export const PREDICTOR_IDS: readonly PredictorId[] = ['seer', 'mrm', 'ngram', 'backoff', 'levelk'];
+export const PREDICTOR_IDS: readonly PredictorId[] = [
+  'seer',
+  'mrm',
+  'ngram',
+  'backoff',
+  'levelk',
+  'context',
+  'runs',
+  'reaction',
+];
+
+/**
+ * The three eras the models come from. The ensemble groups them this way so a
+ * reader can tell the reconstructions from the textbook models from the ones
+ * added to make the machine stronger.
+ */
+export type PredictorEra = '1950s' | 'classic' | 'modern';
+
+export const PREDICTOR_ERA: Record<PredictorId, PredictorEra> = {
+  seer: '1950s',
+  mrm: '1950s',
+  ngram: 'classic',
+  backoff: 'classic',
+  levelk: 'classic',
+  context: 'modern',
+  runs: 'modern',
+  reaction: 'modern',
+};
 
 export interface Citation {
   author: string;
@@ -92,8 +127,8 @@ export interface Session {
 
 export const DEFAULT_CONFIG: Config = {
   decay: 0.95,
-  confidenceFloor: 0.55,
-  minRounds: 20,
+  confidenceFloor: 0.52,
+  minRounds: 12,
   active: [...PREDICTOR_IDS],
   ngramOrder: 5,
 };

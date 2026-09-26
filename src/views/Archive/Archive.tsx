@@ -21,7 +21,13 @@ export function Archive() {
       <div className="archive">
         <div className="archive__disclosure">
           <p>
-            What the machine can see: the sequence of presses you have made, and nothing else.
+            What the machine can see: the sequence of presses you have made, the moves it has
+            already revealed to you, and nothing else.
+          </p>
+          <p>
+            Its own past moves are there so it can tell whether you just won or lost a round. You
+            saw every one of them the moment its seal opened, so it learns nothing from them that
+            was hidden from you. The move it has sealed for the current round is never an input.
           </p>
           <p>
             Not how long you took. Not where on the button you tapped. Not which key you used, not

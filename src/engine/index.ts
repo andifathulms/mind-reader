@@ -8,6 +8,9 @@ import { createBackoff } from './predictors/backoff';
 import { createSeer } from './predictors/seer';
 import { createMrm } from './predictors/mrm';
 import { createLevelK } from './predictors/levelk';
+import { createContextMix } from './predictors/context';
+import { createRuns } from './predictors/runs';
+import { createReaction } from './predictors/reaction';
 import type { Predictor } from './predictors/predictor';
 import type { Config, PredictorId, Session } from './types';
 import { DEFAULT_CONFIG } from './types';
@@ -24,6 +27,12 @@ export function createPredictor(id: PredictorId, config: Config, rng: Rng): Pred
       return createMrm(rng);
     case 'levelk':
       return createLevelK();
+    case 'context':
+      return createContextMix();
+    case 'runs':
+      return createRuns();
+    case 'reaction':
+      return createReaction();
   }
 }
 
@@ -60,6 +69,8 @@ export * from './types';
 export * from './rng';
 export * from './referee';
 export { createMixer } from './mixer';
+export { PRESETS, presetOf } from './presets';
+export type { Preset, PresetId } from './presets';
 export { umpire } from './umpire';
 export type { Match, Exchange } from './umpire';
 export type { Predictor, Guess } from './predictors/predictor';

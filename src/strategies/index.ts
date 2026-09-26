@@ -1,5 +1,6 @@
 import type { Move } from '../engine/types';
 import type { Rng } from '../engine/rng';
+import { PASSAGE } from './passage';
 
 export interface Strategy {
   id: string;
@@ -32,26 +33,43 @@ export interface Strategy {
   play(history: readonly Move[], rng: Rng): Move;
 }
 
-/** Digits of pi, mod 2. Enough of them that no session runs off the end. */
-const PI_DIGITS =
-  '31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679' +
-  '82148086513282306647093844609550582231725359408128481117450284102701938521105559644622948954930381964' +
-  '42881097566593344612847564823378678316527120190914564856692346034861045432664821339360726024914127372' +
-  '45870066063155881748815209209628292540917153643678925903600113305305488204665213841469519415116094330';
+/**
+ * Digits of pi, as many as a session asks for.
+ *
+ * This used to be a stored string of 404 digits read modulo its length, so any
+ * run longer than that replayed the same 404 presses. A sequence that repeats
+ * is not pi and is not random, and a context model will rightly learn it; the
+ * lab's pi row was then measuring the loop rather than the digits. They are
+ * computed instead, by Machin's formula in integer arithmetic, and extended in
+ * doubling blocks as a session reaches the end of what has been computed.
+ */
+let piCache = '';
+
+function arctanInverse(x: bigint, unity: bigint): bigint {
+  // arctan(1/x) = 1/x - 1/(3x^3) + 1/(5x^5) - ...
+  const x2 = x * x;
+  let power = unity / x;
+  let sum = power;
+  let sign = -1n;
+  for (let n = 3n; power !== 0n; n += 2n) {
+    power /= x2;
+    sum += (sign * power) / n;
+    sign = -sign;
+  }
+  return sum;
+}
+
+export function piDigits(count: number): string {
+  if (piCache.length >= count) return piCache;
+  const want = Math.max(count, piCache.length * 2, 1024);
+  const guard = 12;
+  const unity = 10n ** BigInt(want + guard);
+  const pi = 4n * (4n * arctanInverse(5n, unity) - arctanInverse(239n, unity));
+  piCache = pi.toString().slice(0, want);
+  return piCache;
+}
 
 const ALPHABET = 'abcdefghijklmnopqrstuvwxyz';
-
-/**
- * A passage to read letters from. Any text does; this one is the opening of
- * Poe's "The Purloined Letter", whose narrator plays exactly this game and
- * whose method the 1950s papers keep circling back to.
- */
-const PASSAGE =
-  'at paris just after dark one gusty evening in the autumn of eighteen i was enjoying the twofold luxury ' +
-  'of meditation and a meerschaum in company with my friend c auguste dupin in his little back library or ' +
-  'book closet au troisieme no thirty three rue dunot faubourg saint germain for one hour at least we had ' +
-  'maintained a profound silence while each to any casual observer might have seemed intently and exclusively ' +
-  'occupied with the curling eddies of smoke that oppressed the atmosphere of the chamber';
 
 const letters = PASSAGE.replace(/[^a-z]/g, '');
 
@@ -90,7 +108,7 @@ export const STRATEGIES: readonly Strategy[] = [
     verdict:
       'Also holds at 50%. Pi’s digits behave like a coin and the machine gets nothing. The limit is recall: most people manage about thirty digits before they start reconstructing, and reconstructing is a pattern.',
     play: (history) => {
-      const digit = PI_DIGITS[history.length % PI_DIGITS.length] ?? '0';
+      const digit = piDigits(history.length + 1)[history.length] ?? '0';
       return (Number(digit) % 2) as Move;
     },
   },

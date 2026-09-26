@@ -36,6 +36,8 @@ export function umpire(matcher: Predictor, mismatcher: Predictor, rounds: number
 
   const seenByMatcher: Move[] = [];
   const seenByMismatcher: Move[] = [];
+  const playedByMatcher: Move[] = [];
+  const playedByMismatcher: Move[] = [];
   const exchanges: Exchange[] = [];
   let matcherScore = 0;
   let mismatcherScore = 0;
@@ -44,8 +46,8 @@ export function umpire(matcher: Predictor, mismatcher: Predictor, rounds: number
     // Both moves are committed before either is revealed. Sealing one machine's
     // move after seeing the other's would be the same fraud the referee exists
     // to prevent.
-    const a = matcher.predict(seenByMatcher).guess;
-    const b = mismatcher.predict(seenByMismatcher).guess;
+    const a = matcher.predict(seenByMatcher, playedByMatcher).guess;
+    const b = mismatcher.predict(seenByMismatcher, playedByMismatcher).guess;
 
     const matcherWon = a === b;
     if (matcherWon) matcherScore += 1;
@@ -58,6 +60,11 @@ export function umpire(matcher: Predictor, mismatcher: Predictor, rounds: number
     const inverted = (1 - a) as Move;
     mismatcher.observe(inverted);
     seenByMismatcher.push(inverted);
+    // Each machine's own move as it would have seen it: the matcher played `a`,
+    // and the mismatcher, internally still a matcher, believes it played the
+    // inverse of what the umpire passed on.
+    playedByMatcher.push(a);
+    playedByMismatcher.push((1 - b) as Move);
   }
 
   return { exchanges, matcherScore, mismatcherScore };

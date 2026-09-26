@@ -68,10 +68,10 @@ Stage that match live: machine against machine, umpire between them, running at 
 
 ### 2.3 The ensemble — the app's hero
 
-Five predictors run simultaneously against the same player, each with a live weight based on
+Eight predictors run simultaneously against the same player, each with a live weight based on
 recent accuracy. The mixture makes the actual move.
 
-What the user watches is **five competing models of themselves**, rising and falling. Switch
+What the user watches is **eight competing models of themselves**, rising and falling. Switch
 strategy mid-session — start alternating, start copying letters from a book — and the
 weights visibly shift as a different model takes over.
 
@@ -88,7 +88,7 @@ person under different strategies.
 
 ### In
 
-- Five predictors (§4.1) plus the mixer.
+- Eight predictors (§4.1) plus the mixer.
 - Both historical machines, playable individually and against each other.
 - The commitment protocol (§4.3) and the confidence threshold (§4.4).
 - Full measurement layer (§5).
@@ -101,12 +101,12 @@ person under different strategies.
   game theory is clean and the visualisation is legible.
 - Accounts, leaderboards, cross-device history. A session is a session.
 - Any server-side model. Everything runs in the browser.
-- Machine learning beyond the five specified models. A neural predictor would win more and
-  explain less.
+- Machine learning beyond the eight specified models. A neural predictor would win more and
+  explain less. Every model here can say what it was looking at in one sentence.
 
 ## 4. The engine
 
-### 4.1 The five predictors
+### 4.1 The eight predictors
 
 | Predictor | Basis | Note |
 |---|---|---|
@@ -115,6 +115,9 @@ person under different strategies.
 | **N-gram** | Fixed order, default 5 | The Aaronson-style baseline; a count table over the last n presses |
 | **Backoff** | Variable order | Tries order 5, falls back through 4, 3, 2, 1 until a context has enough evidence |
 | **Level-k** | Cognitive hierarchy | Models the player as reasoning about the machine, at depth 1, 2 or 3 |
+| **Context mix** | CTW / PPM family | Every order from 0 to 8 at once, weighted by recent predictive success |
+| **Run length** | Run avoidance | P(switch) given the current run length — people avoid long runs |
+| **Reaction** | Win-stay, lose-shift | P(switch) given whether the player won the last two rounds; reads the machine's revealed moves |
 
 Each implements one interface and each is individually selectable, so a user can play any
 one alone. The level-k model is the one that catches a player who is deliberately
@@ -157,7 +160,7 @@ felt, not described.
 
 ### 4.5 Warm-up
 
-Below a minimum sample the machine plays uniformly at random. This is honest — it has no
+Below a minimum sample (default 12 rounds) the machine plays uniformly at random. This is honest — it has no
 basis for a guess — and it is also the app's dramatic structure (§7.1). Do not fake early
 confidence.
 
@@ -238,7 +241,7 @@ replayable from their export.
 
 ### 7.1 The arc is protected
 
-The first twenty presses must feel like nothing is happening. The machine is warming up
+The first dozen presses must feel like nothing is happening. The machine is warming up
 (§4.5) and genuinely has no edge.
 
 The experience is: *I am winning* → *why is it winning* → *I cannot stop it*. That arc is
@@ -256,12 +259,14 @@ read.
 
 ### 7.3 The machine does not cheat, and says how
 
-A page explains exactly what the machine sees: the player's press history and nothing else.
+A page explains exactly what the machine sees: the player's press history, the machine's own
+moves already revealed to the player, and nothing else.
 Not timing, not cursor position, not which side of the screen was tapped. If a future version
 uses reaction time, that must be disclosed prominently, because reaction time is a genuinely
 strong signal and using it silently would be a betrayal of the app's premise.
 
-v1 uses press history only.
+Press history and the machine's revealed moves only. Its own moves let the reaction model see
+a win-stay / lose-shift habit; they carry nothing the player had not already seen.
 
 ### 7.4 Uncertainty is shown
 

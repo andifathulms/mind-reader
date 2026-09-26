@@ -3,6 +3,41 @@ import type { Move, PerPredictorRecord, PredictorId, MixerConfig } from './types
 import type { Oracle } from './referee';
 import type { Explanation, Predictor } from './predictors/predictor';
 
+/**
+ * The edge is kept on a longer memory than the weights. The weights have to
+ * follow a player who changes strategy within a dozen presses; the edge is the
+ * machine's evidence that a model is better than a coin at all, and twenty
+ * presses of evidence is not enough to tell a 60% model from a lucky streak.
+ */
+export const EDGE_DECAY = 0.98;
+
+/**
+ * How many standard errors the edge is pulled below the measured accuracy.
+ *
+ * With eight models, one of them is always on a lucky run against a random
+ * source, and a point estimate would let that run through as confidence. The
+ * edge is therefore a lower bound — "at least this much better than a coin" —
+ * which is what keeps the machine falling back to its PRNG against noise
+ * (fairness.test.ts) while still acting on a steady human bias.
+ */
+export const EDGE_MARGIN = 0.4;
+
+export interface Edge {
+  /** `(hits + 1) / (tries + 2)`: Laplace-smoothed accuracy. */
+  accuracy: number;
+  /** Accuracy less EDGE_MARGIN standard errors. */
+  lower: number;
+  /** `max(0, 2 * lower - 1)`. */
+  edge: number;
+}
+
+/** A model's edge from its decayed record. Shared with `derive` so the two cannot disagree. */
+export function edgeFrom(hits: number, tries: number): Edge {
+  const accuracy = (hits + 1) / (tries + 2);
+  const lower = accuracy - EDGE_MARGIN * Math.sqrt((accuracy * (1 - accuracy)) / (tries + 2));
+  return { accuracy, lower, edge: Math.max(0, 2 * lower - 1) };
+}
+
 export interface MixerState {
   weights: ReadonlyMap<PredictorId, number>;
   /** How much better than a coin each predictor has recently been, 0 to 1. */
@@ -53,6 +88,9 @@ export function createMixer(
   let tries = new Map<PredictorId, number>();
   let rounds = 0;
   let lastGuesses: Array<{ id: PredictorId; guess: Move }> = [];
+  /** The machine's own committed moves, one per resolved round, and the one now sealed. */
+  let own: Move[] = [];
+  let pending: Move | null = null;
 
   const seed = () => {
     weights = new Map(predictors.map((p) => [p.id, 1 / predictors.length]));
@@ -60,20 +98,17 @@ export function createMixer(
     tries = new Map(predictors.map((p) => [p.id, 0]));
     rounds = 0;
     lastGuesses = [];
+    own = [];
+    pending = null;
   };
   seed();
 
   /**
-   * How much better than a coin this predictor has recently been, 0 to 1.
-   * Laplace-smoothed, so a model with a short record is pulled back towards
-   * having no edge rather than towards whatever its first few guesses did.
+   * How much better than a coin this predictor has recently been, 0 to 1, as a
+   * lower bound. Laplace-smoothed and then pulled down by EDGE_MARGIN standard
+   * errors, so a short or noisy record counts for less than a long steady one.
    */
-  const edgeOf = (id: PredictorId): number => {
-    const hit = hits.get(id) ?? 0;
-    const total = tries.get(id) ?? 0;
-    const accuracy = (hit + 1) / (total + 2);
-    return Math.max(0, 2 * accuracy - 1);
-  };
+  const edgeOf = (id: PredictorId): number => edgeFrom(hits.get(id) ?? 0, tries.get(id) ?? 0).edge;
 
   const normalise = () => {
     let sum = 0;
@@ -93,7 +128,7 @@ export function createMixer(
 
       for (const p of predictors) {
         const weight = weights.get(p.id) ?? 0;
-        const { guess, confidence } = p.predict(history);
+        const { guess, confidence } = p.predict(history, own);
         const edge = edgeOf(p.id);
         perPredictor.push({
           id: p.id,
@@ -120,6 +155,7 @@ export function createMixer(
       // fair bit from the seeded PRNG.
       const wasRandom = rounds < config.minRounds || confidence < config.confidenceFloor;
       const move: Move = wasRandom ? rng.bit() : believed;
+      pending = move;
 
       return { move, confidence, wasRandom, perPredictor };
     },
@@ -129,11 +165,13 @@ export function createMixer(
         const correct = guess === actual;
         const w = weights.get(id) ?? 0;
         weights.set(id, w * config.decay + (correct ? 1 : 0));
-        hits.set(id, (hits.get(id) ?? 0) * config.decay + (correct ? 1 : 0));
-        tries.set(id, (tries.get(id) ?? 0) * config.decay + 1);
+        hits.set(id, (hits.get(id) ?? 0) * EDGE_DECAY + (correct ? 1 : 0));
+        tries.set(id, (tries.get(id) ?? 0) * EDGE_DECAY + 1);
       }
       normalise();
       for (const p of predictors) p.observe(actual);
+      if (pending !== null) own.push(pending);
+      pending = null;
       rounds += 1;
     },
 

@@ -48,6 +48,11 @@ export function writeUrl({ config, seed }: UrlState): string {
   params.set('floor', config.confidenceFloor.toFixed(2));
   params.set('warmup', String(config.minRounds));
   params.set('order', String(config.ngramOrder));
-  params.set('models', config.active.join(','));
+  // The full default set is the absence of the parameter, which keeps a link
+  // short and lets a new model join an old link's mixture by default.
+  const all =
+    config.active.length === DEFAULT_CONFIG.active.length &&
+    DEFAULT_CONFIG.active.every((id) => config.active.includes(id));
+  if (!all) params.set('models', config.active.join(','));
   return `#${params.toString()}`;
 }

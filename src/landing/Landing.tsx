@@ -18,6 +18,9 @@ const PREDICTOR_NAMES: Record<PredictorId, string> = {
   ngram: 'N-gram',
   backoff: 'Backoff',
   levelk: 'Level-k',
+  context: 'Context mix',
+  runs: 'Run length',
+  reaction: 'Reaction',
 };
 
 const pct = (x: number) => `${Math.round(x * 100)}%`;
@@ -204,10 +207,10 @@ export function Landing() {
       {/* 4. The ensemble. The band is the figure; the prose is the caption. */}
       <section className="ensemble on-machine">
         <Reveal as="div" className="ensemble__lead">
-          <h2>Five models of you, competing.</h2>
+          <h2>Eight models of you, competing.</h2>
           <p>
-            Each predictor sees your press history and nothing else. No timing, no coordinates, no
-            tap position. The mixer weights them by how right they have recently been, and the
+            Each predictor sees your press history and the moves the machine has already shown you,
+            and nothing else. No timing, no coordinates, no tap position. The mixer weights them by how right they have recently been, and the
             weights move while you play. That is the machine changing its mind about who you are.
           </p>
         </Reveal>

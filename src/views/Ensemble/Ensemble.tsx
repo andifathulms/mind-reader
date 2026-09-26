@@ -6,6 +6,7 @@ import { Reveal } from '../../ui/Reveal';
 import type { Config, PerPredictorRecord, PredictorId, Round } from '../../engine/types';
 import { PREDICTOR_IDS } from '../../engine/types';
 import { derive } from '../../engine/derive';
+import { EDGE_DECAY, EDGE_MARGIN } from '../../engine/mixer';
 import './Ensemble.css';
 
 export const PREDICTOR_NAMES: Record<PredictorId, string> = {
@@ -14,6 +15,9 @@ export const PREDICTOR_NAMES: Record<PredictorId, string> = {
   ngram: 'N-gram',
   backoff: 'Backoff',
   levelk: 'Level-k',
+  context: 'Context mix',
+  runs: 'Run length',
+  reaction: 'Reaction',
 };
 
 export const PREDICTOR_TINTS: Record<PredictorId, string> = {
@@ -22,6 +26,9 @@ export const PREDICTOR_TINTS: Record<PredictorId, string> = {
   ngram: 'var(--p-ngram)',
   backoff: 'var(--p-backoff)',
   levelk: 'var(--p-levelk)',
+  context: 'var(--p-context)',
+  runs: 'var(--p-runs)',
+  reaction: 'var(--p-reaction)',
 };
 
 /** A one-line account of what each model is actually doing. */
@@ -31,6 +38,9 @@ const PREDICTOR_NOTES: Record<PredictorId, string> = {
   ngram: 'Counts what followed this exact context before.',
   backoff: 'Long context first, falling back to shorter ones when it is thin.',
   levelk: 'Assumes you are anticipating it, and steps one level further.',
+  context: 'Every context length at once, weighted by which has been right.',
+  runs: 'How likely you are to switch after a run of one, two, three.',
+  reaction: 'What you do after winning or losing a round.',
 };
 
 const side = (move: 0 | 1) => (move === 0 ? 'left' : 'right');
@@ -65,7 +75,7 @@ function Weather({ rounds, active }: { rounds: readonly Round[]; active: readonl
     }
 
     // The panel is scaled to the tallest weight the session actually reached,
-    // not to 1. Five models rarely put more than a third of the mixture on any
+    // not to 1. Eight models rarely put more than a third of the mixture on any
     // one of them, and a chart drawn to 1 spends four fifths of its height on
     // territory nothing ever enters.
     const top = Math.max(0.25, Math.min(1, peak * 1.12));
@@ -277,9 +287,11 @@ function Ledger({
           <p className="ledger__rule">
             Edge is how much better than a coin a model has lately been.{' '}
             {PREDICTOR_NAMES[heaviest.id]} had {heaviest.hits.toFixed(2)} correct from{' '}
-            {heaviest.tries.toFixed(2)} guesses, both counted under the same decay as the weights,
-            which smooths to ({heaviest.hits.toFixed(2)} + 1) / ({heaviest.tries.toFixed(2)} + 2) ={' '}
-            {heaviest.accuracy.toFixed(3)}, and doubles about a half to an edge of{' '}
+            {heaviest.tries.toFixed(2)} guesses, counted with old guesses fading at{' '}
+            {EDGE_DECAY} a round. That smooths to ({heaviest.hits.toFixed(2)} + 1) / (
+            {heaviest.tries.toFixed(2)} + 2) = {heaviest.accuracy.toFixed(3)}. It is then pulled
+            down by {EDGE_MARGIN} standard errors to {heaviest.lower.toFixed(3)}, because a short
+            lucky run should not count as skill, and doubled about a half to an edge of{' '}
             {heaviest.edge.toFixed(3)}. A model right half the time lands on zero and contributes
             nothing however sure it sounds. That is what holds this machine to a draw against a
             sequence it cannot read.
@@ -323,7 +335,7 @@ function Ledger({
 }
 
 /**
- * Five competing models of the same player, each with a live weight based on
+ * Eight competing models of the same player, each with a live weight based on
  * recent accuracy. What a user watches here is the machine changing its mind
  * about who they are: change strategy mid-session and the weights redistribute
  * over a dozen or so presses as a different model takes over.
@@ -390,7 +402,7 @@ export function Ensemble() {
       title="The ensemble"
       eyebrow="self-report"
       ground="machine"
-      intro="Five models of you, running at once against the same presses. Each is weighted by how well it has been doing lately, and the mixture makes the actual move. Change how you are playing and watch the weights move. Each one also shows what it is looking at right now, which is the state behind the prediction already sealed for your next press."
+      intro="Eight models of you, running at once against the same presses. Each is weighted by how well it has been doing lately, and the mixture makes the actual move. Change how you are playing and watch the weights move. Each one also shows what it is looking at right now, which is the state behind the prediction already sealed for your next press."
     >
       <Reveal className="ensemble__mixture">
         <div className="ensemble__stack" aria-hidden="true">
@@ -513,7 +525,7 @@ export function Ensemble() {
         <p className="ensemble__legend">
           Where the models agree and are right together they are rewarded
           identically, so their weights stay even and their traces lie exactly on
-          top of one another. A flat run in a single colour is all five, not one.
+          top of one another. A flat run in a single colour is several at once, not one.
         </p>
       </Reveal>
 
