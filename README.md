@@ -20,7 +20,7 @@ strategy you already know, and the counter-strategy is published and simple too.
 
 That gap is the app.
 
-Five predictors run against you at once, two of them reconstructions of real machines:
+Eight predictors run against you at once, two of them reconstructions of real machines:
 Hagelbarger's **SEER** (Bell Labs, 1956) and Shannon's **MRM** (1953). A mixer weights them by
 how right each has recently been, and the mixture makes the actual move. Every prediction is
 sealed before your input is read, and the app will re-seal your whole session in front of you
@@ -28,10 +28,13 @@ to prove it.
 
 ## What the machine sees
 
-Your press history. Nothing else.
+Your press history, and the moves it has already shown you. Nothing else.
 
 No timing, no coordinates, no tap position, no reaction time. That is not a convention, it is
-the type signature: `predict(history: readonly Move[])` has nowhere to pass anything else.
+the type signature: `predict(history: readonly Move[], own: readonly Move[])` has nowhere to
+pass anything else. The machine's own past moves are there so one model can see whether you
+just won or lost; each was revealed to you when its seal opened, and the move sealed for the
+current round is never an input.
 Nothing leaves the device, there are no network requests at runtime, and there is no analytics.
 
 ## Running it
@@ -70,7 +73,7 @@ src/
 │  ├─ mixer.ts        weighting, confidence, the random fallback
 │  ├─ verify.ts       re-seals a session to show each prediction predates its press
 │  ├─ umpire.ts       the box Shannon and Hagelbarger put between their two machines
-│  └─ predictors/     the five models, and NOTES.md on what the papers do not settle
+│  └─ predictors/     the eight models, and NOTES.md on what the papers do not settle
 ├─ stats/           six measurements, each checked against an independent calculation
 ├─ views/           arena · seal · ensemble · settings · portrait · lab · rematch · archive
 └─ meta.ts          every route's title and description, and the page copy they come from
