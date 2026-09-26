@@ -7,7 +7,7 @@
 .arena {
   position: relative;
   height: 100svh;
-  min-height: 520px;
+  min-height: 560px;
   overflow: hidden;
   background: var(--yours);
   color: var(--yours-ink);
@@ -16,13 +16,9 @@
   /* Contains the layout and paint of a surface that repaints on every press. */
   contain: layout paint;
 
-  /*
-   * How much room the head takes, so the score below it is positioned from one
-   * number rather than from a magic constant repeated per breakpoint. The head
-   * grew a second row when it gained the lede; this is what it grew to.
-   */
-  --head-top: max(var(--s3), env(safe-area-inset-top));
-  --head-h: 84px;
+  --edge-x: var(--gutter);
+  --edge-top: max(var(--s3), env(safe-area-inset-top));
+  --edge-bottom: max(var(--s2), env(safe-area-inset-bottom));
 }
 
 /*
@@ -42,9 +38,16 @@
   --ink-soft: var(--yours-ink-soft);
 }
 
+/*
+ * The machine's ground: relay black, lit faintly from the boundary down, with
+ * a dot grid like the glass over an instrument. Both are fixed to the arena
+ * rather than to the layer's clip, so they do not slide as the line moves.
+ */
 .arena__layer--machine {
   color: var(--machine-ink);
-  background: var(--machine);
+  background:
+    radial-gradient(rgb(255 255 255 / 0.045) 1px, transparent 1.2px) 0 0 / 20px 20px,
+    radial-gradient(120% 70% at 50% 0%, #121823 0%, var(--machine) 70%);
   clip-path: inset(var(--split) 0 0 0);
   pointer-events: none;
 }
@@ -65,10 +68,8 @@
 
 /*
  * The verdict. One pulse runs the width of the boundary on reveal, in the
- * colour of the mark that was just laid: the line the two sides share is where
- * a round is settled, so that is where the settlement shows. It carries no
- * information the marks and the scores do not already carry — it is the beat,
- * not the report.
+ * colour of the mark that was just laid. It carries no information the marks
+ * and the scores do not already carry — it is the beat, not the report.
  */
 .arena__pulse {
   position: absolute;
@@ -97,8 +98,8 @@
 
 @keyframes boundary-pulse {
   from {
-    opacity: calc(0.9 * (1 - var(--still)));
-    transform: scaleX(0.06) scaleY(2.5);
+    opacity: calc(0.95 * (1 - var(--still)));
+    transform: scaleX(0.05) scaleY(3);
   }
   to {
     opacity: 0;
@@ -108,7 +109,9 @@
 
 /*
  * The boundary's past, arriving from the left and meeting the line exactly
- * where it now sits. Neutral ink, because the history belongs to neither side.
+ * where it now sits. Drawn in the machine's colour, because it is the machine's
+ * score over time, and faded in from the left so the present is the loudest
+ * part of it.
  */
 .arena__trail {
   position: absolute;
@@ -116,68 +119,102 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
+  mask-image: linear-gradient(90deg, transparent, #000 70%);
 }
 
 .arena__trail polyline {
   fill: none;
-  stroke: var(--boundary);
-  stroke-width: 1.25;
+  stroke: var(--hit);
+  stroke-width: 1.75;
   stroke-linejoin: round;
   stroke-linecap: round;
-  opacity: 0.42;
+  opacity: 0.85;
 }
 
-/* ------------------------------------------------------------------- head */
+/* ------------------------------------------------------------- the top */
+
+.arena__top {
+  position: absolute;
+  top: var(--edge-top);
+  left: var(--edge-x);
+  right: var(--edge-x);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(20px, 3.4vh, 40px);
+}
 
 .arena__head {
-  position: absolute;
-  left: var(--gutter);
-  right: var(--gutter);
-  top: var(--head-top);
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: flex-start;
   justify-content: space-between;
-  /* Row gap is tight: the lede belongs to the title, not to the layout. */
-  gap: 4px var(--s2);
+  gap: var(--s1) var(--s3);
+}
+
+.arena__brand {
+  display: grid;
+  gap: 4px;
+}
+
+.arena__title {
+  font: 850 semi-expanded clamp(20px, 1.9vw, 25px) / 1.05 var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+/* Shannon's question mark, once, and given the room to be the thing it is. */
+.arena__query {
+  color: var(--hit-ink);
+  font-weight: 700;
+  font-stretch: 100%;
 }
 
 /*
- * Up one step, from the 17px h2 to the title. The name and Shannon's question
- * mark were set smaller than the readout beside them and six times smaller
- * than a zero, which left the first screen with no anchor to read first.
+ * The premise. The one sentence a first-time reader has to get, set under the
+ * name it belongs to rather than floating at the far edge of the screen.
  */
-.arena__title {
-  font: var(--t-title);
-  letter-spacing: var(--track-title);
+.arena__lede {
+  font: var(--t-note);
+  color: var(--ink-soft);
+  max-width: 44ch;
 }
 
 .arena__meta {
   display: flex;
-  align-items: baseline;
-  gap: var(--s2);
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
 }
 
-/*
- * The premise. Body size, because it is the one sentence a first-time reader
- * has to get, and a full row of its own so it never competes with the round
- * counter for the baseline.
- */
-.arena__lede {
-  order: 3;
-  flex-basis: 100%;
-  font: var(--t-body);
-  letter-spacing: var(--track-body);
+.arena__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5ch;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font: var(--t-readout);
+  font-size: 12px;
   color: var(--ink-soft);
-  max-width: 46ch;
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  white-space: nowrap;
+}
+
+/* The warm-up is the machine admitting it has no basis yet. In its own colour,
+   because the admission is the machine's. */
+.arena__chip--warm {
+  color: var(--hit-ink);
+  background: color-mix(in srgb, var(--hit) 13%, transparent);
 }
 
 .arena__about {
+  font: var(--t-note);
+  font-size: 13px;
   color: var(--ink-soft);
   text-decoration: underline;
   text-underline-offset: 3px;
   text-decoration-color: var(--rule-strong);
   white-space: nowrap;
+  padding: 4px 2px;
   transition: color var(--tap) linear;
 }
 
@@ -186,84 +223,78 @@
   text-decoration-color: currentColor;
 }
 
-/* Shannon's question mark, once, and given the room to be the thing it is. */
-.arena__query {
-  color: var(--hit-ink);
-  font-weight: 700;
-}
-
-.arena__layer--machine .arena__query {
-  color: var(--p-mrm);
-}
-
-/*
- * The quiet text in the arena is set in the ground's own soft ink rather than
- * being the loud ink at reduced opacity: an opacity that looks right on the
- * light side lands under 4.5:1 on it, and the soft ink is a value that has been
- * checked on both.
- */
-.arena__round {
-  color: var(--ink-soft);
-}
-
-/* ------------------------------------------------------------- the scores */
+/* ----------------------------------------------------------- the scores */
 
 .arena__side {
-  position: absolute;
-  left: var(--gutter);
-  right: var(--gutter);
   display: flex;
   flex-direction: column;
-  gap: 2px;
-}
-
-.arena__side--yours {
-  top: calc(var(--head-top) + var(--head-h));
-}
-
-.arena__side--machine {
-  bottom: 168px;
+  align-items: flex-start;
+  gap: 6px;
 }
 
 .arena__label {
   color: var(--ink-soft);
 }
 
+/*
+ * The scores. Archivo at its widest and heaviest: the loudest thing on the
+ * screen, and the only typographic drama the app allows itself.
+ */
 .arena__score {
+  display: block;
   font: var(--t-score);
   letter-spacing: var(--track-score);
   font-variant-numeric: tabular-nums;
-  /* Hugs its digits. As a stretched flex child its box ran the width of the
-     arena, which makes it impossible to reason about what it collides with. */
-  align-self: flex-start;
-  /* The number is the loudest thing on the screen and must not move the layout
-     when it gains a digit; the box is sized for three. */
-  min-width: 2.4ch;
+  overflow: hidden;
+  /* The number must not move the layout when it gains a digit. */
+  min-width: 2.2ch;
+  /* A little room for the roll to start below the baseline without clipping
+     the numeral at rest. */
+  padding-block: 0.04em;
+}
+
+.arena__score-digits {
+  display: inline-block;
+  animation: score-roll 170ms var(--ease-out);
+}
+
+@keyframes score-roll {
+  from {
+    transform: translateY(calc(40% * (1 - var(--still))));
+    opacity: calc(0.2 + 0.8 * var(--still));
+  }
+}
+
+/* ------------------------------------------------------------ the bottom */
+
+.arena__bottom {
+  position: absolute;
+  left: var(--edge-x);
+  right: var(--edge-x);
+  bottom: var(--edge-bottom);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 2.6vh, 28px);
 }
 
 .arena__readout {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   margin-top: 4px;
   max-width: 34rem;
 }
 
 .arena__rate {
-  font: var(--t-note);
-  letter-spacing: var(--track-note);
+  font: var(--t-readout);
   color: var(--ink-soft);
 }
 
-.arena__last,
-.arena__boundary-note {
-  font: var(--t-note);
-  letter-spacing: var(--track-note);
-  color: var(--ink-soft);
-}
-
-.arena__boundary-note {
-  max-width: 42ch;
+.arena__gauge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
 }
 
 /*
@@ -273,11 +304,10 @@
 .arena__interval {
   position: relative;
   display: block;
-  width: min(280px, 60vw);
-  height: 8px;
-  border-top: 1px solid currentColor;
-  border-bottom: 1px solid currentColor;
-  border-color: color-mix(in srgb, currentColor 22%, transparent);
+  width: min(220px, 52vw);
+  height: 6px;
+  border-radius: 3px;
+  background: color-mix(in srgb, currentColor 14%, transparent);
 }
 
 .arena__interval-band {
@@ -286,8 +316,11 @@
   bottom: 0;
   left: var(--low);
   right: calc(100% - var(--high));
-  background: color-mix(in srgb, currentColor 26%, transparent);
-  transition: all var(--weight-change) var(--ease-out);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--hit) 45%, transparent);
+  transition:
+    left var(--weight-change) var(--ease-out),
+    right var(--weight-change) var(--ease-out);
 }
 
 /* 50%, a coin. The one reference the number needs. */
@@ -297,7 +330,7 @@
   bottom: -3px;
   left: 50%;
   width: 1px;
-  background: color-mix(in srgb, currentColor 40%, transparent);
+  background: color-mix(in srgb, currentColor 45%, transparent);
 }
 
 .arena__interval-point {
@@ -307,30 +340,63 @@
   left: var(--point);
   width: 2px;
   margin-left: -1px;
-  background: currentColor;
+  border-radius: 1px;
+  background: var(--hit);
   transition: left var(--weight-change) var(--ease-out);
 }
 
-/* Round marks: a strip on the boundary, oldest scrolling off the left. The
-   strip is clipped rather than counted, so it fills whatever width there is. */
+.arena__why {
+  font: var(--t-note);
+  font-size: 13px;
+  color: var(--ink-soft);
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--rule-strong);
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+.arena__why:hover {
+  color: var(--ink);
+}
+
+/* The real button is under the machine's copy; mirror its focus ring. */
+.arena:has(.arena__layer--yours .arena__why:focus-visible) .arena__layer--machine .arena__why {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.arena__last,
+.arena__boundary-note {
+  font: var(--t-note);
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.arena__boundary-note {
+  max-width: 46ch;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+/* --------------------------------------------------------- round marks */
+
+/*
+ * The tape. A strip on the boundary from the seal to the right edge, oldest at
+ * the seal and newest at the edge, so time runs left to right. Both scores are
+ * on the left, so the right of the seal is the one band that is clear at every
+ * width and in every state.
+ *
+ * The machine's rounds hang below the line in its colour, the player's stand
+ * above it in theirs, and the random rounds sit on the line, belonging to
+ * neither side.
+ */
 .arena__marks {
   position: absolute;
-  /*
-   * The strip runs from the seal to the right edge.
-   *
-   * It used to end at the seal and run back to the left gutter, which put it
-   * straight through the scores: the strip rides the boundary, the boundary
-   * spends a one-sided session clamped against an edge, and that edge is
-   * exactly where a score sits. The marks painted across a 100px numeral and
-   * read as a rendering fault. Indenting past the score fixed a desktop and
-   * left a phone 19px of strip.
-   *
-   * Both scores are on the left, so the right of the seal is the one band that
-   * is clear at every width and in every state. Oldest at the seal, newest at
-   * the far edge, so time still runs left to right.
-   */
-  left: calc(50% + 40px);
-  right: var(--gutter);
+  left: calc(50% + 56px);
+  right: var(--edge-x);
   top: var(--split);
   height: 48px;
   margin-top: -24px;
@@ -340,32 +406,31 @@
   gap: 3px;
   overflow: hidden;
   pointer-events: none;
-  mask-image: linear-gradient(90deg, transparent, #000 12%, #000);
+  mask-image: linear-gradient(90deg, transparent, #000 14%, #000);
 }
 
 .arena__mark {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 16px;
   flex: none;
-  border-radius: 1px;
+  border-radius: 1.5px;
   transform: translateY(var(--offset));
 }
 
 .arena__mark--hit {
   background: var(--hit);
-  --offset: 12px;
+  --offset: 10px;
 }
 
 .arena__mark--miss {
   background: var(--miss);
-  --offset: -12px;
+  --offset: -10px;
 }
 
 /* A stretch of neutral marks during warm-up tells the truth: nothing is
-   happening yet. Those rounds are not a contest, and marking them as wins or
-   losses would misrepresent what the machine is claiming. They sit on the line,
-   belonging to neither side. */
+   happening yet. Those rounds are not a contest. */
 .arena__mark--random {
+  height: 6px;
   background: var(--random);
   --offset: 0px;
 }
@@ -376,14 +441,16 @@
 
 @keyframes mark-land {
   from {
-    transform: translateY(0) scale(2.4);
+    transform: translateY(0) scaleY(0.2);
     opacity: 0.35;
   }
   to {
-    transform: translateY(var(--offset)) scale(1);
+    transform: translateY(var(--offset)) scaleY(1);
     opacity: 1;
   }
 }
+
+/* ------------------------------------------------------------- the seal */
 
 /* The seal sits on the boundary, because it belongs to neither side until it
    opens. */
@@ -395,37 +462,64 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--s1);
+  gap: 12px;
   pointer-events: none;
 }
 
+/*
+ * The seal is drawn in fixed colours, not the local ink: it is one object
+ * straddling both grounds, and the two layers' copies of it have to meet at the
+ * line without a seam.
+ */
 .arena__seal {
   position: relative;
-  width: 52px;
-  height: 52px;
-  margin-top: -26px;
+  width: clamp(68px, 7vw, 88px);
+  aspect-ratio: 1;
+  margin-top: calc(clamp(68px, 7vw, 88px) / -2);
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--yours-raised);
+  box-shadow:
+    0 0 0 1.5px var(--boundary),
+    0 16px 32px -14px rgb(0 0 0 / 0.55);
 }
 
 .arena__caption {
+  font: var(--t-readout);
+  font-size: 12px;
   color: var(--ink-soft);
   white-space: nowrap;
 }
 
-/* Opened, the seal shows the machine's committed move. Always in the machine's
-   own colours: the move was the machine's, whatever ground it lands on. */
+/* Opened, the seal shows the machine's committed move, on paper, in the
+   machine's ink: the move was the machine's, whatever ground it lands on. */
 .arena__seal-move {
   position: absolute;
   inset: 0;
   display: grid;
-  place-items: center;
-  font: var(--t-micro);
-  letter-spacing: var(--track-eyebrow);
-  text-transform: uppercase;
-  color: var(--machine-ink);
-  background: var(--machine);
-  border: 1px solid var(--boundary);
+  place-content: center;
+  justify-items: center;
+  gap: 4px;
+  color: var(--machine);
 }
 
+.arena__seal-arrow {
+  font: 850 expanded clamp(24px, 2.6vw, 32px) / 1 var(--font-display);
+}
+
+.arena__seal-word {
+  font: var(--t-micro);
+  font-size: 10px;
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--yours-ink-soft);
+}
+
+/*
+ * Closed, the seal is two hatched halves of a dark lid: something is in there
+ * and you cannot see it. The lock is the machine's lamp, lit while the move
+ * is sealed.
+ */
 .arena__seal-half {
   position: absolute;
   top: 0;
@@ -433,41 +527,45 @@
      seam, and a seal you can see through is not a seal. */
   width: calc(50% + 0.5px);
   height: 100%;
-  background: var(--yours);
-  border: 1px solid var(--boundary);
-  opacity: 1;
+  background-color: var(--machine-raised);
   transition:
     transform var(--seal-open) var(--ease-seal),
     opacity var(--seal-open) var(--ease-seal);
 }
 
-.arena__layer--machine .arena__seal-half {
-  background: var(--machine);
-}
-
 .arena__seal-half--left {
   left: 0;
-  border-right: none;
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgb(255 255 255 / 0.12) 0 1.5px,
+    transparent 1.5px 7px
+  );
+  box-shadow: inset -1px 0 0 rgb(255 255 255 / 0.14);
 }
 
 .arena__seal-half--right {
   right: 0;
-  border-left: none;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgb(255 255 255 / 0.12) 0 1.5px,
+    transparent 1.5px 7px
+  );
 }
 
-/* Closed, the seal is filled with a fine cross-hatch: something is in there and
-   you cannot see it. */
-.arena__seal-half::after {
-  content: '';
+.arena__seal-lock {
   position: absolute;
-  inset: 0;
-  background-image: repeating-linear-gradient(45deg, var(--boundary) 0 1px, transparent 1px 4px),
-    repeating-linear-gradient(-45deg, var(--boundary) 0 1px, transparent 1px 4px);
-  opacity: 0.5;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 0 4px rgb(255 122 47 / 0.22);
+  transition: opacity 80ms linear;
 }
 
-/* Opening, the halves draw apart and go with them. Leaving them parked either
-   side of the opening reads as a seal still closed in two places. */
+/* Opening, the halves draw apart and go with them, and the lamp goes out. */
 .arena__seal--open .arena__seal-half--left {
   transform: translateX(-100%);
   opacity: 0;
@@ -478,106 +576,104 @@
   opacity: 0;
 }
 
-/* Two tap targets, side by side, generous enough for a thumb without looking.
-   They never change appearance based on the prediction. Ever. */
-.arena__targets {
-  position: absolute;
-  left: var(--gutter);
-  right: var(--gutter);
-  bottom: calc(max(var(--s3), env(safe-area-inset-bottom)) + 26px);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--s2);
+.arena__seal--open .arena__seal-lock {
+  opacity: 0;
 }
 
+/* ------------------------------------------------------------- the keys */
+
 /*
- * The focus ring, mirrored onto the machine's copy of the target.
+ * Two keys, side by side, generous enough for a thumb without looking. They
+ * never change appearance based on the prediction. Ever.
  *
- * The two layers are siblings and the machine's is second, so it paints over
- * the player's wherever its clip lets it through. Its clip runs from --split to
- * the bottom and --split never exceeds 0.78, so the bottom fifth of the arena
- * is always the machine's — and the targets live there. The real button is the
- * one in the player's layer, underneath, which meant the outline was drawn and
- * then covered on every round of every session: a keyboard player could not see
- * which target they were on, on the only control the game has.
- *
- * Lifting the focused button above the machine's layer would carry the player's
- * ink onto the machine's ground with it, and its label would go dark on dark.
- * So the ring is painted where it can be seen instead. The machine's layer
- * already mirrors the whole face; this mirrors one more thing, in whichever
- * ink is local to the ground that is actually showing.
+ * They always sit on the machine's ground — the boundary stops above the
+ * machine's score — so they are drawn in its colours in both layers. A key has
+ * depth and a travel: every round starts with a press, and the press should
+ * feel like one.
  */
-.arena:has(.arena__layer--yours .arena__targets > :first-child:focus-visible)
-  .arena__layer--machine
-  .arena__targets
-  > :first-child,
-.arena:has(.arena__layer--yours .arena__targets > :last-child:focus-visible)
-  .arena__layer--machine
-  .arena__targets
-  > :last-child {
-  outline: 2px solid currentColor;
-  outline-offset: 3px;
-  border-radius: 1px;
+.arena__targets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
 .arena__target {
   position: relative;
-  min-height: 92px;
-  display: grid;
-  place-items: center;
-  gap: 4px;
-  font: var(--t-h2);
-  letter-spacing: 0.06em;
-  color: inherit;
-  background: transparent;
-  border: 1.5px solid currentColor;
-  border-radius: var(--radius);
-  overflow: hidden;
-  transition: transform var(--tap) var(--ease-out);
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(18px, 2vw, 26px);
+  font: 620 clamp(17px, 1.4vw, 19px) / 1 var(--font);
+  color: var(--machine-ink);
+  background: linear-gradient(#1c232f, #141922);
+  border-radius: 18px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.09),
+    inset 0 0 0 1px rgb(255 255 255 / 0.04),
+    0 4px 0 #05070a,
+    0 12px 26px -10px rgb(0 0 0 / 0.7);
+  transition:
+    transform 70ms var(--ease-out),
+    box-shadow 70ms var(--ease-out),
+    background 160ms linear;
 }
 
 .arena__target-hint {
-  font: var(--t-micro);
-  letter-spacing: var(--track-eyebrow);
-  color: var(--ink-soft);
-}
-
-/*
- * The press. A wash rises through the target and the target gives a little
- * under the finger — the acknowledgement has to land before the reveal does,
- * which is why it is a transform on an element that is already composited.
- */
-.arena__layer--yours .arena__target:active {
-  transform: scale(0.985);
-  background: color-mix(in srgb, var(--yours-ink) 10%, transparent);
-}
-
-.arena__layer--yours .arena__target::after {
-  content: '';
-  position: absolute;
-  inset: auto 0 0;
-  height: 100%;
-  background: color-mix(in srgb, currentColor 8%, transparent);
-  transform: scaleY(0);
-  transform-origin: 50% 100%;
-  transition: transform 220ms var(--ease-out);
+  font: var(--t-readout);
+  font-size: 13px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  color: var(--machine-ink-soft);
+  background: rgb(255 255 255 / 0.07);
+  box-shadow: inset 0 -1px 0 rgb(0 0 0 / 0.45);
 }
 
 @media (hover: hover) {
-  .arena__layer--yours .arena__target:hover::after {
-    transform: scaleY(1);
+  .arena:has(.arena__layer--yours .arena__target--left:hover)
+    .arena__layer--machine
+    .arena__target--left,
+  .arena:has(.arena__layer--yours .arena__target--right:hover)
+    .arena__layer--machine
+    .arena__target--right {
+    background: linear-gradient(#212936, #171d27);
   }
 }
 
-.arena__layer--machine .arena__target {
-  border-color: var(--machine-ink);
+/*
+ * The press, in both layers at once. The visible key is the machine layer's
+ * copy, which takes no pointer events, so :active never reaches it; the arena
+ * carries which key went down for the length of the travel instead.
+ */
+.arena[data-pressed='left'] .arena__target--left,
+.arena[data-pressed='right'] .arena__target--right {
+  transform: translateY(calc(3px * (1 - var(--still))));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.06),
+    inset 0 0 0 1px rgb(255 255 255 / 0.04),
+    0 1px 0 #05070a,
+    0 4px 12px -6px rgb(0 0 0 / 0.6);
+}
+
+/*
+ * The focus ring, mirrored onto the machine's copy of the key. The real button
+ * is in the player's layer, underneath the machine's copy, so its own outline
+ * is covered; the ring is painted where it can be seen instead.
+ */
+.arena:has(.arena__layer--yours .arena__target--left:focus-visible)
+  .arena__layer--machine
+  .arena__target--left,
+.arena:has(.arena__layer--yours .arena__target--right:focus-visible)
+  .arena__layer--machine
+  .arena__target--right {
+  outline: 2px solid var(--machine-ink);
+  outline-offset: 3px;
 }
 
 .arena__cue {
-  position: absolute;
-  left: 50%;
-  bottom: max(var(--s1), env(safe-area-inset-bottom));
-  transform: translateX(-50%);
+  align-self: center;
+  font: var(--t-readout);
+  font-size: 12px;
   color: var(--ink-soft);
   white-space: nowrap;
   animation: cue-breathe var(--drift) ease-in-out infinite;
@@ -597,17 +693,16 @@
 
 /*
  * One entrance, played once, on a surface that is interactive from the first
- * frame. The targets are last because they are the invitation; the score is
+ * frame. The keys are last because they are the invitation; the score is
  * first because it is the subject.
  */
-.arena__title,
-.arena__meta,
-.arena__lede,
+.arena__head,
 .arena__side,
 .arena__targets,
 .arena__cue,
 .arena__marks,
-.arena__trail {
+.arena__trail,
+.arena__committed {
   opacity: calc(0.001 + var(--still));
   transition:
     opacity 620ms var(--ease-out) var(--in, 0ms),
@@ -623,16 +718,8 @@
   --in: 240ms;
 }
 
-.arena__title {
+.arena__head {
   --in: 40ms;
-}
-
-.arena__meta {
-  --in: 120ms;
-}
-
-.arena__lede {
-  --in: 160ms;
 }
 
 .arena__side--yours {
@@ -641,6 +728,10 @@
 
 .arena__side--machine {
   --in: 160ms;
+}
+
+.arena__committed {
+  --in: 120ms;
 }
 
 .arena__marks,
@@ -652,41 +743,41 @@
   --in: 500ms;
 }
 
-.arena--ready .arena__title,
-.arena--ready .arena__meta,
-.arena--ready .arena__lede,
+.arena--ready .arena__head,
 .arena--ready .arena__side,
 .arena--ready .arena__targets,
 .arena--ready .arena__cue,
 .arena--ready .arena__marks,
-.arena--ready .arena__trail {
+.arena--ready .arena__trail,
+.arena--ready .arena__committed {
   opacity: 1;
   transform: none;
 }
 
+/* The committed block centres itself with a transform, which the entrance
+   would otherwise replace. */
+.arena--ready .arena__committed,
+.arena__committed {
+  transform: translateX(-50%);
+}
 
 /* The boundary itself never animates in. It is a readout and it is correct from
    the first frame; sliding it into place would be a claim about a score that
    had not been played. */
 
 @media (max-width: 720px) {
-  /* The lede wraps to two lines at this width, so the head is taller and the
-     score starts lower. One value, read by the rule above. */
-  .arena {
-    --head-h: 100px;
-  }
-
-  .arena__side--machine {
-    bottom: 152px;
-  }
-
-  .arena__last,
-  .arena__boundary-note {
+  .arena__streak,
+  .arena__last {
     display: none;
   }
 
   .arena__marks {
-    left: calc(50% + 34px);
+    left: calc(50% + 46px);
+    gap: 2px;
+  }
+
+  .arena__mark {
+    width: 4px;
   }
 }
 
@@ -699,33 +790,20 @@
 
 @media (max-width: 420px) {
   .arena {
-    min-height: 480px;
-  }
-
-  .arena__side--machine {
-    bottom: 146px;
+    min-height: 520px;
+    --edge-x: var(--s2);
   }
 
   .arena__target {
-    min-height: 82px;
+    min-height: 70px;
   }
 }
 
-/* A short viewport has no room for the trail's full height or a breathing cue;
-   the game survives, the decoration does not. */
-@media (max-height: 620px) {
+/* A short viewport keeps the game and drops the decoration. */
+@media (max-height: 640px) {
   .arena__cue,
-  .arena__interval {
+  .arena__lede,
+  .arena__last {
     display: none;
-  }
-
-  /* No room for the premise here. The link in the head still leads to it, and
-     the game keeps the layout it had before the lede existed. */
-  .arena__lede {
-    display: none;
-  }
-
-  .arena {
-    --head-h: 46px;
   }
 }

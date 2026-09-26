@@ -248,6 +248,9 @@ applies.
 
 **The seal** opens on reveal. Fast — 120 ms — because the game's feel depends on it.
 
+**The press** is felt: the key travels, the changed score rolls up, and a phone ticks for 8 ms.
+All three are identical on a win and a loss.
+
 **One pulse** runs the boundary on reveal, in the colour of the mark just laid. It is the same
 on a win as on a loss and carries nothing the marks and the scores do not. DESIGN.md §6.4 is
 the test anything else proposed here has to pass.

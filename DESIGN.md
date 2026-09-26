@@ -198,12 +198,28 @@ Round marks run as a strip just above the boundary, oldest scrolling off the lef
 below the line in the machine's colour, misses above in the player's, random rounds on the
 line in neutral.
 
-### 4.2 The tap targets
+The head (name, premise, a warm-up chip and a round chip) and the player's score share one
+column in normal flow at the top; the machine's score, its readout and the keys share another
+anchored to the bottom. However the head wraps, nothing lands on anything else. The boundary's
+stops are measured from the two numerals, so the line comes to rest short of a score rather
+than running through it.
 
-Two, side by side, at the bottom. Minimum 44 px, and in practice much larger — this is a
-phone app and the targets should be generous enough for a thumb without looking.
+The warm-up chip — `Warm-up · 7 of 12` — is true information: the machine is playing a fair
+coin and says so. It tells a player the first dozen rounds are not the game yet, without
+saying what the game will be.
 
-Labelled `left` and `right`, not `heads` and `tails`, because the arrow keys map to them on
+The explanation of the boundary's shrinkage sits one tap away (`Why the line is at 83%`), not
+beside the score while the player is trying to play.
+
+### 4.2 The keys
+
+Two, side by side, at the bottom. 70–76 px tall — generous enough for a thumb without looking.
+
+They are keys, not outlines: a dark cap with a lit top edge, a 4 px travel, and a keycap hint
+for the arrow key on devices that have one. They always sit on the machine's ground, so they
+are drawn in its colours in both layers.
+
+Labelled `Left` and `Right`, not `heads` and `tails`, because the arrow keys map to them on
 desktop and the mapping should be obvious.
 
 They do not change appearance based on prediction. Ever. The seal is the only thing that
@@ -239,11 +255,12 @@ machine-versus-machine exchange stays legible on a small screen.
 
 ### 5.1 The seal
 
-A small square on the boundary. Closed, it is filled with a fine cross-hatch — something is
-in there and you cannot see it.
+A rounded square on the boundary, 68–88 px. Closed, it is two dark hatched halves with the
+machine's amber lamp lit at the centre — something is in there and you cannot see it. It is
+drawn in fixed colours, not the local ink, because it is one object straddling both grounds.
 
-On reveal it opens along a vertical split, showing the machine's committed move. The move
-then flies to whichever side won and lands as a round mark.
+On reveal the halves draw apart and the lamp goes out, showing the committed move as an arrow
+with `sealed` or `random` under it. The round then lands on the tape as a mark.
 
 The seal must read as closed at a glance and its opening must be fast (§6.2). It carries the
 app's entire trust claim and it does so without a word of explanation.
@@ -332,6 +349,10 @@ through one shared observer. Bars grow from their own feet, traces wipe in left 
 the direction the session was played. A reveal is a flourish; nothing depends on one to become
 visible, and an element whose observer never fires is shown immediately.
 
+**The press.** The key travels 3 px for 110 ms, in both layers at once; on a phone an 8 ms
+haptic tick lands with it. The score that changed rolls up in 170 ms. All three are the same on
+a win as on a loss: they say a press landed and a number went up, nothing about whose.
+
 **The arena's opening**, played once on load, staggered over 600 ms. The surface is
 interactive from the first frame: a press during the entrance is played, not swallowed.
 
@@ -341,7 +362,8 @@ interactive from the first frame: a press during the entrance is played, not swa
 |---|---|---|
 | Seal opening | 120 ms | `cubic-bezier(.4,0,.2,1)` |
 | Move flying to its side | 180 ms, overlapping the seal | `cubic-bezier(.32,.72,0,1)` |
-| Press acknowledgement | 90 ms | `cubic-bezier(.16,1,.3,1)` |
+| Key travel | 70 ms down, held 110 ms | `cubic-bezier(.16,1,.3,1)` |
+| Score roll | 170 ms | `cubic-bezier(.16,1,.3,1)` |
 | Boundary pulse | 380 ms | `cubic-bezier(.16,1,.3,1)` |
 | Boundary | continuous, no duration | — |
 | Ensemble weight change | 400 ms | `cubic-bezier(.32,.72,0,1)` |
@@ -371,7 +393,8 @@ machine has begun to claim its guesses rather than a dramatic effect.
 
 ### 6.4 Restraint
 
-No celebration. No taunt. No shake, no particle, no sound. The machine reports its score and
+No celebration. No taunt. No shake, no particle, no sound. The haptic tick is not a sound: it
+is the key's travel felt through the glass, and it is identical on every press. The machine reports its score and
 says nothing else, and that silence is the app's register (CLAUDE.md §10).
 
 The one pulse in §6.1 is the single exception. The test it has to pass, and the test anything
